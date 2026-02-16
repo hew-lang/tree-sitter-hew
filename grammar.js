@@ -601,6 +601,7 @@ export default grammar({
       $.spawn_expression,
       $.select_expression,
       $.join_expression,
+      $.race_expression,
       $.scope_expression,
       $.scope_launch,
       $.scope_cancel,
@@ -608,6 +609,8 @@ export default grammar({
       $.cooperate_expression,
       $.yield_expression,
       $.path_expression,
+      $.try_catch_expression,
+      $.unsafe_expression,
     ),
 
     unary_expression: $ => prec(PREC.UNARY, seq(
@@ -800,6 +803,25 @@ export default grammar({
     scope_check: $ => seq('scope', '.', 'is_cancelled', '(', ')'),
     cooperate_expression: $ => 'cooperate',
     yield_expression: $ => seq('yield', $.expression),
+
+    try_catch_expression: $ => seq(
+      'try',
+      field('body', $.block),
+      optional(seq(
+        'catch',
+        optional(field('binding', $.identifier)),
+        field('handler', $.block),
+      )),
+    ),
+
+    unsafe_expression: $ => seq('unsafe', $.block),
+
+    race_expression: $ => seq(
+      'race',
+      '{',
+      repeat($.select_arm),
+      '}',
+    ),
 
     path_expression: $ => seq($.identifier, '::', $.identifier),
 

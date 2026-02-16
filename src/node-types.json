@@ -1085,6 +1085,10 @@
           "named": true
         },
         {
+          "type": "race_expression",
+          "named": true
+        },
+        {
           "type": "scope_cancel",
           "named": true
         },
@@ -1121,6 +1125,10 @@
           "named": true
         },
         {
+          "type": "try_catch_expression",
+          "named": true
+        },
+        {
           "type": "try_expression",
           "named": true
         },
@@ -1130,6 +1138,10 @@
         },
         {
           "type": "unary_expression",
+          "named": true
+        },
+        {
+          "type": "unsafe_expression",
           "named": true
         },
         {
@@ -2437,6 +2449,21 @@
     "fields": {}
   },
   {
+    "type": "race_expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "select_arm",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "receive_function",
     "named": true,
     "fields": {
@@ -3278,6 +3305,42 @@
     }
   },
   {
+    "type": "try_catch_expression",
+    "named": true,
+    "fields": {
+      "binding": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "body": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "block",
+            "named": true
+          }
+        ]
+      },
+      "handler": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "block",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "try_expression",
     "named": true,
     "fields": {},
@@ -3564,6 +3627,21 @@
     "type": "unit_type",
     "named": true,
     "fields": {}
+  },
+  {
+    "type": "unsafe_expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "block",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "var_statement",
@@ -4162,6 +4240,10 @@
     "named": false
   },
   {
+    "type": "catch",
+    "named": false
+  },
+  {
     "type": "char",
     "named": false
   },
@@ -4411,6 +4493,10 @@
     "named": false
   },
   {
+    "type": "race",
+    "named": false
+  },
+  {
     "type": "receive",
     "named": false
   },
@@ -4491,6 +4577,10 @@
     "named": false
   },
   {
+    "type": "try",
+    "named": false
+  },
+  {
     "type": "type",
     "named": false
   },
@@ -4508,6 +4598,10 @@
   },
   {
     "type": "u8",
+    "named": false
+  },
+  {
+    "type": "unsafe",
     "named": false
   },
   {

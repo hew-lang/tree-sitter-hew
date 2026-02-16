@@ -3,9 +3,9 @@
 ; ---- Keywords ----
 [
   "fn" "let" "var" "const" "pub" "return" "if" "else" "match" "for" "while"
-  "loop" "break" "continue" "in" "spawn" "await" "select" "join"
+  "loop" "break" "continue" "in" "spawn" "await" "select" "join" "race"
   "import" "extern" "async" "gen" "yield" "scope" "move"
-  "type" "where" "dyn" "mut"
+  "type" "where" "dyn" "mut" "try" "catch" "unsafe"
 ] @keyword
 
 "receive" @keyword
