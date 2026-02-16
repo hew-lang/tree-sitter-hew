@@ -1,0 +1,134 @@
+================================================================================
+Simple function
+================================================================================
+
+fn main() -> i32 {
+    0
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    (return_type (primitive_type))
+    body: (block
+      (expression_statement
+        (expression (integer_literal))))))
+
+================================================================================
+Function with parameters
+================================================================================
+
+fn add(x: i32, y: i32) -> i32 {
+    x + y
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    (parameters
+      (parameter name: (identifier) type: (primitive_type))
+      (parameter name: (identifier) type: (primitive_type)))
+    (return_type (primitive_type))
+    body: (block
+      (expression_statement
+        (expression
+          (binary_expression
+            (expression (identifier))
+            (expression (identifier))))))))
+
+================================================================================
+Let binding
+================================================================================
+
+fn main() {
+    let x = 42;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (let_statement
+        pattern: (pattern (identifier))
+        value: (expression (integer_literal))))))
+
+================================================================================
+Var binding
+================================================================================
+
+fn main() {
+    var x: i32 = 0;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (var_statement
+        name: (identifier)
+        type: (primitive_type)
+        value: (expression (integer_literal))))))
+
+================================================================================
+If expression
+================================================================================
+
+fn main() -> i32 {
+    if true { 1 } else { 0 }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    (return_type (primitive_type))
+    body: (block
+      (expression_statement
+        (expression
+          (if_expression
+            condition: (expression (boolean_literal))
+            consequence: (block
+              (expression_statement
+                (expression (integer_literal))))
+            alternative: (else_clause
+              (block
+                (expression_statement
+                  (expression (integer_literal)))))))))))
+
+================================================================================
+Match expression
+================================================================================
+
+fn main() -> i32 {
+    match x {
+        1 => 10,
+        _ => 0,
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    (return_type (primitive_type))
+    body: (block
+      (expression_statement
+        (expression
+          (match_expression
+            value: (expression (identifier))
+            (match_arm
+              pattern: (pattern (integer_literal))
+              value: (expression (integer_literal)))
+            (match_arm
+              pattern: (pattern)
+              value: (expression (integer_literal)))))))))

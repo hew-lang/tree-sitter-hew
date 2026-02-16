@@ -1,0 +1,45 @@
+{
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/config.schema.json",
+  "grammars": [
+    {
+      "name": "hew",
+      "camelcase": "Hew",
+      "title": "Hew",
+      "scope": "source.hew",
+      "file-types": [
+        "hew"
+      ],
+      "injection-regex": "^hew$",
+      "class-name": "TreeSitterHew",
+      "highlights": "queries/highlights.scm",
+      "locals": "queries/locals.scm",
+      "folds": "queries/folds.scm",
+      "indents": "queries/indents.scm"
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "Hew grammar for tree-sitter",
+    "authors": [
+      {
+        "name": "Hew Contributors",
+        "url": "https://hew.sh"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/hew-lang/tree-sitter-hew",
+      "funding": ""
+    }
+  },
+  "bindings": {
+    "c": true,
+    "go": true,
+    "java": false,
+    "node": true,
+    "python": true,
+    "rust": true,
+    "swift": true,
+    "zig": false
+  }
+}

@@ -1,0 +1,118 @@
+================================================================================
+Struct declaration
+================================================================================
+
+struct Point {
+    x: i32,
+    y: i32,
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (struct_declaration
+    name: (identifier)
+    body: (struct_body
+      (struct_field name: (identifier) type: (primitive_type))
+      (struct_field name: (identifier) type: (primitive_type)))))
+
+================================================================================
+Enum declaration
+================================================================================
+
+enum Color {
+    Red,
+    Green,
+    Blue,
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (enum_declaration
+    name: (identifier)
+    body: (enum_body
+      (variant name: (identifier))
+      (variant name: (identifier))
+      (variant name: (identifier)))))
+
+================================================================================
+Trait declaration
+================================================================================
+
+trait Printable {
+    fn print(self: Printable) -> i32;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (trait_declaration
+    name: (identifier)
+    (trait_function_signature
+      name: (identifier)
+      (parameters
+        (parameter name: (self) type: (identifier)))
+      (return_type (primitive_type)))))
+
+================================================================================
+Impl block
+================================================================================
+
+impl Printable for Point {
+    fn print(self: Point) -> i32 {
+        self.x
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (impl_declaration
+    trait: (identifier)
+    type: (identifier)
+    (function_declaration
+      name: (identifier)
+      (parameters
+        (parameter name: (self) type: (identifier)))
+      (return_type (primitive_type))
+      body: (block
+        (expression_statement
+          (expression
+            (field_expression
+              object: (expression (self))
+              field: (identifier))))))))
+
+================================================================================
+Actor declaration
+================================================================================
+
+actor Counter {
+    let count: i32;
+
+    receive fn increment() {
+        self.count = self.count + 1;
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (actor_declaration
+    name: (identifier)
+    (actor_field name: (identifier) type: (primitive_type))
+    (receive_function
+      name: (identifier)
+      body: (block
+        (assignment_statement
+          left: (expression
+            (field_expression
+              object: (expression (self))
+              field: (identifier)))
+          right: (expression
+            (binary_expression
+              (expression
+                (field_expression
+                  object: (expression (self))
+                  field: (identifier)))
+              (expression (integer_literal)))))))))
