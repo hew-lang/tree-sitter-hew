@@ -1,7 +1,7 @@
 /**
  * @file Hew grammar for tree-sitter
  * @author Hew Contributors
- * @license MIT
+ * @license Apache-2.0
  */
 
 /// <reference types="tree-sitter-cli/dsl" />

@@ -8,7 +8,7 @@
     "url": "git+https://github.com/hew-lang/tree-sitter-hew.git"
   },
   "funding": "",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "author": {
     "name": "Hew Contributors",
     "url": "https://hew.sh"
