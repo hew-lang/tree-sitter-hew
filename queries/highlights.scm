@@ -26,7 +26,10 @@
 (duration_literal) @number
 
 (string_literal) @string
+(raw_string_literal) @string
+(regex_literal) @string.regexp
 (interpolated_string) @string
+(template_literal) @string.template
 (fstring_start) @string.special
 (string_content) @string
 
@@ -57,6 +60,9 @@
   name: (identifier) @function)
 
 (receive_function
+  name: (identifier) @function.method)
+
+(receive_gen_function
   name: (identifier) @function.method)
 
 ; Function calls: foo(x)
@@ -151,4 +157,8 @@
 ; ---- Strings interpolation ----
 (interpolation
   "{" @punctuation.special
+  "}" @punctuation.special)
+
+(template_interpolation
+  "${" @punctuation.special
   "}" @punctuation.special)
