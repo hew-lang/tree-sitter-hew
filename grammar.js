@@ -11,13 +11,17 @@
 const PREC = {
   SEND: 1,        // <-
   OR: 3,          // || or
+  BIT_OR: 4,      // |
   AND: 5,         // && and
-  EQ: 7,          // == !=
+  BIT_AND: 6,     // &
+  BIT_XOR: 6,     // ^
+  EQ: 7,          // == != =~ !~
   REL: 9,         // < <= > >=
   RANGE: 11,      // .. ..=
+  SHIFT: 12,      // << >>
   ADD: 13,        // + -
   MUL: 15,        // * / %
-  UNARY: 17,      // ! - await
+  UNARY: 17,      // ! - ~ await
   POSTFIX: 19,    // . () [] ?
   FIELD: 20,      // field access
 };
@@ -543,7 +547,7 @@ export default grammar({
 
     assignment_statement: $ => seq(
       field('left', $.expression),
-      field('operator', choice('=', '+=', '-=', '*=', '/=', '%=')),
+      field('operator', choice('=', '+=', '-=', '*=', '/=', '%=', '&=', '|=', '^=', '<<=', '>>=')),
       field('right', $.expression),
       ';',
     ),
@@ -614,17 +618,21 @@ export default grammar({
     ),
 
     unary_expression: $ => prec(PREC.UNARY, seq(
-      field('operator', choice('!', '-')),
+      field('operator', choice('!', '-', '~')),
       field('operand', $.expression),
     )),
 
     binary_expression: $ => choice(
       prec.right(PREC.SEND, seq($.expression, '<-', $.expression)),
       prec.left(PREC.OR, seq($.expression, choice('||', 'or'), $.expression)),
+      prec.left(PREC.BIT_OR, seq($.expression, '|', $.expression)),
+      prec.left(PREC.BIT_XOR, seq($.expression, '^', $.expression)),
       prec.left(PREC.AND, seq($.expression, choice('&&', 'and'), $.expression)),
-      prec.left(PREC.EQ, seq($.expression, choice('==', '!='), $.expression)),
+      prec.left(PREC.BIT_AND, seq($.expression, '&', $.expression)),
+      prec.left(PREC.EQ, seq($.expression, choice('==', '!=', '=~', '!~'), $.expression)),
       prec.left(PREC.REL, seq($.expression, choice('<', '<=', '>', '>='), $.expression)),
       prec.right(PREC.RANGE, seq($.expression, choice('..', '..='), $.expression)),
+      prec.left(PREC.SHIFT, seq($.expression, choice('<<', '>>'), $.expression)),
       prec.left(PREC.ADD, seq($.expression, choice('+', '-'), $.expression)),
       prec.left(PREC.MUL, seq($.expression, choice('*', '/', '%'), $.expression)),
     ),
@@ -869,6 +877,9 @@ export default grammar({
       $.integer_literal,
       $.float_literal,
       $.string_literal,
+      $.raw_string_literal,
+      $.regex_literal,
+      $.template_literal,
       $.boolean_literal,
       $.none_literal,
     ),
@@ -876,6 +887,7 @@ export default grammar({
     integer_literal: $ => token(choice(
       /0[xX][0-9a-fA-F][0-9a-fA-F_]*/,
       /0[bB][01][01_]*/,
+      /0[oO][0-7][0-7_]*/,
       /[0-9][0-9_]*/,
     )),
 
@@ -918,6 +930,36 @@ export default grammar({
 
     interpolation: $ => seq(
       token.immediate('{'),
+      $.expression,
+      '}',
+    ),
+
+    raw_string_literal: $ => token(seq(
+      'r"',
+      /[^"]*/,
+      '"',
+    )),
+
+    regex_literal: $ => token(seq(
+      're"',
+      /[^"]*/,
+      '"',
+    )),
+
+    template_literal: $ => seq(
+      '`',
+      repeat(choice(
+        alias($.template_literal_content, $.string_content),
+        $.template_interpolation,
+        $.escape_sequence,
+      )),
+      '`',
+    ),
+
+    template_literal_content: $ => token.immediate(prec(1, /[^`\\$]+/)),
+
+    template_interpolation: $ => seq(
+      token.immediate('${'),
       $.expression,
       '}',
     ),
