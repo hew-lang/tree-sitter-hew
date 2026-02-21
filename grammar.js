@@ -45,23 +45,28 @@ export default grammar({
 
     // ---- Items ----
 
-    _item: $ => choice(
-      $.import_declaration,
-      $.const_declaration,
-      $.struct_declaration,
-      $.enum_declaration,
-      $.wire_declaration,
-      $.trait_declaration,
-      $.impl_declaration,
-      $.function_declaration,
-      $.gen_function_declaration,
-      $.async_gen_function_declaration,
-      $.async_function_declaration,
-      $.extern_block,
-      $.actor_declaration,
-      $.supervisor_declaration,
-      $.type_alias,
+    _item: $ => seq(
+      repeat($.attribute),
+      choice(
+        $.import_declaration,
+        $.const_declaration,
+        $.struct_declaration,
+        $.enum_declaration,
+        $.wire_declaration,
+        $.trait_declaration,
+        $.impl_declaration,
+        $.function_declaration,
+        $.gen_function_declaration,
+        $.async_gen_function_declaration,
+        $.async_function_declaration,
+        $.extern_block,
+        $.actor_declaration,
+        $.supervisor_declaration,
+        $.type_alias,
+      ),
     ),
+
+    attribute: $ => seq('#', '[', $.identifier, optional(seq('(', optional(sep1(choice($.identifier, $._literal), ',')), ')')), ']'),
 
     import_declaration: $ => seq(
       'import',
@@ -513,7 +518,7 @@ export default grammar({
       $.let_statement,
       $.var_statement,
       $.assignment_statement,
-
+      $.defer_statement,
 
       $.for_statement,
       $.while_statement,
@@ -570,6 +575,8 @@ export default grammar({
 
     return_statement: $ => seq('return', optional($.expression), ';'),
 
+    defer_statement: $ => seq('defer', $.expression, ';'),
+
     expression_statement: $ => seq($.expression, optional(';')),
 
     if_statement: $ => $.if_expression,
@@ -577,7 +584,7 @@ export default grammar({
 
     block_statement: $ => $.block,
 
-    label: $ => seq("'", $.identifier),
+    label: $ => /@[a-zA-Z_][a-zA-Z0-9_]*/,
 
     // ---- Expressions ----
 
@@ -640,10 +647,15 @@ export default grammar({
     call_expression: $ => prec(PREC.POSTFIX, seq(
       field('function', $.expression),
       '(',
-      optional(sep1($.expression, ',')),
+      optional(sep1($.call_argument, ',')),
       optional(','),
       ')',
     )),
+
+    call_argument: $ => choice(
+      seq(field('name', $.identifier), ':', field('value', $.expression)),
+      $.expression,
+    ),
 
     method_call_expression: $ => prec(PREC.POSTFIX, seq(
       field('object', $.expression),
@@ -805,7 +817,11 @@ export default grammar({
       field('body', $.block),
     )),
 
-    scope_expression: $ => seq('scope', $.block),
+    scope_expression: $ => seq(
+      'scope',
+      optional(seq('|', field('binding', $.identifier), '|')),
+      $.block,
+    ),
     scope_launch: $ => seq('scope', '.', 'launch', $.block),
     scope_cancel: $ => seq('scope', '.', 'cancel', '(', ')'),
     scope_check: $ => seq('scope', '.', 'is_cancelled', '(', ')'),
