@@ -172,7 +172,7 @@
       "required": false,
       "types": [
         {
-          "type": "expression",
+          "type": "call_argument",
           "named": true
         },
         {
@@ -636,10 +636,6 @@
         },
         {
           "type": "string_literal",
-          "named": true
-        },
-        {
-          "type": "template_literal",
           "named": true
         }
       ]
@@ -1207,10 +1203,6 @@
           "named": true
         },
         {
-          "type": "race_expression",
-          "named": true
-        },
-        {
           "type": "raw_string_literal",
           "named": true
         },
@@ -1219,19 +1211,7 @@
           "named": true
         },
         {
-          "type": "scope_cancel",
-          "named": true
-        },
-        {
-          "type": "scope_check",
-          "named": true
-        },
-        {
           "type": "scope_expression",
-          "named": true
-        },
-        {
-          "type": "scope_launch",
           "named": true
         },
         {
@@ -1252,14 +1232,6 @@
         },
         {
           "type": "struct_init",
-          "named": true
-        },
-        {
-          "type": "template_literal",
-          "named": true
-        },
-        {
-          "type": "try_catch_expression",
           "named": true
         },
         {
@@ -2487,10 +2459,6 @@
           "named": true
         },
         {
-          "type": "template_literal",
-          "named": true
-        },
-        {
           "type": "tuple_pattern",
           "named": true
         }
@@ -2578,21 +2546,6 @@
     "type": "primitive_type",
     "named": true,
     "fields": {}
-  },
-  {
-    "type": "race_expression",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "select_arm",
-          "named": true
-        }
-      ]
-    }
   },
   {
     "type": "receive_function",
@@ -2833,16 +2786,6 @@
     }
   },
   {
-    "type": "scope_cancel",
-    "named": true,
-    "fields": {}
-  },
-  {
-    "type": "scope_check",
-    "named": true,
-    "fields": {}
-  },
-  {
     "type": "scope_expression",
     "named": true,
     "fields": {
@@ -2857,21 +2800,6 @@
         ]
       }
     },
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "block",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "scope_launch",
-    "named": true,
-    "fields": {},
     "children": {
       "multiple": false,
       "required": true,
@@ -3312,44 +3240,6 @@
     }
   },
   {
-    "type": "template_interpolation",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "expression",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "template_literal",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "escape_sequence",
-          "named": true
-        },
-        {
-          "type": "string_content",
-          "named": true
-        },
-        {
-          "type": "template_interpolation",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "trait_bound",
     "named": true,
     "fields": {},
@@ -3486,42 +3376,6 @@
           "named": true
         }
       ]
-    }
-  },
-  {
-    "type": "try_catch_expression",
-    "named": true,
-    "fields": {
-      "binding": {
-        "multiple": false,
-        "required": false,
-        "types": [
-          {
-            "type": "identifier",
-            "named": true
-          }
-        ]
-      },
-      "body": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "block",
-            "named": true
-          }
-        ]
-      },
-      "handler": {
-        "multiple": false,
-        "required": false,
-        "types": [
-          {
-            "type": "block",
-            "named": true
-          }
-        ]
-      }
     }
   },
   {
@@ -4243,10 +4097,6 @@
     "named": false
   },
   {
-    "type": "${",
-    "named": false
-  },
-  {
     "type": "%",
     "named": false
   },
@@ -4423,10 +4273,6 @@
     "named": false
   },
   {
-    "type": "`",
-    "named": false
-  },
-  {
     "type": "actor",
     "named": false
   },
@@ -4469,14 +4315,6 @@
   },
   {
     "type": "bytes",
-    "named": false
-  },
-  {
-    "type": "cancel",
-    "named": false
-  },
-  {
-    "type": "catch",
     "named": false
   },
   {
@@ -4636,10 +4474,6 @@
     "named": true
   },
   {
-    "type": "is_cancelled",
-    "named": false
-  },
-  {
     "type": "isize",
     "named": false
   },
@@ -4650,10 +4484,6 @@
   {
     "type": "label",
     "named": true
-  },
-  {
-    "type": "launch",
-    "named": false
   },
   {
     "type": "let",
@@ -4734,10 +4564,6 @@
   },
   {
     "type": "pub",
-    "named": false
-  },
-  {
-    "type": "race",
     "named": false
   },
   {
@@ -4826,10 +4652,6 @@
   },
   {
     "type": "true",
-    "named": false
-  },
-  {
-    "type": "try",
     "named": false
   },
   {

@@ -20,6 +20,4 @@
   (match_expression)
   (select_expression)
   (join_expression)
-  (race_expression)
-  (try_catch_expression)
 ] @fold

@@ -105,7 +105,7 @@ export default grammar({
 
     struct_declaration: $ => seq(
       optional($.visibility),
-      choice('struct', 'type'),
+      'type',
       field('name', $.identifier),
       optional($.type_parameters),
       optional($.where_clause),
@@ -612,15 +612,10 @@ export default grammar({
       $.spawn_expression,
       $.select_expression,
       $.join_expression,
-      $.race_expression,
       $.scope_expression,
-      $.scope_launch,
-      $.scope_cancel,
-      $.scope_check,
       $.cooperate_expression,
       $.yield_expression,
       $.path_expression,
-      $.try_catch_expression,
       $.unsafe_expression,
     ),
 
@@ -760,7 +755,7 @@ export default grammar({
       field('actor', $.identifier),
       optional($.type_arguments),
       '(',
-      optional(sep1($.expression, ',')),
+      optional(sep1($.call_argument, ',')),
       ')',
     ),
 
@@ -822,30 +817,10 @@ export default grammar({
       optional(seq('|', field('binding', $.identifier), '|')),
       $.block,
     ),
-    scope_launch: $ => seq('scope', '.', 'launch', $.block),
-    scope_cancel: $ => seq('scope', '.', 'cancel', '(', ')'),
-    scope_check: $ => seq('scope', '.', 'is_cancelled', '(', ')'),
     cooperate_expression: $ => 'cooperate',
     yield_expression: $ => seq('yield', $.expression),
 
-    try_catch_expression: $ => seq(
-      'try',
-      field('body', $.block),
-      optional(seq(
-        'catch',
-        optional(field('binding', $.identifier)),
-        field('handler', $.block),
-      )),
-    ),
-
     unsafe_expression: $ => seq('unsafe', $.block),
-
-    race_expression: $ => seq(
-      'race',
-      '{',
-      repeat($.select_arm),
-      '}',
-    ),
 
     path_expression: $ => seq($.identifier, '::', $.identifier),
 
@@ -895,7 +870,6 @@ export default grammar({
       $.string_literal,
       $.raw_string_literal,
       $.regex_literal,
-      $.template_literal,
       $.boolean_literal,
       $.none_literal,
     ),
@@ -961,24 +935,6 @@ export default grammar({
       /[^"]*/,
       '"',
     )),
-
-    template_literal: $ => seq(
-      '`',
-      repeat(choice(
-        alias($.template_literal_content, $.string_content),
-        $.template_interpolation,
-        $.escape_sequence,
-      )),
-      '`',
-    ),
-
-    template_literal_content: $ => token.immediate(prec(1, /[^`\\$]+/)),
-
-    template_interpolation: $ => seq(
-      token.immediate('${'),
-      $.expression,
-      '}',
-    ),
 
     boolean_literal: $ => choice('true', 'false'),
 

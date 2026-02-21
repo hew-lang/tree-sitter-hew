@@ -13,12 +13,10 @@
   (match_expression)
   (select_expression)
   (join_expression)
-  (race_expression)
   (if_expression)
   (for_statement)
   (while_statement)
   (loop_statement)
-  (try_catch_expression)
   (lambda)
 ] @indent
 

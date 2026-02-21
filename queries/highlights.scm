@@ -3,13 +3,12 @@
 ; ---- Keywords ----
 [
   "fn" "let" "var" "const" "pub" "return" "if" "else" "match" "for" "while"
-  "loop" "break" "continue" "in" "spawn" "await" "select" "join" "race"
+  "loop" "break" "continue" "in" "spawn" "await" "select" "join"
   "import" "extern" "async" "gen" "yield" "scope" "move"
-  "type" "where" "dyn" "mut" "try" "catch" "unsafe" "defer"
+  "type" "where" "dyn" "unsafe" "defer"
   "init" "child" "restart" "budget" "strategy"
   "package" "super" "after" "from"
   "reserved" "optional" "deprecated" "default"
-  "mailbox" "overflow"
 ] @keyword
 
 "receive" @keyword
@@ -17,7 +16,7 @@
 (cooperate_expression) @keyword
 
 [
-  "struct" "enum" "trait" "impl" "actor" "supervisor" "wire"
+  "enum" "trait" "impl" "actor" "supervisor" "wire"
 ] @keyword.type
 
 [
@@ -44,7 +43,6 @@
 (raw_string_literal) @string
 (regex_literal) @string.regexp
 (interpolated_string) @string
-(template_literal) @string.template
 (fstring_start) @string.special
 (string_content) @string
 (escape_sequence) @string.escape
@@ -187,6 +185,4 @@
   "{" @punctuation.special
   "}" @punctuation.special)
 
-(template_interpolation
-  "${" @punctuation.special
-  "}" @punctuation.special)
+
