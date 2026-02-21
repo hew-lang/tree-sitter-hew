@@ -5,7 +5,11 @@
   "fn" "let" "var" "const" "pub" "return" "if" "else" "match" "for" "while"
   "loop" "break" "continue" "in" "spawn" "await" "select" "join" "race"
   "import" "extern" "async" "gen" "yield" "scope" "move"
-  "type" "where" "dyn" "mut" "try" "catch" "unsafe"
+  "type" "where" "dyn" "mut" "try" "catch" "unsafe" "defer"
+  "init" "child" "restart" "budget" "strategy"
+  "package" "super"
+  "reserved" "optional" "deprecated" "default"
+  "mailbox" "overflow"
 ] @keyword
 
 "receive" @keyword
@@ -20,6 +24,17 @@
   "and" "or"
 ] @keyword.operator
 
+[
+  "permanent" "transient" "temporary"
+  "one_for_one" "one_for_all" "rest_for_one"
+] @constant.builtin
+
+; ---- Attributes ----
+(attribute "#" @punctuation.special)
+(attribute "[" @punctuation.special)
+(attribute "]" @punctuation.special)
+(attribute (identifier) @attribute)
+
 ; ---- Literals ----
 (integer_literal) @number
 (float_literal) @number.float
@@ -32,6 +47,7 @@
 (template_literal) @string.template
 (fstring_start) @string.special
 (string_content) @string
+(escape_sequence) @string.escape
 
 (boolean_literal) @boolean
 (none_literal) @constant.builtin
@@ -56,6 +72,9 @@
 (gen_function_declaration
   name: (identifier) @function)
 
+(async_gen_function_declaration
+  name: (identifier) @function)
+
 (trait_function_signature
   name: (identifier) @function)
 
@@ -75,8 +94,15 @@
     (field_expression
       field: (identifier) @function.method.call)))
 
+; Named arguments in calls
+(call_argument
+  name: (identifier) @property)
+
 ; ---- Variables & Parameters ----
 (parameter
+  name: (identifier) @variable.parameter)
+
+(lambda_parameter
   name: (identifier) @variable.parameter)
 
 (self) @variable.builtin
@@ -144,6 +170,8 @@
 [
   "+" "-" "*" "/" "%" "!" "=" "==" "!=" "<" "<=" ">" ">=" "&&" "||"
   "+=" "-=" "*=" "/=" "%=" ".." "..=" "<-" "=>" "->" "?"
+  "<<" ">>" "&=" "|=" "^=" "<<=" ">>="
+  "&" "|" "^" "~" "=~" "!~"
 ] @operator
 
 ; ---- Punctuation ----

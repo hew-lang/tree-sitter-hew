@@ -2,6 +2,10 @@
 
 [
   (block)
+  (function_declaration)
+  (async_function_declaration)
+  (gen_function_declaration)
+  (async_gen_function_declaration)
   (struct_declaration)
   (enum_declaration)
   (trait_declaration)
@@ -9,5 +13,13 @@
   (actor_declaration)
   (supervisor_declaration)
   (wire_declaration)
+  (extern_block)
+  (receive_function)
+  (receive_gen_function)
+  (if_expression)
   (match_expression)
+  (select_expression)
+  (join_expression)
+  (race_expression)
+  (try_catch_expression)
 ] @fold
