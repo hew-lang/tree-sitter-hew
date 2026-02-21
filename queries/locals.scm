@@ -35,5 +35,9 @@
 (scope_expression
   binding: (identifier) @local.definition)
 
+; Select arm bindings
+(select_arm
+  (identifier) @local.definition)
+
 ; References
 (identifier) @local.reference

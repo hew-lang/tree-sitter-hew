@@ -7,7 +7,7 @@
   "import" "extern" "async" "gen" "yield" "scope" "move"
   "type" "where" "dyn" "mut" "try" "catch" "unsafe" "defer"
   "init" "child" "restart" "budget" "strategy"
-  "package" "super"
+  "package" "super" "after" "from"
   "reserved" "optional" "deprecated" "default"
   "mailbox" "overflow"
 ] @keyword
