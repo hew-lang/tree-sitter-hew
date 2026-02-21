@@ -307,6 +307,7 @@ export default grammar({
     // ---- Actors ----
 
     actor_declaration: $ => seq(
+      optional('isolated'),
       'actor',
       field('name', $.identifier),
       optional($.type_parameters),
@@ -503,7 +504,7 @@ export default grammar({
 
     function_type: $ => prec(1, seq('fn', '(', optional(sep1($._type, ',')), ')', optional($.return_type))),
 
-    pointer_type: $ => seq('*', optional(choice('const', 'mut')), $._type),
+    pointer_type: $ => seq('*', optional('var'), $._type),
 
     trait_object_type: $ => seq('dyn', choice(
       $.trait_bound,

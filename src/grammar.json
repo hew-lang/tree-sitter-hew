@@ -1894,6 +1894,18 @@
       "type": "SEQ",
       "members": [
         {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "isolated"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
           "type": "STRING",
           "value": "actor"
         },
@@ -3267,17 +3279,8 @@
           "type": "CHOICE",
           "members": [
             {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "STRING",
-                  "value": "const"
-                },
-                {
-                  "type": "STRING",
-                  "value": "mut"
-                }
-              ]
+              "type": "STRING",
+              "value": "var"
             },
             {
               "type": "BLANK"
