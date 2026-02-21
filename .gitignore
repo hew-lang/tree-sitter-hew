@@ -46,3 +46,8 @@ zig-out/
 *.tgz
 *.zip
 *.jar
+
+# AI assistant config
+CLAUDE.md
+.claude/
+.github/copilot-instructions.md
