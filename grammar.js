@@ -202,6 +202,7 @@ export default grammar({
     ),
 
     trait_function_signature: $ => seq(
+      optional('pure'),
       'fn',
       field('name', $.identifier),
       optional($.type_parameters),
@@ -239,6 +240,7 @@ export default grammar({
 
     function_declaration: $ => seq(
       optional($.visibility),
+      optional('pure'),
       'fn',
       field('name', $.identifier),
       optional($.type_parameters),
@@ -251,6 +253,7 @@ export default grammar({
     ),
 
     gen_function_declaration: $ => seq(
+      optional('pure'),
       'gen',
       'fn',
       field('name', $.identifier),
@@ -307,7 +310,6 @@ export default grammar({
     // ---- Actors ----
 
     actor_declaration: $ => seq(
-      optional('isolated'),
       'actor',
       field('name', $.identifier),
       optional($.type_parameters),
@@ -364,6 +366,7 @@ export default grammar({
     ),
 
     receive_function: $ => seq(
+      optional('pure'),
       'receive',
       'fn',
       field('name', $.identifier),
@@ -377,6 +380,7 @@ export default grammar({
     ),
 
     receive_gen_function: $ => seq(
+      optional('pure'),
       'receive',
       'gen',
       'fn',
@@ -489,7 +493,7 @@ export default grammar({
       'u8', 'u16', 'u32', 'u64',
       'f32', 'f64',
       'isize', 'usize',
-      'bool', 'char', 'string', 'bytes', 'void',
+      'bool', 'char', 'string', 'bytes', 'void', 'duration',
     ),
 
     generic_type: $ => prec(1, seq($.identifier, $.type_arguments)),
@@ -627,10 +631,10 @@ export default grammar({
 
     binary_expression: $ => choice(
       prec.right(PREC.SEND, seq($.expression, '<-', $.expression)),
-      prec.left(PREC.OR, seq($.expression, choice('||', 'or'), $.expression)),
+      prec.left(PREC.OR, seq($.expression, '||', $.expression)),
       prec.left(PREC.BIT_OR, seq($.expression, '|', $.expression)),
       prec.left(PREC.BIT_XOR, seq($.expression, '^', $.expression)),
-      prec.left(PREC.AND, seq($.expression, choice('&&', 'and'), $.expression)),
+      prec.left(PREC.AND, seq($.expression, '&&', $.expression)),
       prec.left(PREC.BIT_AND, seq($.expression, '&', $.expression)),
       prec.left(PREC.EQ, seq($.expression, choice('==', '!=', '=~', '!~'), $.expression)),
       prec.left(PREC.REL, seq($.expression, choice('<', '<=', '>', '>='), $.expression)),
@@ -866,6 +870,7 @@ export default grammar({
     // ---- Literals ----
 
     _literal: $ => choice(
+      $.duration_literal,
       $.integer_literal,
       $.float_literal,
       $.string_literal,

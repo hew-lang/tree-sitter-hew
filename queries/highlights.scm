@@ -19,9 +19,7 @@
   "enum" "trait" "impl" "actor" "supervisor" "wire"
 ] @keyword.type
 
-[
-  "and" "or"
-] @keyword.operator
+"pure" @keyword
 
 [
   "permanent" "transient" "temporary"

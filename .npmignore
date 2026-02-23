@@ -1,0 +1,35 @@
+# Test files
+test/
+bindings/node/binding_test.js
+bindings/go/
+bindings/python/
+bindings/rust/
+bindings/swift/
+bindings/c/
+
+# Build artifacts
+target/
+node_modules/
+
+# Language-specific package files
+Cargo.toml
+Cargo.lock
+CMakeLists.txt
+Makefile
+Package.swift
+Package.resolved
+pyproject.toml
+setup.py
+go.mod
+go.sum
+
+# Editor / tooling
+.editorconfig
+.gitattributes
+tools/
+linguist/
+
+# CI / misc
+.github/
+CLAUDE.md
+.claude/
