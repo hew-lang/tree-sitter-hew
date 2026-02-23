@@ -17,12 +17,12 @@ require('nvim-treesitter.configs').setup {
 ### Node.js
 
 ```bash
-npm install tree-sitter-hew
+npm install @hew-lang/tree-sitter-hew
 ```
 
 ```javascript
 const Parser = require('tree-sitter');
-const Hew = require('tree-sitter-hew');
+const Hew = require('@hew-lang/tree-sitter-hew');
 
 const parser = new Parser();
 parser.setLanguage(Hew);
@@ -35,7 +35,7 @@ console.log(tree.rootNode.toString());
 
 ```toml
 [dependencies]
-tree-sitter-hew = "0.1"
+tree-sitter-hew = "1"
 ```
 
 ## Development
