@@ -38,6 +38,7 @@ export default grammar({
     [$.if_statement, $.expression],
     [$.match_statement, $.expression],
     [$.expression, $.struct_init],
+    [$.actor_spawn],
   ],
 
   rules: {
@@ -147,7 +148,7 @@ export default grammar({
 
     wire_declaration: $ => seq(
       'wire',
-      choice('struct', 'enum'),
+      choice('struct', 'enum', 'type'),
       field('name', $.identifier),
       field('body', $.wire_body),
     ),
@@ -759,9 +760,11 @@ export default grammar({
     actor_spawn: $ => seq(
       field('actor', $.identifier),
       optional($.type_arguments),
-      '(',
-      optional(sep1($.call_argument, ',')),
-      ')',
+      optional(seq(
+        '(',
+        optional(sep1($.call_argument, ',')),
+        ')',
+      )),
     ),
 
     lambda_actor: $ => prec(2, seq(
