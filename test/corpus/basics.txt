@@ -132,3 +132,46 @@ fn main() -> i32 {
             (match_arm
               pattern: (pattern)
               value: (expression (integer_literal)))))))))
+
+================================================================================
+Map literal
+================================================================================
+
+fn main() {
+    let m = {"name": "Alice", "age": "30"};
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (let_statement
+        pattern: (pattern (identifier))
+        value: (expression
+          (map_literal
+            (map_entry
+              key: (expression (string_literal (string_content)))
+              value: (expression (string_literal (string_content))))
+            (map_entry
+              key: (expression (string_literal (string_content)))
+              value: (expression (string_literal (string_content))))))))))
+
+================================================================================
+Byte string literal
+================================================================================
+
+fn main() {
+    let data = b"hello";
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (let_statement
+        pattern: (pattern (identifier))
+        value: (expression (byte_string_literal))))))

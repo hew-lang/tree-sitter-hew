@@ -63,6 +63,7 @@ export default grammar({
         $.extern_block,
         $.actor_declaration,
         $.supervisor_declaration,
+        $.machine_declaration,
         $.type_alias,
       ),
     ),
@@ -433,6 +434,58 @@ export default grammar({
 
     duration_literal: $ => seq($.integer_literal, choice('ns', 'us', 'ms', 's', 'm', 'h')),
 
+    // ---- Machines ----
+
+    machine_declaration: $ => seq(
+      optional($.visibility),
+      'machine',
+      field('name', $.identifier),
+      '{',
+      repeat(choice(
+        $.machine_state,
+        $.machine_event,
+        $.machine_transition,
+        $.machine_default,
+      )),
+      '}',
+    ),
+
+    machine_state: $ => seq(
+      'state',
+      field('name', $.identifier),
+      optional(seq('{', repeat($.struct_field), '}')),
+      optional(';'),
+    ),
+
+    machine_event: $ => seq(
+      'event',
+      field('name', $.identifier),
+      optional(seq('{', repeat($.struct_field), '}')),
+      optional(';'),
+    ),
+
+    machine_transition: $ => seq(
+      'on',
+      field('event', $.identifier),
+      ':',
+      field('source', $.identifier),
+      '->',
+      field('target', $.identifier),
+      optional(seq('when', field('guard', $.expression))),
+      choice(
+        ';',
+        seq('{', repeat(choice($.field_initializer, $._statement)), '}'),
+      ),
+    ),
+
+    machine_default: $ => seq(
+      'default',
+      choice(
+        seq('{', repeat($._statement), '}'),
+        ';',
+      ),
+    ),
+
     // ---- Extern ----
 
     extern_block: $ => seq(
@@ -610,6 +663,7 @@ export default grammar({
       $.struct_init,
       $.array_expression,
       $.array_repeat,
+      $.map_literal,
       $.tuple_expression,
       $.parenthesized_expression,
       $.if_expression,
@@ -712,6 +766,19 @@ export default grammar({
     ),
 
     array_repeat: $ => seq('[', $.expression, ';', $.expression, ']'),
+
+    map_literal: $ => seq(
+      '{',
+      sep1($.map_entry, ','),
+      optional(','),
+      '}',
+    ),
+
+    map_entry: $ => seq(
+      field('key', $.expression),
+      ':',
+      field('value', $.expression),
+    ),
 
     tuple_expression: $ => seq('(', $.expression, ',', optional(sep1($.expression, ',')), ')'),
 
@@ -878,6 +945,7 @@ export default grammar({
       $.float_literal,
       $.string_literal,
       $.raw_string_literal,
+      $.byte_string_literal,
       $.regex_literal,
       $.boolean_literal,
       $.none_literal,
@@ -936,6 +1004,12 @@ export default grammar({
     raw_string_literal: $ => token(seq(
       'r"',
       /[^"]*/,
+      '"',
+    )),
+
+    byte_string_literal: $ => token(seq(
+      'b"',
+      /([^"\\]|\\.)*/,
       '"',
     )),
 

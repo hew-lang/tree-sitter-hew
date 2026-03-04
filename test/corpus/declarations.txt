@@ -116,3 +116,66 @@ actor Counter {
                   object: (expression (self))
                   field: (identifier)))
               (expression (integer_literal)))))))))
+
+================================================================================
+Machine declaration
+================================================================================
+
+machine TrafficLight {
+    state Red;
+    state Green;
+    state Yellow;
+
+    event Timer;
+    event Emergency { reason: string }
+
+    on Timer: Red -> Green;
+    on Timer: Green -> Yellow;
+    on Timer: Yellow -> Red;
+    on Emergency: Red -> Red {
+        log(event.reason);
+    }
+
+    default { self }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (machine_declaration
+    name: (identifier)
+    (machine_state name: (identifier))
+    (machine_state name: (identifier))
+    (machine_state name: (identifier))
+    (machine_event name: (identifier))
+    (machine_event
+      name: (identifier)
+      (struct_field name: (identifier) type: (primitive_type)))
+    (machine_transition
+      event: (identifier)
+      source: (identifier)
+      target: (identifier))
+    (machine_transition
+      event: (identifier)
+      source: (identifier)
+      target: (identifier))
+    (machine_transition
+      event: (identifier)
+      source: (identifier)
+      target: (identifier))
+    (machine_transition
+      event: (identifier)
+      source: (identifier)
+      target: (identifier)
+      (expression_statement
+        (expression
+          (call_expression
+            function: (expression (identifier))
+            (call_argument
+              (expression
+                (field_expression
+                  object: (expression (identifier))
+                  field: (identifier))))))))
+    (machine_default
+      (expression_statement
+        (expression (self))))))

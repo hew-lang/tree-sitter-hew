@@ -611,6 +611,10 @@
           "named": true
         },
         {
+          "type": "byte_string_literal",
+          "named": true
+        },
+        {
           "type": "duration_literal",
           "named": true
         },
@@ -1143,6 +1147,10 @@
           "named": true
         },
         {
+          "type": "byte_string_literal",
+          "named": true
+        },
+        {
           "type": "call_expression",
           "named": true
         },
@@ -1188,6 +1196,10 @@
         },
         {
           "type": "lambda",
+          "named": true
+        },
+        {
+          "type": "map_literal",
           "named": true
         },
         {
@@ -2096,6 +2108,279 @@
     }
   },
   {
+    "type": "machine_declaration",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "machine_default",
+          "named": true
+        },
+        {
+          "type": "machine_event",
+          "named": true
+        },
+        {
+          "type": "machine_state",
+          "named": true
+        },
+        {
+          "type": "machine_transition",
+          "named": true
+        },
+        {
+          "type": "visibility",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "machine_default",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "assignment_statement",
+          "named": true
+        },
+        {
+          "type": "block_statement",
+          "named": true
+        },
+        {
+          "type": "break_statement",
+          "named": true
+        },
+        {
+          "type": "continue_statement",
+          "named": true
+        },
+        {
+          "type": "defer_statement",
+          "named": true
+        },
+        {
+          "type": "expression_statement",
+          "named": true
+        },
+        {
+          "type": "for_statement",
+          "named": true
+        },
+        {
+          "type": "if_statement",
+          "named": true
+        },
+        {
+          "type": "let_statement",
+          "named": true
+        },
+        {
+          "type": "loop_statement",
+          "named": true
+        },
+        {
+          "type": "match_statement",
+          "named": true
+        },
+        {
+          "type": "return_statement",
+          "named": true
+        },
+        {
+          "type": "var_statement",
+          "named": true
+        },
+        {
+          "type": "while_statement",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "machine_event",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "struct_field",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "machine_state",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "struct_field",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "machine_transition",
+    "named": true,
+    "fields": {
+      "event": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "guard": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      },
+      "source": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "target": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "assignment_statement",
+          "named": true
+        },
+        {
+          "type": "block_statement",
+          "named": true
+        },
+        {
+          "type": "break_statement",
+          "named": true
+        },
+        {
+          "type": "continue_statement",
+          "named": true
+        },
+        {
+          "type": "defer_statement",
+          "named": true
+        },
+        {
+          "type": "expression_statement",
+          "named": true
+        },
+        {
+          "type": "field_initializer",
+          "named": true
+        },
+        {
+          "type": "for_statement",
+          "named": true
+        },
+        {
+          "type": "if_statement",
+          "named": true
+        },
+        {
+          "type": "let_statement",
+          "named": true
+        },
+        {
+          "type": "loop_statement",
+          "named": true
+        },
+        {
+          "type": "match_statement",
+          "named": true
+        },
+        {
+          "type": "return_statement",
+          "named": true
+        },
+        {
+          "type": "var_statement",
+          "named": true
+        },
+        {
+          "type": "while_statement",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "mailbox_declaration",
     "named": true,
     "fields": {},
@@ -2109,6 +2394,47 @@
         },
         {
           "type": "overflow_policy",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "map_entry",
+    "named": true,
+    "fields": {
+      "key": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "map_literal",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "map_entry",
           "named": true
         }
       ]
@@ -2420,6 +2746,10 @@
       "types": [
         {
           "type": "boolean_literal",
+          "named": true
+        },
+        {
+          "type": "byte_string_literal",
           "named": true
         },
         {
@@ -2959,6 +3289,10 @@
         },
         {
           "type": "import_declaration",
+          "named": true
+        },
+        {
+          "type": "machine_declaration",
           "named": true
         },
         {
@@ -4322,6 +4656,10 @@
     "named": false
   },
   {
+    "type": "byte_string_literal",
+    "named": true
+  },
+  {
     "type": "bytes",
     "named": false
   },
@@ -4388,6 +4726,10 @@
   {
     "type": "escape_sequence",
     "named": true
+  },
+  {
+    "type": "event",
+    "named": false
   },
   {
     "type": "extern",
@@ -4519,6 +4861,10 @@
     "named": false
   },
   {
+    "type": "machine",
+    "named": false
+  },
+  {
     "type": "mailbox",
     "named": false
   },
@@ -4540,6 +4886,10 @@
   },
   {
     "type": "ns",
+    "named": false
+  },
+  {
+    "type": "on",
     "named": false
   },
   {
@@ -4623,6 +4973,10 @@
     "named": false
   },
   {
+    "type": "state",
+    "named": false
+  },
+  {
     "type": "strategy",
     "named": false
   },
@@ -4700,6 +5054,10 @@
   },
   {
     "type": "void",
+    "named": false
+  },
+  {
+    "type": "when",
     "named": false
   },
   {

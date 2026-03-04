@@ -16,8 +16,12 @@
 (cooperate_expression) @keyword
 
 [
-  "enum" "trait" "impl" "actor" "supervisor" "wire"
+  "enum" "trait" "impl" "actor" "supervisor" "wire" "machine"
 ] @keyword.type
+
+[
+  "state" "event" "on" "when"
+] @keyword
 
 "pure" @keyword
 
@@ -39,6 +43,7 @@
 
 (string_literal) @string
 (raw_string_literal) @string
+(byte_string_literal) @string
 (regex_literal) @string.regexp
 (interpolated_string) @string
 (fstring_start) @string.special
@@ -136,6 +141,21 @@
 
 (wire_declaration
   name: (identifier) @type)
+
+(machine_declaration
+  name: (identifier) @type)
+
+(machine_state
+  name: (identifier) @constant)
+
+(machine_event
+  name: (identifier) @constant)
+
+(machine_transition
+  event: (identifier) @constant)
+
+(map_entry
+  key: (expression) @property)
 
 (type_alias
   name: (identifier) @type)
