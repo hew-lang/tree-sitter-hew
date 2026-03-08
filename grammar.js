@@ -165,6 +165,7 @@ export default grammar({
       optional(choice(',', ';')),
     )),
 
+    // @sync:wire_types
     wire_type: $ => choice(
       'u8', 'u16', 'u32', 'u64',
       'i8', 'i16', 'i32', 'i64',
@@ -178,6 +179,7 @@ export default grammar({
       'reserved', '(', sep1($.integer_literal, ','), ')', ';',
     ),
 
+    // @sync:wire_attributes
     wire_attribute: $ => choice(
       'optional',
       'deprecated',
@@ -350,6 +352,7 @@ export default grammar({
       $.overflow_kind,
     ),
 
+    // @sync:overflow_kinds
     overflow_kind: $ => choice(
       'block',
       'drop_new',
@@ -426,12 +429,15 @@ export default grammar({
     restart_spec: $ => seq(
       'restart',
       '(',
+      // @sync:restart_permanence
       choice('permanent', 'transient', 'temporary'),
       ')',
       optional(seq('budget', '(', $.integer_literal, ',', $.duration_literal, ')')),
+      // @sync:restart_strategies
       optional(seq('strategy', '(', choice('one_for_one', 'one_for_all', 'rest_for_one'), ')')),
     ),
 
+    // @sync:duration_suffixes
     duration_literal: $ => seq($.integer_literal, choice('ns', 'us', 'ms', 's', 'm', 'h')),
 
     // ---- Machines ----
@@ -542,6 +548,7 @@ export default grammar({
       $.unit_type,
     ),
 
+    // @sync:primitive_types
     primitive_type: $ => choice(
       'i8', 'i16', 'i32', 'i64',
       'u8', 'u16', 'u32', 'u64',
@@ -611,6 +618,7 @@ export default grammar({
 
     assignment_statement: $ => seq(
       field('left', $.expression),
+      // @sync:assignment_operators
       field('operator', choice('=', '+=', '-=', '*=', '/=', '%=', '&=', '|=', '^=', '<<=', '>>=')),
       field('right', $.expression),
       ';',
@@ -1019,6 +1027,7 @@ export default grammar({
       '"',
     )),
 
+    // @sync:boolean_literals
     boolean_literal: $ => choice('true', 'false'),
 
     none_literal: $ => 'None',
