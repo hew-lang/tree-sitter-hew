@@ -167,10 +167,8 @@ export default grammar({
 
     // @sync:wire_types
     wire_type: $ => choice(
-      'u8', 'u16', 'u32', 'u64',
-      'i8', 'i16', 'i32', 'i64',
-      'f32', 'f64',
-      'bool', 'bytes', 'string',
+      'u8', 'u16', 'u32', 'u64', 'i8', 'i16', 'i32', 'i64', 'f32', 'f64', 'bool',
+      'bytes', 'string',
       $.identifier,
       seq('list', '[', $.wire_type, ']'),
     ),
@@ -181,8 +179,7 @@ export default grammar({
 
     // @sync:wire_attributes
     wire_attribute: $ => choice(
-      'optional',
-      'deprecated',
+      'optional', 'deprecated',
       seq('default', '(', $.expression, ')'),
       seq('reserved', '(', sep1($.integer_literal, ','), ')'),
     ),
@@ -354,10 +351,7 @@ export default grammar({
 
     // @sync:overflow_kinds
     overflow_kind: $ => choice(
-      'block',
-      'drop_new',
-      'drop_old',
-      'fail',
+      'block', 'drop_new', 'drop_old', 'fail',
       seq('coalesce', '(', $.identifier, ')', optional(seq('fallback', $.overflow_kind))),
     ),
 
@@ -550,11 +544,8 @@ export default grammar({
 
     // @sync:primitive_types
     primitive_type: $ => choice(
-      'i8', 'i16', 'i32', 'i64',
-      'u8', 'u16', 'u32', 'u64',
-      'f32', 'f64',
-      'isize', 'usize',
-      'bool', 'char', 'string', 'bytes', 'void', 'duration',
+      'i8', 'i16', 'i32', 'i64', 'u8', 'u16', 'u32', 'u64', 'isize', 'usize',
+      'f32', 'f64', 'bool', 'char', 'string', 'bytes', 'void', 'duration',
     ),
 
     generic_type: $ => prec(1, seq($.identifier, $.type_arguments)),

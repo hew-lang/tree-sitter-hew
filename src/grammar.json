@@ -3429,19 +3429,19 @@
         },
         {
           "type": "STRING",
-          "value": "f32"
-        },
-        {
-          "type": "STRING",
-          "value": "f64"
-        },
-        {
-          "type": "STRING",
           "value": "isize"
         },
         {
           "type": "STRING",
           "value": "usize"
+        },
+        {
+          "type": "STRING",
+          "value": "f32"
+        },
+        {
+          "type": "STRING",
+          "value": "f64"
         },
         {
           "type": "STRING",
