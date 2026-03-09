@@ -1,6 +1,6 @@
 {
   "name": "@hew-lang/tree-sitter-hew",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Hew grammar for tree-sitter",
   "type": "module",
   "repository": {
