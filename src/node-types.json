@@ -1255,6 +1255,10 @@
           "named": true
         },
         {
+          "type": "this_expression",
+          "named": true
+        },
+        {
           "type": "try_expression",
           "named": true
         },
@@ -5003,6 +5007,10 @@
   {
     "type": "temporary",
     "named": false
+  },
+  {
+    "type": "this_expression",
+    "named": true
   },
   {
     "type": "trait",

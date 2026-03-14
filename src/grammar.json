@@ -4327,6 +4327,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "this_expression"
+        },
+        {
+          "type": "SYMBOL",
           "name": "yield_expression"
         },
         {
@@ -6084,6 +6088,10 @@
     "cooperate_expression": {
       "type": "STRING",
       "value": "cooperate"
+    },
+    "this_expression": {
+      "type": "STRING",
+      "value": "this"
     },
     "yield_expression": {
       "type": "SEQ",

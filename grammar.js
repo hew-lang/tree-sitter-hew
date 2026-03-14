@@ -673,6 +673,7 @@ export default grammar({
       $.join_expression,
       $.scope_expression,
       $.cooperate_expression,
+      $.this_expression,
       $.yield_expression,
       $.path_expression,
       $.unsafe_expression,
@@ -892,6 +893,7 @@ export default grammar({
       $.block,
     ),
     cooperate_expression: $ => 'cooperate',
+    this_expression: $ => 'this',
     yield_expression: $ => seq('yield', $.expression),
 
     unsafe_expression: $ => seq('unsafe', $.block),

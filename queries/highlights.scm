@@ -15,6 +15,8 @@
 
 (cooperate_expression) @keyword
 
+(this_expression) @keyword
+
 [
   "enum" "trait" "impl" "actor" "supervisor" "wire" "machine"
 ] @keyword.type
