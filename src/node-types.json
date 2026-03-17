@@ -740,6 +740,10 @@
           "named": true
         },
         {
+          "type": "while_let_statement",
+          "named": true
+        },
+        {
           "type": "while_statement",
           "named": true
         }
@@ -845,6 +849,68 @@
           "named": true
         }
       ]
+    }
+  },
+  {
+    "type": "cast_expression",
+    "named": true,
+    "fields": {
+      "type": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "array_type",
+            "named": true
+          },
+          {
+            "type": "function_type",
+            "named": true
+          },
+          {
+            "type": "generic_type",
+            "named": true
+          },
+          {
+            "type": "identifier",
+            "named": true
+          },
+          {
+            "type": "pointer_type",
+            "named": true
+          },
+          {
+            "type": "primitive_type",
+            "named": true
+          },
+          {
+            "type": "slice_type",
+            "named": true
+          },
+          {
+            "type": "trait_object_type",
+            "named": true
+          },
+          {
+            "type": "tuple_type",
+            "named": true
+          },
+          {
+            "type": "unit_type",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {
@@ -1155,6 +1221,10 @@
           "named": true
         },
         {
+          "type": "cast_expression",
+          "named": true
+        },
+        {
           "type": "cooperate_expression",
           "named": true
         },
@@ -1228,6 +1298,10 @@
         },
         {
           "type": "regex_literal",
+          "named": true
+        },
+        {
+          "type": "reserved_keyword",
           "named": true
         },
         {
@@ -2214,6 +2288,10 @@
           "named": true
         },
         {
+          "type": "while_let_statement",
+          "named": true
+        },
+        {
           "type": "while_statement",
           "named": true
         }
@@ -2375,6 +2453,10 @@
         },
         {
           "type": "var_statement",
+          "named": true
+        },
+        {
+          "type": "while_let_statement",
           "named": true
         },
         {
@@ -3045,6 +3127,11 @@
         }
       ]
     }
+  },
+  {
+    "type": "reserved_keyword",
+    "named": true,
+    "fields": {}
   },
   {
     "type": "restart_spec",
@@ -4249,6 +4336,52 @@
     }
   },
   {
+    "type": "while_let_statement",
+    "named": true,
+    "fields": {
+      "body": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "block",
+            "named": true
+          }
+        ]
+      },
+      "pattern": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "pattern",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "label",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "while_statement",
     "named": true,
     "fields": {
@@ -4631,6 +4764,10 @@
     "named": false
   },
   {
+    "type": "as",
+    "named": false
+  },
+  {
     "type": "async",
     "named": false
   },
@@ -4665,6 +4802,10 @@
   },
   {
     "type": "bytes",
+    "named": false
+  },
+  {
+    "type": "catch",
     "named": false
   },
   {
@@ -4772,6 +4913,10 @@
     "named": false
   },
   {
+    "type": "foreign",
+    "named": false
+  },
+  {
     "type": "from",
     "named": false
   },
@@ -4821,6 +4966,10 @@
   },
   {
     "type": "in",
+    "named": false
+  },
+  {
+    "type": "indirect",
     "named": false
   },
   {
@@ -4929,6 +5078,10 @@
     "named": false
   },
   {
+    "type": "race",
+    "named": false
+  },
+  {
     "type": "raw_string_literal",
     "named": true
   },
@@ -5022,6 +5175,10 @@
   },
   {
     "type": "true",
+    "named": false
+  },
+  {
+    "type": "try",
     "named": false
   },
   {

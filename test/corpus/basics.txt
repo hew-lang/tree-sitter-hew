@@ -175,3 +175,59 @@ fn main() {
       (let_statement
         pattern: (pattern (identifier))
         value: (expression (byte_string_literal))))))
+
+================================================================================
+While let statement
+================================================================================
+
+fn main() {
+    while let Some(x) = iter.next() {
+        process(x);
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (while_let_statement
+        pattern: (pattern
+          (constructor_pattern
+            name: (identifier)
+            (pattern (identifier))))
+        value: (expression
+          (call_expression
+            function: (expression
+              (field_expression
+                object: (expression (identifier))
+                field: (identifier)))))
+        body: (block
+          (expression_statement
+            (expression
+              (call_expression
+                function: (expression (identifier))
+                (call_argument
+                  (expression (identifier)))))))))))
+
+================================================================================
+Cast expression
+================================================================================
+
+fn main() {
+    let y = x as u64;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (let_statement
+        pattern: (pattern (identifier))
+        value: (expression
+          (cast_expression
+            value: (expression (identifier))
+            type: (primitive_type)))))))

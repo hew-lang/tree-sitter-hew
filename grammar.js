@@ -39,6 +39,7 @@ export default grammar({
     [$.match_statement, $.expression],
     [$.expression, $.struct_init],
     [$.actor_spawn],
+    [$.trait_bound],
   ],
 
   rules: {
@@ -126,6 +127,7 @@ export default grammar({
 
     enum_declaration: $ => seq(
       optional($.visibility),
+      optional('indirect'),
       'enum',
       field('name', $.identifier),
       optional($.type_parameters),
@@ -579,6 +581,7 @@ export default grammar({
 
       $.for_statement,
       $.while_statement,
+      $.while_let_statement,
       $.loop_statement,
       $.break_statement,
       $.continue_statement,
@@ -658,6 +661,7 @@ export default grammar({
       $.field_expression,
       $.index_expression,
       $.try_expression,
+      $.cast_expression,
       $.await_expression,
       $.struct_init,
       $.array_expression,
@@ -677,6 +681,7 @@ export default grammar({
       $.yield_expression,
       $.path_expression,
       $.unsafe_expression,
+      $.reserved_keyword,
     ),
 
     unary_expression: $ => prec(PREC.UNARY, seq(
@@ -738,6 +743,12 @@ export default grammar({
     try_expression: $ => prec(PREC.POSTFIX, seq(
       $.expression,
       '?',
+    )),
+
+    cast_expression: $ => prec(PREC.POSTFIX, seq(
+      field('value', $.expression),
+      'as',
+      field('type', $._type),
     )),
 
     await_expression: $ => prec(PREC.UNARY, seq(
@@ -884,6 +895,16 @@ export default grammar({
       optional(seq($.label, ':')),
       'while',
       field('condition', $.expression),
+      field('body', $.block),
+    )),
+
+    while_let_statement: $ => prec(10, seq(
+      optional(seq($.label, ':')),
+      'while',
+      'let',
+      field('pattern', $.pattern),
+      '=',
+      field('value', $.expression),
       field('body', $.block),
     )),
 
@@ -1034,6 +1055,9 @@ export default grammar({
     block_comment: $ => token(seq('/*', /[^*]*\*+([^/*][^*]*\*+)*/, '/')),
 
     // ---- Identifiers ----
+
+    // @sync:reserved_unused
+    reserved_keyword: $ => choice('try', 'catch', 'race', 'foreign'),
 
     identifier: $ => /[a-zA-Z_][a-zA-Z0-9_]*/,
   },

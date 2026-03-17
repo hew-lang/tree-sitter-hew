@@ -37,6 +37,26 @@ enum Color {
       (variant name: (identifier)))))
 
 ================================================================================
+Indirect enum declaration
+================================================================================
+
+indirect enum Expr {
+    Lit(i32),
+    Add(Expr, Expr),
+    Neg(Expr),
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (enum_declaration
+    name: (identifier)
+    body: (enum_body
+      (variant name: (identifier) (primitive_type))
+      (variant name: (identifier) (identifier) (identifier))
+      (variant name: (identifier) (identifier)))))
+
+================================================================================
 Trait declaration
 ================================================================================
 

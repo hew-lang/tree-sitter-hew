@@ -17,6 +17,10 @@
 
 (this_expression) @keyword
 
+"indirect" @keyword
+
+"as" @keyword
+
 [
   "enum" "trait" "impl" "actor" "supervisor" "wire" "machine"
 ] @keyword.type
@@ -26,6 +30,9 @@
 ] @keyword
 
 "pure" @keyword
+
+; Reserved keywords (future use)
+(reserved_keyword) @keyword.reserved
 
 [
   "permanent" "transient" "temporary"
