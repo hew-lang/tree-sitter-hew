@@ -319,8 +319,8 @@ export default grammar({
       optional(seq(':', $.trait_bounds)),
       optional($.where_clause),
       '{',
-      optional($.actor_init),
       repeat(choice(
+        $.actor_init,
         $.actor_field,
         $.mailbox_declaration,
         $.receive_function,
