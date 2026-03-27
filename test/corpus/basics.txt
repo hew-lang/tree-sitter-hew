@@ -281,3 +281,76 @@ fn main() {
             (match_arm
               pattern: (pattern)
               value: (expression (integer_literal)))))))))
+
+================================================================================
+If let expression
+================================================================================
+
+fn main() {
+    if let Some(x) = value {
+        println(x);
+    } else {
+        println(0);
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (expression_statement
+        (expression
+          (if_expression
+            pattern: (pattern
+              (constructor_pattern
+                name: (identifier)
+                (pattern (identifier))))
+            value: (expression (identifier))
+            consequence: (block
+              (expression_statement
+                (expression
+                  (call_expression
+                    function: (expression (identifier))
+                    (call_argument
+                      (expression (identifier)))))))
+            alternative: (else_clause
+              (block
+                (expression_statement
+                  (expression
+                    (call_expression
+                      function: (expression (identifier))
+                      (call_argument
+                        (expression (integer_literal))))))))))))))
+
+================================================================================
+If let as expression
+================================================================================
+
+fn main() {
+    let result = if let Some(x) = value { x } else { 0 };
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (let_statement
+        pattern: (pattern (identifier))
+        value: (expression
+          (if_expression
+            pattern: (pattern
+              (constructor_pattern
+                name: (identifier)
+                (pattern (identifier))))
+            value: (expression (identifier))
+            consequence: (block
+              (expression_statement
+                (expression (identifier))))
+            alternative: (else_clause
+              (block
+                (expression_statement
+                  (expression (integer_literal)))))))))))

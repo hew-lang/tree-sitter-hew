@@ -947,9 +947,13 @@
       }
     },
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": false,
       "types": [
+        {
+          "type": "call_argument",
+          "named": true
+        },
         {
           "type": "restart_spec",
           "named": true
@@ -1765,7 +1769,7 @@
       },
       "condition": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "expression",
@@ -1779,6 +1783,26 @@
         "types": [
           {
             "type": "block",
+            "named": true
+          }
+        ]
+      },
+      "pattern": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "pattern",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "expression",
             "named": true
           }
         ]

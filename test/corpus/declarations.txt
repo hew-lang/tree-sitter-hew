@@ -222,3 +222,26 @@ actor Worker {
             (call_expression
               function: (expression
                 (identifier)))))))))
+
+================================================================================
+Supervisor with child arguments
+================================================================================
+
+supervisor Pool {
+    strategy: one_for_one;
+    child worker: Counter(100);
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (supervisor_declaration
+    name: (identifier)
+    (supervisor_field
+      name: (identifier)
+      value: (expression (identifier)))
+    (child_spec
+      name: (identifier)
+      actor: (identifier)
+      (call_argument
+        (expression (integer_literal))))))
