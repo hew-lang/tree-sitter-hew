@@ -321,6 +321,7 @@ export default grammar({
       '{',
       repeat(choice(
         $.actor_init,
+        $.terminate_block,
         $.actor_field,
         $.mailbox_declaration,
         $.receive_function,
@@ -336,6 +337,11 @@ export default grammar({
       '(',
       optional($.parameters),
       ')',
+      $.block,
+    ),
+
+    terminate_block: $ => seq(
+      'terminate',
       $.block,
     ),
 
@@ -968,6 +974,7 @@ export default grammar({
       $.string_literal,
       $.raw_string_literal,
       $.byte_string_literal,
+      $.char_literal,
       $.regex_literal,
       $.boolean_literal,
       $.none_literal,
@@ -1033,6 +1040,15 @@ export default grammar({
       'b"',
       /([^"\\]|\\.)*/,
       '"',
+    )),
+
+    char_literal: $ => token(seq(
+      '\'',
+      choice(
+        /[^'\\]/,
+        seq('\\', /./),
+      ),
+      '\'',
     )),
 
     regex_literal: $ => token(seq(
