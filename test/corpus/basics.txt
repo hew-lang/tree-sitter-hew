@@ -231,3 +231,25 @@ fn main() {
           (cast_expression
             value: (expression (identifier))
             type: (primitive_type)))))))
+
+================================================================================
+Char literal
+================================================================================
+
+fn main() {
+    let c = 'a';
+    let escaped = '\n';
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (let_statement
+        pattern: (pattern (identifier))
+        value: (expression (char_literal)))
+      (let_statement
+        pattern: (pattern (identifier))
+        value: (expression (char_literal))))))
