@@ -199,3 +199,26 @@ machine TrafficLight {
     (machine_default
       (expression_statement
         (expression (self))))))
+
+================================================================================
+Actor with terminate block
+================================================================================
+
+actor Worker {
+    terminate {
+        cleanup();
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (actor_declaration
+    name: (identifier)
+    (terminate_block
+      (block
+        (expression_statement
+          (expression
+            (call_expression
+              function: (expression
+                (identifier)))))))))

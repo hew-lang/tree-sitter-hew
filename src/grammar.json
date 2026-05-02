@@ -2021,6 +2021,10 @@
               },
               {
                 "type": "SYMBOL",
+                "name": "terminate_block"
+              },
+              {
+                "type": "SYMBOL",
                 "name": "actor_field"
               },
               {
@@ -2078,6 +2082,19 @@
         {
           "type": "STRING",
           "value": ")"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "block"
+        }
+      ]
+    },
+    "terminate_block": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "terminate"
         },
         {
           "type": "SYMBOL",
@@ -6544,6 +6561,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "char_literal"
+        },
+        {
+          "type": "SYMBOL",
           "name": "regex_literal"
         },
         {
@@ -6768,6 +6789,44 @@
           {
             "type": "STRING",
             "value": "\""
+          }
+        ]
+      }
+    },
+    "char_literal": {
+      "type": "TOKEN",
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "'"
+          },
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "PATTERN",
+                "value": "[^'\\\\]"
+              },
+              {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": "\\"
+                  },
+                  {
+                    "type": "PATTERN",
+                    "value": "."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "STRING",
+            "value": "'"
           }
         ]
       }
