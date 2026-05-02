@@ -253,3 +253,31 @@ fn main() {
       (let_statement
         pattern: (pattern (identifier))
         value: (expression (char_literal))))))
+
+================================================================================
+Char literal in pattern position
+================================================================================
+
+fn main() {
+    match c {
+        'a' => 1,
+        _ => 0,
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (expression_statement
+        (expression
+          (match_expression
+            value: (expression (identifier))
+            (match_arm
+              pattern: (pattern (char_literal))
+              value: (expression (integer_literal)))
+            (match_arm
+              pattern: (pattern)
+              value: (expression (integer_literal)))))))))
