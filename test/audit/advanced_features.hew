@@ -1,0 +1,188 @@
+// Advanced features: gen functions, for-await, while-let, scope, lambda actors,
+// type aliases, indirect enums, trait bounds, where clauses
+
+// Type alias
+type IntPair = (i32, i32);
+
+// Indirect enum (recursive)
+indirect enum Expr {
+    Lit(i32),
+    Add(Expr, Expr),
+    Neg(Expr),
+}
+
+// Trait with bounds and associated type
+trait Serializable {
+    fn serialize(self: Serializable) -> bytes;
+    type Output;
+}
+
+// Actor with init block and mailbox
+actor BufferedWorker {
+    let id: i32;
+    var buffer: i32;
+
+    mailbox 16;
+
+    init(id: i32) {
+        println(f"Worker {id} started");
+    }
+
+    receive fn process(value: i32) -> i32 {
+        buffer = buffer + value;
+        buffer
+    }
+}
+
+// Scope expression with binding
+fn test_scope() {
+    let result = scope |s| {
+        let a = 10;
+        let b = 20;
+        a + b
+    };
+    println(result);
+}
+
+// Lambda actors
+fn test_lambda_actors() {
+    let doubler = spawn (x: int) => {
+        println(x * 2);
+    };
+    doubler.send(21);
+}
+
+// For loop with range
+fn test_for_range() {
+    for i in 0..10 {
+        println(i);
+    }
+}
+
+// While-let
+fn test_while_let() {
+    while let Some(x) = iter.next() {
+        process(x);
+    }
+}
+
+// Unsafe block
+fn test_unsafe() {
+    unsafe {
+        let ptr = raw_alloc(64);
+    }
+}
+
+// Wire enum
+wire enum Command {
+    Start;
+    Stop;
+    Pause;
+}
+
+// Wire struct with all features
+wire struct Packet {
+    header: u32 @1;
+    payload: bytes @2 optional;
+    version: u16 @3 deprecated;
+    reserved(10, 11, 12);
+}
+
+// Extern block
+extern "C" {
+    fn malloc(size: usize) -> *void;
+    fn free(ptr: *void);
+}
+
+// Const declarations
+pub const MAX_BUFFER: u32 = 1024;
+const PI: f64 = 3.14159;
+
+// String interpolation with complex expressions
+fn test_interpolation() {
+    let name = "world";
+    let x = 42;
+    println(f"Hello {name}, the answer is {x + 1}");
+}
+
+// Regex and raw strings
+fn test_string_types() {
+    let raw = r"no \escapes here";
+    let regex = re"[a-z]+";
+    let byte_str = b"binary data";
+}
+
+// Cast and try expressions
+fn test_cast_try() {
+    let x = 42 as u64;
+    let result = some_fallible_fn()?;
+}
+
+// Array and tuple expressions
+fn test_collections() {
+    let arr = [1, 2, 3, 4, 5];
+    let repeated = [0; 100];
+    let tuple = (1, "hello", true);
+    let map = {"key": "value", "name": "hew"};
+}
+
+// Labeled loops with break/continue
+fn test_labeled_loops() {
+    @outer: for i in 0..10 {
+        @inner: while true {
+            if i > 5 {
+                break @outer;
+            }
+            continue @inner;
+        }
+    }
+}
+
+// Defer statement
+fn test_defer() {
+    let handle = open_file("test.txt");
+    defer close(handle);
+    process(handle);
+}
+
+// Compound assignment operators
+fn test_compound_assign() {
+    var x = 10;
+    x += 5;
+    x -= 3;
+    x *= 2;
+    x /= 4;
+    x %= 3;
+    x &= 0xFF;
+    x |= 0x01;
+    x ^= 0x10;
+    x <<= 2;
+    x >>= 1;
+}
+
+// Visibility modifiers
+pub fn public_fn() {}
+
+// Pure functions
+pure fn add(a: i32, b: i32) -> i32 {
+    a + b
+}
+
+// Cooperate and this expressions
+fn test_keywords() {
+    cooperate;
+    this;
+}
+
+fn main() {
+    test_scope();
+    test_lambda_actors();
+    test_for_range();
+    test_interpolation();
+    test_string_types();
+    test_collections();
+    test_labeled_loops();
+    test_defer();
+    test_compound_assign();
+    test_keywords();
+}

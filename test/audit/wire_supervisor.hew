@@ -1,0 +1,40 @@
+// Demonstrates wire types, supervisors, and actors
+actor Counter {
+    let count: i32;
+    receive fn increment(amount: i32) {
+        count = count + amount;
+    }
+    receive fn get_count() {
+        println(count);
+    }
+}
+
+wire type StatusUpdate {
+    actor_id: u32 @1;
+    count: i32 @2;
+    message: String @3;
+}
+
+supervisor CounterPool {
+    strategy: one_for_one;
+    max_restarts: 5;
+    window: 60;
+}
+
+fn fibonacci(n: i32) -> i32 {
+    if n <= 1 {
+        n
+    } else {
+        fibonacci(n - 1) + fibonacci(n - 2)
+    }
+}
+
+fn main() {
+    println("=== Hew Language Demo ===");
+    let fib10 = fibonacci(10);
+    println(f"   fibonacci(10) = {fib10}");
+    let greeting = "Hello, " + "Hew!";
+    println(f"   {greeting}");
+    let len = greeting.len();
+    println(f"   length = {len}");
+}

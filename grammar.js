@@ -424,6 +424,7 @@ export default grammar({
       field('name', $.identifier),
       ':',
       field('actor', $.identifier),
+      optional(seq('(', optional(sep1($.call_argument, ',')), ')')),
       optional($.restart_spec),
       ';',
     ),
@@ -801,11 +802,22 @@ export default grammar({
 
     parenthesized_expression: $ => seq('(', $.expression, ')'),
 
-    if_expression: $ => prec.right(seq(
-      'if',
-      field('condition', $.expression),
-      field('consequence', $.block),
-      optional(field('alternative', $.else_clause)),
+    if_expression: $ => prec.right(choice(
+      seq(
+        'if',
+        field('condition', $.expression),
+        field('consequence', $.block),
+        optional(field('alternative', $.else_clause)),
+      ),
+      seq(
+        'if',
+        'let',
+        field('pattern', $.pattern),
+        '=',
+        field('value', $.expression),
+        field('consequence', $.block),
+        optional(field('alternative', $.else_clause)),
+      ),
     )),
 
     else_clause: $ => seq('else', choice($.if_expression, $.block)),

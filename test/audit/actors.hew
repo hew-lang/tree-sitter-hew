@@ -1,0 +1,36 @@
+// Fibonacci across actors - demonstrates deterministic fan-out with joins
+fn fib(n: int) -> int {
+    if n <= 1 {
+        n
+    } else {
+        fib(n - 1) + fib(n - 2)
+    }
+}
+
+fn print_result(worker_id: int, n: int, result: int) {
+    println(f"Worker {worker_id}: fib({n}) = {result}");
+}
+
+actor FibWorker {
+    receive fn compute(n: int) -> int {
+        fib(n)
+    }
+}
+
+fn main() {
+    println("=== Fibonacci via Actors ===");
+    let w1 = spawn FibWorker;
+    let w2 = spawn FibWorker;
+    let w3 = spawn FibWorker;
+
+    let (r1, r2, r3) = join {
+        w1.compute(5),
+        w2.compute(10),
+        w3.compute(15),
+    };
+
+    print_result(1, 5, r1);
+    print_result(2, 10, r2);
+    print_result(3, 15, r3);
+    println("=== Done ===");
+}

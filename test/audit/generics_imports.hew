@@ -1,0 +1,34 @@
+//! Tests for the std::option helper functions.
+
+import std::option;
+import std::testing;
+
+#[test]
+fn test_is_some_int_with_value() {
+    let x = Some(42);
+    testing.assert_true(option.is_some_int(x));
+}
+
+#[test]
+fn test_is_some_int_with_none() {
+    let x: Option<int> = None;
+    testing.assert_false(option.is_some_int(x));
+}
+
+#[test]
+fn test_unwrap_int_some() {
+    let x = Some(42);
+    testing.assert_eq(option.unwrap_int(x), 42);
+}
+
+#[test]
+fn test_unwrap_or_int_some() {
+    let x = Some(42);
+    testing.assert_eq(option.unwrap_or_int(x, 0), 42);
+}
+
+#[test]
+fn test_unwrap_or_int_none() {
+    let x: Option<int> = None;
+    testing.assert_eq(option.unwrap_or_int(x, -1), -1);
+}
