@@ -1,0 +1,256 @@
+================================================================================
+Actor expression — bare params
+================================================================================
+
+fn main() {
+    let handler = actor |msg: string| {
+        log(msg);
+    };
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (let_statement
+        pattern: (pattern (identifier))
+        value: (expression
+          (actor_expression
+            (lambda_parameter name: (identifier) type: (primitive_type))
+            body: (block
+              (expression_statement
+                (expression
+                  (call_expression
+                    function: (expression (identifier))
+                    (call_argument
+                      (expression (identifier)))))))))))))
+
+================================================================================
+Actor expression — move keyword
+================================================================================
+
+fn main() {
+    let h = actor move |x: i32| -> i32 {
+        x + 1
+    };
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (let_statement
+        pattern: (pattern (identifier))
+        value: (expression
+          (actor_expression
+            (lambda_parameter name: (identifier) type: (primitive_type))
+            (return_type (primitive_type))
+            body: (block
+              (expression_statement
+                (expression
+                  (binary_expression
+                    (expression (identifier))
+                    (expression (integer_literal))))))))))))
+
+================================================================================
+Actor expression — no params
+================================================================================
+
+fn main() {
+    let a = actor || {
+        work();
+    };
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (let_statement
+        pattern: (pattern (identifier))
+        value: (expression
+          (actor_expression
+            body: (block
+              (expression_statement
+                (expression
+                  (call_expression
+                    function: (expression (identifier))))))))))))
+
+================================================================================
+Scope expression with fork child (named binding)
+================================================================================
+
+fn main() {
+    scope {
+        fork result = compute();
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (expression_statement
+        (expression
+          (scope_expression
+            body: (block
+              (expression_statement
+                (expression
+                  (fork_expression
+                    binding: (identifier)
+                    expr: (expression
+                      (call_expression
+                        function: (expression (identifier))))))))))))))
+
+================================================================================
+Scope expression with bare fork child
+================================================================================
+
+fn main() {
+    scope {
+        fork run_task();
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (expression_statement
+        (expression
+          (scope_expression
+            body: (block
+              (expression_statement
+                (expression
+                  (fork_expression
+                    expr: (expression
+                      (call_expression
+                        function: (expression (identifier))))))))))))))
+
+================================================================================
+Scope expression with fork block
+================================================================================
+
+fn main() {
+    scope {
+        fork {
+            do_work();
+        }
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (expression_statement
+        (expression
+          (scope_expression
+            body: (block
+              (expression_statement
+                (expression
+                  (fork_expression
+                    body: (block
+                      (expression_statement
+                        (expression
+                          (call_expression
+                            function: (expression (identifier))))))))))))))))
+
+================================================================================
+Scope expression with after deadline
+================================================================================
+
+fn main() {
+    scope {
+        fork run_task();
+        after(5s) {
+            cancel();
+        }
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (expression_statement
+        (expression
+          (scope_expression
+            body: (block
+              (expression_statement
+                (expression
+                  (fork_expression
+                    expr: (expression
+                      (call_expression
+                        function: (expression (identifier)))))))
+              (expression_statement
+                (expression
+                  (scope_deadline
+                    duration: (expression (duration_literal (integer_literal)))
+                    body: (block
+                      (expression_statement
+                        (expression
+                          (call_expression
+                            function: (expression (identifier))))))))))))))))
+
+================================================================================
+Spawn actor by name (v0.5 unchanged)
+================================================================================
+
+fn main() {
+    let a = spawn Counter(42);
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (let_statement
+        pattern: (pattern (identifier))
+        value: (expression
+          (spawn_expression
+            (actor_spawn
+              actor: (identifier)
+              (call_argument
+                (expression (integer_literal))))))))))
+
+================================================================================
+Scope expression (plain, no fork)
+================================================================================
+
+fn main() {
+    scope {
+        work();
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (expression_statement
+        (expression
+          (scope_expression
+            body: (block
+              (expression_statement
+                (expression
+                  (call_expression
+                    function: (expression (identifier))))))))))))

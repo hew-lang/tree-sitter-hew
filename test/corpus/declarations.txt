@@ -201,11 +201,12 @@ machine TrafficLight {
         (expression (self))))))
 
 ================================================================================
-Actor with terminate block
+Actor with lifecycle hooks (v0.5)
 ================================================================================
 
 actor Worker {
-    terminate {
+    #[on(stop)]
+    fn shutdown() {
         cleanup();
     }
 }
@@ -215,13 +216,54 @@ actor Worker {
 (source_file
   (actor_declaration
     name: (identifier)
-    (terminate_block
-      (block
+    (attribute (identifier) (identifier))
+    (function_declaration
+      name: (identifier)
+      body: (block
         (expression_statement
           (expression
             (call_expression
               function: (expression
                 (identifier)))))))))
+
+================================================================================
+Actor with on(start) and on(stop) hooks
+================================================================================
+
+actor Counter {
+    let count: i64;
+
+    #[on(start)]
+    fn boot() {
+        count = 0;
+    }
+
+    #[on(stop)]
+    fn shutdown() {
+        count = 0;
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (actor_declaration
+    name: (identifier)
+    (actor_field name: (identifier) type: (primitive_type))
+    (attribute (identifier) (identifier))
+    (function_declaration
+      name: (identifier)
+      body: (block
+        (assignment_statement
+          left: (expression (identifier))
+          right: (expression (integer_literal)))))
+    (attribute (identifier) (identifier))
+    (function_declaration
+      name: (identifier)
+      body: (block
+        (assignment_statement
+          left: (expression (identifier))
+          right: (expression (integer_literal)))))))
 
 ================================================================================
 Supervisor with child arguments
