@@ -10,6 +10,7 @@
 (while_statement) @local.scope
 (loop_statement) @local.scope
 (lambda) @local.scope
+(actor_expression) @local.scope
 (receive_function) @local.scope
 (receive_gen_function) @local.scope
 (match_arm) @local.scope
@@ -32,7 +33,8 @@
 (for_statement
   pattern: (pattern (identifier) @local.definition))
 
-(scope_expression
+; Fork child binding introduces a Task<T> name in the enclosing scope
+(fork_expression
   binding: (identifier) @local.definition)
 
 ; Select arm bindings

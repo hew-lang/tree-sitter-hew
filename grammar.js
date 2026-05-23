@@ -40,6 +40,8 @@ export default grammar({
     [$.expression, $.struct_init],
     [$.actor_spawn],
     [$.trait_bound],
+    [$.expression, $.fork_expression],
+    [$.binary_expression, $.fork_expression],
   ],
 
   rules: {
@@ -321,13 +323,12 @@ export default grammar({
       '{',
       repeat(choice(
         $.actor_init,
-        $.terminate_block,
         $.actor_field,
         $.mailbox_declaration,
         $.receive_function,
         $.receive_gen_function,
-        $.function_declaration,
-        $.gen_function_declaration,
+        seq(repeat($.attribute), $.function_declaration),
+        seq(repeat($.attribute), $.gen_function_declaration),
       )),
       '}',
     ),
@@ -337,11 +338,6 @@ export default grammar({
       '(',
       optional($.parameters),
       ')',
-      $.block,
-    ),
-
-    terminate_block: $ => seq(
-      'terminate',
       $.block,
     ),
 
@@ -679,10 +675,13 @@ export default grammar({
       $.if_expression,
       $.match_expression,
       $.lambda,
+      $.actor_expression,
       $.spawn_expression,
       $.select_expression,
       $.join_expression,
       $.scope_expression,
+      $.fork_expression,
+      $.scope_deadline,
       $.cooperate_expression,
       $.this_expression,
       $.yield_expression,
@@ -845,12 +844,21 @@ export default grammar({
       optional(seq(':', field('type', $._type))),
     ),
 
+    // actor [move] |params| [-> Ret] { body } — inline actor literal (v0.5)
+    // Replaces the removed `spawn (...) => ...` lambda-actor form.
+    actor_expression: $ => prec(2, seq(
+      'actor',
+      optional('move'),
+      '|',
+      optional(sep1($.lambda_parameter, ',')),
+      '|',
+      optional($.return_type),
+      field('body', $.block),
+    )),
+
     spawn_expression: $ => seq(
       'spawn',
-      choice(
-        $.actor_spawn,
-        $.lambda_actor,
-      ),
+      $.actor_spawn,
     ),
 
     actor_spawn: $ => seq(
@@ -862,16 +870,6 @@ export default grammar({
         ')',
       )),
     ),
-
-    lambda_actor: $ => prec(2, seq(
-      optional('move'),
-      '(',
-      optional(sep1($.lambda_parameter, ',')),
-      ')',
-      optional($.return_type),
-      '=>',
-      choice($.expression, $.block),
-    )),
 
     select_expression: $ => seq(
       'select',
@@ -928,9 +926,26 @@ export default grammar({
 
     scope_expression: $ => seq(
       'scope',
-      optional(seq('|', field('binding', $.identifier), '|')),
-      $.block,
+      field('body', $.block),
     ),
+
+    // fork { body } — anonymous child-task block inside a scope.
+    // fork [name =] expr — named or bare child-task launch inside a scope.
+    fork_expression: $ => choice(
+      prec(2, seq('fork', field('body', $.block))),
+      prec.dynamic(10, seq('fork', field('binding', $.identifier), '=', field('expr', $.expression))),
+      prec(1, seq('fork', field('expr', $.expression))),
+    ),
+
+    // after(duration) { body } — deadline clause inside a scope block.
+    scope_deadline: $ => seq(
+      'after',
+      '(',
+      field('duration', $.expression),
+      ')',
+      field('body', $.block),
+    ),
+
     cooperate_expression: $ => 'cooperate',
     this_expression: $ => 'this',
     yield_expression: $ => seq('yield', $.expression),

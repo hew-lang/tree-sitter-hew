@@ -4,7 +4,7 @@
 [
   "fn" "let" "var" "const" "pub" "return" "if" "else" "match" "for" "while"
   "loop" "break" "continue" "in" "spawn" "await" "select" "join"
-  "import" "extern" "async" "gen" "yield" "scope" "move"
+  "import" "extern" "async" "gen" "yield" "scope" "move" "fork"
   "type" "where" "dyn" "unsafe" "defer"
   "init" "child" "restart" "budget" "strategy"
   "package" "super" "after" "from"
@@ -212,4 +212,21 @@
   "{" @punctuation.special
   "}" @punctuation.special)
 
+; ---- Actor expression (inline actor literal) ----
+(actor_expression
+  "actor" @keyword.type
+  "|" @punctuation.bracket
+  "|" @punctuation.bracket)
 
+; ---- Fork / scope-deadline ----
+(fork_expression
+  "fork" @keyword)
+
+(scope_deadline
+  "after" @keyword
+  "(" @punctuation.bracket
+  ")" @punctuation.bracket)
+
+; Fork child binding name
+(fork_expression
+  binding: (identifier) @variable.definition)
