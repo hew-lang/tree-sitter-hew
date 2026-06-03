@@ -501,7 +501,7 @@ export default grammar({
     ),
 
     // state Ident ;
-    // state Ident { StructFields [entry Block] [exit Block] [CompositeMember*] } ;?
+    // state Ident { StructFields [entry Block] [exit Block] [CompositeMember*] [TransitionDecl*] } ;?
     machine_state: $ => seq(
       'state',
       field('name', $.identifier),
@@ -512,6 +512,7 @@ export default grammar({
           optional(seq('entry', field('entry_body', $.block))),
           optional(seq('exit', field('exit_body', $.block))),
           repeat($.machine_composite_member),
+          repeat($.machine_transition),
           '}',
         ),
       ),

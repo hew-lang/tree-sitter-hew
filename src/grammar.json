@@ -3203,6 +3203,13 @@
                   }
                 },
                 {
+                  "type": "REPEAT",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "machine_transition"
+                  }
+                },
+                {
                   "type": "STRING",
                   "value": "}"
                 }

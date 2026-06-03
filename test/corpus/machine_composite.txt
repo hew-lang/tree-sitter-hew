@@ -17,13 +17,13 @@ machine ConnectionLifecycle {
         initial state Authenticating;
         state Active;
         state Draining;
+        on Disconnect: _ => Disconnected;
     }
 
     on Connect: Disconnected => Authenticating;
     on AuthOk: Authenticating => Active;
     on DrainStart: Active => Draining;
     on DrainDone: Draining => Disconnected;
-    on Disconnect: _ => Disconnected;
     on Connect: _ => _ {
         state
     }
@@ -48,7 +48,10 @@ machine ConnectionLifecycle {
       (machine_composite_member
         (machine_state name: (identifier)))
       (machine_composite_member
-        (machine_state name: (identifier))))
+        (machine_state name: (identifier)))
+      (machine_transition
+        event: (identifier)
+        target: (identifier)))
     (machine_transition
       event: (identifier)
       source: (identifier)
@@ -64,9 +67,6 @@ machine ConnectionLifecycle {
     (machine_transition
       event: (identifier)
       source: (identifier)
-      target: (identifier))
-    (machine_transition
-      event: (identifier)
       target: (identifier))
     (machine_transition
       event: (identifier)

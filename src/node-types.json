@@ -2511,6 +2511,10 @@
           "named": true
         },
         {
+          "type": "machine_transition",
+          "named": true
+        },
+        {
           "type": "struct_field",
           "named": true
         }
