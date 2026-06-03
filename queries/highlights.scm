@@ -6,7 +6,7 @@
   "loop" "break" "continue" "in" "spawn" "await" "select" "join"
   "import" "extern" "async" "gen" "yield" "scope" "move" "fork"
   "type" "where" "dyn" "unsafe" "defer"
-  "init" "child" "restart" "budget" "strategy"
+  "init" "child" "pool" "restart" "shutdown" "wired_to"
   "package" "super" "after" "from"
   "reserved" "optional" "deprecated" "default"
 ] @keyword
@@ -26,7 +26,8 @@
 ] @keyword.type
 
 [
-  "state" "event" "on" "when"
+  "state" "on" "when"
+  "events" "emits" "reenter" "entry" "exit" "emit" "initial"
 ] @keyword
 
 "pure" @keyword
@@ -36,7 +37,7 @@
 
 [
   "permanent" "transient" "temporary"
-  "one_for_one" "one_for_all" "rest_for_one"
+  "brutal_kill" "infinity"
 ] @constant.builtin
 
 ; ---- Attributes ----
@@ -157,10 +158,13 @@
 (machine_state
   name: (identifier) @constant)
 
-(machine_event
+(machine_event_decl
   name: (identifier) @constant)
 
 (machine_transition
+  event: (identifier) @constant)
+
+(emit_statement
   event: (identifier) @constant)
 
 (map_entry
@@ -196,7 +200,7 @@
   "+" "-" "*" "/" "%" "!" "=" "==" "!=" "<" "<=" ">" ">=" "&&" "||"
   "+=" "-=" "*=" "/=" "%=" ".." "..=" "<-" "=>" "->" "?"
   "<<" ">>" "&=" "|=" "^=" "<<=" ">>="
-  "&" "|" "^" "~" "=~" "!~"
+  "&" "|" "^" "~" "=~" "!~" "is"
 ] @operator
 
 ; ---- Punctuation ----

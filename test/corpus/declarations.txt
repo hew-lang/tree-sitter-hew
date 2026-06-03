@@ -138,25 +138,28 @@ actor Counter {
               (expression (integer_literal)))))))))
 
 ================================================================================
-Machine declaration
+Machine declaration (v0.5)
 ================================================================================
 
 machine TrafficLight {
+    events {
+        Timer;
+        Emergency { reason: string; }
+    }
+
     state Red;
     state Green;
     state Yellow;
 
-    event Timer;
-    event Emergency { reason: string }
-
-    on Timer: Red -> Green;
-    on Timer: Green -> Yellow;
-    on Timer: Yellow -> Red;
-    on Emergency: Red -> Red {
+    on Timer: Red => Green { Green }
+    on Timer: Green => Yellow { Yellow }
+    on Timer: Yellow => Red { Red }
+    on Emergency: Red => Red reenter {
         log(event.reason);
+        Red
     }
 
-    default { self }
+    default { state }
 }
 
 --------------------------------------------------------------------------------
@@ -164,41 +167,48 @@ machine TrafficLight {
 (source_file
   (machine_declaration
     name: (identifier)
+    events_header: (machine_events_header
+      (machine_event_decl name: (identifier))
+      (machine_event_decl
+        name: (identifier)
+        (struct_field name: (identifier) type: (primitive_type))))
     (machine_state name: (identifier))
     (machine_state name: (identifier))
     (machine_state name: (identifier))
-    (machine_event name: (identifier))
-    (machine_event
-      name: (identifier)
-      (struct_field name: (identifier) type: (primitive_type)))
-    (machine_transition
-      event: (identifier)
-      source: (identifier)
-      target: (identifier))
-    (machine_transition
-      event: (identifier)
-      source: (identifier)
-      target: (identifier))
-    (machine_transition
-      event: (identifier)
-      source: (identifier)
-      target: (identifier))
     (machine_transition
       event: (identifier)
       source: (identifier)
       target: (identifier)
-      (expression_statement
-        (expression
-          (call_expression
-            function: (expression (identifier))
-            (call_argument
-              (expression
-                (field_expression
-                  object: (expression (identifier))
-                  field: (identifier))))))))
-    (machine_default
-      (expression_statement
-        (expression (self))))))
+      body: (block
+        (expression_statement (expression (identifier)))))
+    (machine_transition
+      event: (identifier)
+      source: (identifier)
+      target: (identifier)
+      body: (block
+        (expression_statement (expression (identifier)))))
+    (machine_transition
+      event: (identifier)
+      source: (identifier)
+      target: (identifier)
+      body: (block
+        (expression_statement (expression (identifier)))))
+    (machine_transition
+      event: (identifier)
+      source: (identifier)
+      target: (identifier)
+      body: (block
+        (expression_statement
+          (expression
+            (call_expression
+              function: (expression (identifier))
+              (call_argument
+                (expression
+                  (field_expression
+                    object: (expression (identifier))
+                    field: (identifier)))))))
+        (expression_statement (expression (identifier)))))
+    (machine_default)))
 
 ================================================================================
 Actor with lifecycle hooks (v0.5)

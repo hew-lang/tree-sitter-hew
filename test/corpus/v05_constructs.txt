@@ -254,3 +254,228 @@ fn main() {
                 (expression
                   (call_expression
                     function: (expression (identifier))))))))))))
+
+================================================================================
+Machine with events header and transitions (v0.5)
+================================================================================
+
+machine Counter {
+    events { Inc; Reset; }
+    state Zero;
+    state NonZero { value: i64; }
+    on Inc: Zero => NonZero { NonZero { value: 1 } }
+    on Inc: NonZero => NonZero reenter { NonZero { value: self.value + 1 } }
+    on Reset: NonZero => Zero { Zero }
+    default { state }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (machine_declaration
+    name: (identifier)
+    events_header: (machine_events_header
+      (machine_event_decl name: (identifier))
+      (machine_event_decl name: (identifier)))
+    (machine_state name: (identifier))
+    (machine_state
+      name: (identifier)
+      (struct_field name: (identifier) type: (primitive_type)))
+    (machine_transition
+      event: (identifier)
+      source: (identifier)
+      target: (identifier)
+      body: (block
+        (expression_statement
+          (expression
+            (struct_init
+              name: (identifier)
+              (field_initializer name: (identifier) value: (expression (integer_literal))))))))
+    (machine_transition
+      event: (identifier)
+      source: (identifier)
+      target: (identifier)
+      body: (block
+        (expression_statement
+          (expression
+            (struct_init
+              name: (identifier)
+              (field_initializer
+                name: (identifier)
+                value: (expression
+                  (binary_expression
+                    (expression (field_expression object: (expression (self)) field: (identifier)))
+                    (expression (integer_literal))))))))))
+    (machine_transition
+      event: (identifier)
+      source: (identifier)
+      target: (identifier)
+      body: (block
+        (expression_statement (expression (identifier)))))
+    (machine_default)))
+
+================================================================================
+Machine with wildcard transitions (v0.5)
+================================================================================
+
+machine Toggle {
+    events { Flip; Reset; }
+    state Off;
+    state On;
+    on Flip: Off => On { On }
+    on Flip: On => Off { Off }
+    on Reset: _ => Off { Off }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (machine_declaration
+    name: (identifier)
+    events_header: (machine_events_header
+      (machine_event_decl name: (identifier))
+      (machine_event_decl name: (identifier)))
+    (machine_state name: (identifier))
+    (machine_state name: (identifier))
+    (machine_transition
+      event: (identifier)
+      source: (identifier)
+      target: (identifier)
+      body: (block (expression_statement (expression (identifier)))))
+    (machine_transition
+      event: (identifier)
+      source: (identifier)
+      target: (identifier)
+      body: (block (expression_statement (expression (identifier)))))
+    (machine_transition
+      event: (identifier)
+      target: (identifier)
+      body: (block (expression_statement (expression (identifier)))))))
+
+================================================================================
+Machine with emits block and emit statement (v0.5)
+================================================================================
+
+machine Signal {
+    events { Fire; }
+    emits { Fired; }
+    state Ready;
+    state Done;
+    on Fire: Ready => Done {
+        emit Fired;
+        Done
+    }
+    default { state }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (machine_declaration
+    name: (identifier)
+    events_header: (machine_events_header
+      (machine_event_decl name: (identifier)))
+    emits_header: (machine_emits_header
+      (identifier))
+    (machine_state name: (identifier))
+    (machine_state name: (identifier))
+    (machine_transition
+      event: (identifier)
+      source: (identifier)
+      target: (identifier)
+      body: (block
+        (emit_statement event: (identifier))
+        (expression_statement (expression (identifier)))))
+    (machine_default)))
+
+================================================================================
+Machine with payload binding and when guard (v0.5)
+================================================================================
+
+machine Bucket {
+    events { Add { amount: i64; } Drain; }
+    state Empty;
+    state Full { level: i64; }
+    on Add(amount): Empty => Full when amount > 0 { Full { level: amount } }
+    default { state }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (machine_declaration
+    name: (identifier)
+    events_header: (machine_events_header
+      (machine_event_decl
+        name: (identifier)
+        (struct_field name: (identifier) type: (primitive_type)))
+      (machine_event_decl name: (identifier)))
+    (machine_state name: (identifier))
+    (machine_state
+      name: (identifier)
+      (struct_field name: (identifier) type: (primitive_type)))
+    (machine_transition
+      event: (identifier)
+      payload_bindings: (identifier)
+      source: (identifier)
+      target: (identifier)
+      guard: (expression
+        (binary_expression
+          (expression (identifier))
+          (expression (integer_literal))))
+      body: (block
+        (expression_statement
+          (expression
+            (struct_init
+              name: (identifier)
+              (field_initializer name: (identifier) value: (expression (identifier))))))))
+    (machine_default)))
+
+================================================================================
+Machine with state entry and exit hooks (v0.5)
+================================================================================
+
+machine Lamp {
+    events { On; Off; }
+    state Dark {
+        entry { log("on"); }
+        exit { log("off"); }
+    }
+    state Bright;
+    on On: Dark => Bright { Bright }
+    on Off: Bright => Dark { Dark }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (machine_declaration
+    name: (identifier)
+    events_header: (machine_events_header
+      (machine_event_decl name: (identifier))
+      (machine_event_decl name: (identifier)))
+    (machine_state
+      name: (identifier)
+      entry_body: (block
+        (expression_statement
+          (expression
+            (call_expression
+              function: (expression (identifier))
+              (call_argument (expression (string_literal (string_content))))))))
+      exit_body: (block
+        (expression_statement
+          (expression
+            (call_expression
+              function: (expression (identifier))
+              (call_argument (expression (string_literal (string_content)))))))))
+    (machine_state name: (identifier))
+    (machine_transition
+      event: (identifier)
+      source: (identifier)
+      target: (identifier)
+      body: (block (expression_statement (expression (identifier)))))
+    (machine_transition
+      event: (identifier)
+      source: (identifier)
+      target: (identifier)
+      body: (block (expression_statement (expression (identifier)))))))

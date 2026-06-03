@@ -416,24 +416,27 @@ export default grammar({
     )),
 
     child_spec: $ => seq(
-      'child',
+      // @sync:child_kinds
+      choice('child', 'pool'),
       field('name', $.identifier),
       ':',
       field('actor', $.identifier),
       optional(seq('(', optional(sep1($.call_argument, ',')), ')')),
-      optional($.restart_spec),
+      repeat($.child_clause),
       ';',
     ),
 
-    restart_spec: $ => seq(
-      'restart',
-      '(',
-      // @sync:restart_permanence
-      choice('permanent', 'transient', 'temporary'),
-      ')',
-      optional(seq('budget', '(', $.integer_literal, ',', $.duration_literal, ')')),
-      // @sync:restart_strategies
-      optional(seq('strategy', '(', choice('one_for_one', 'one_for_all', 'rest_for_one'), ')')),
+    child_clause: $ => choice(
+      seq('restart', ':', choice('permanent', 'transient', 'temporary')),
+      seq('shutdown', ':', $.shutdown_directive),
+      seq('wired_to', ':', '{', repeat(seq($.identifier, optional(seq(':', $.identifier)), optional(','))), '}'),
+    ),
+
+    // @sync:shutdown_directives
+    shutdown_directive: $ => choice(
+      $.duration_literal,
+      'brutal_kill',
+      'infinity',
     ),
 
     // @sync:duration_suffixes
@@ -445,50 +448,93 @@ export default grammar({
       optional($.visibility),
       'machine',
       field('name', $.identifier),
+      optional($.type_parameters),
+      optional($.where_clause),
       '{',
+      field('events_header', $.machine_events_header),
+      optional(field('emits_header', $.machine_emits_header)),
       repeat(choice(
         $.machine_state,
-        $.machine_event,
         $.machine_transition,
         $.machine_default,
       )),
       '}',
     ),
 
+    // events { EventDecl* }
+    machine_events_header: $ => seq(
+      'events',
+      '{',
+      repeat($.machine_event_decl),
+      '}',
+    ),
+
+    // EventDecl = Ident ( ";" | "{" { StructField } "}" ";"? )
+    machine_event_decl: $ => seq(
+      field('name', $.identifier),
+      choice(
+        ';',
+        seq('{', repeat($.struct_field), '}', optional(';')),
+      ),
+    ),
+
+    // emits { Ident ";" * }
+    machine_emits_header: $ => seq(
+      'emits',
+      '{',
+      repeat(seq($.identifier, ';')),
+      '}',
+    ),
+
+    // state Ident ;
+    // state Ident { StructFields [entry Block] [exit Block] [CompositeMember*] } ;?
     machine_state: $ => seq(
       'state',
       field('name', $.identifier),
-      optional(seq('{', repeat($.struct_field), '}')),
+      optional(
+        seq(
+          '{',
+          repeat($.struct_field),
+          optional(seq('entry', field('entry_body', $.block))),
+          optional(seq('exit', field('exit_body', $.block))),
+          repeat($.machine_composite_member),
+          '}',
+        ),
+      ),
       optional(';'),
     ),
 
-    machine_event: $ => seq(
-      'event',
-      field('name', $.identifier),
-      optional(seq('{', repeat($.struct_field), '}')),
-      optional(';'),
+    // [ "initial" ] StateDecl  — depth-1 composite substate
+    machine_composite_member: $ => seq(
+      optional('initial'),
+      $.machine_state,
     ),
 
+    // on EventIdent [ "(" Ident { "," Ident } ")" ] : Source => Target
+    //   [ "reenter" ] [ "when" Expr ] TransitionBody
+    // Source/Target = Ident | "_"
     machine_transition: $ => seq(
       'on',
       field('event', $.identifier),
+      optional(seq('(', field('payload_bindings', sep1($.identifier, ',')), ')')),
       ':',
-      field('source', $.identifier),
-      '->',
-      field('target', $.identifier),
+      field('source', choice($.identifier, '_')),
+      '=>',
+      field('target', choice($.identifier, '_')),
+      optional('reenter'),
       optional(seq('when', field('guard', $.expression))),
       choice(
         ';',
-        seq('{', repeat(choice($.field_initializer, $._statement)), '}'),
+        field('body', $.block),
       ),
     ),
 
+    // default { state }  — covers all remaining uncovered (state, event) cells
     machine_default: $ => seq(
       'default',
-      choice(
-        seq('{', repeat($._statement), '}'),
-        ';',
-      ),
+      '{',
+      'state',
+      '}',
     ),
 
     // ---- Extern ----
@@ -581,6 +627,7 @@ export default grammar({
       $.var_statement,
       $.assignment_statement,
       $.defer_statement,
+      $.emit_statement,
 
       $.for_statement,
       $.while_statement,
@@ -640,6 +687,14 @@ export default grammar({
     return_statement: $ => seq('return', optional($.expression), ';'),
 
     defer_statement: $ => seq('defer', $.expression, ';'),
+
+    // emit EventName { field: value, … } ;  — Mealy output inside a transition body
+    emit_statement: $ => seq(
+      'emit',
+      field('event', $.identifier),
+      optional(seq('{', optional(seq(sep1($.field_initializer, ','), optional(','))), '}')),
+      ';',
+    ),
 
     expression_statement: $ => seq($.expression, optional(';')),
 
@@ -702,7 +757,7 @@ export default grammar({
       prec.left(PREC.BIT_XOR, seq($.expression, '^', $.expression)),
       prec.left(PREC.AND, seq($.expression, '&&', $.expression)),
       prec.left(PREC.BIT_AND, seq($.expression, '&', $.expression)),
-      prec.left(PREC.EQ, seq($.expression, choice('==', '!=', '=~', '!~'), $.expression)),
+      prec.left(PREC.EQ, seq($.expression, choice('==', '!=', '=~', '!~', 'is'), $.expression)),
       prec.left(PREC.REL, seq($.expression, choice('<', '<=', '>', '>='), $.expression)),
       prec.right(PREC.RANGE, seq($.expression, choice('..', '..='), $.expression)),
       prec.left(PREC.SHIFT, seq($.expression, choice('<<', '>>'), $.expression)),
