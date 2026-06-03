@@ -1436,6 +1436,10 @@
           "named": true
         },
         {
+          "type": "supervisor_strategy_value",
+          "named": true
+        },
+        {
           "type": "this_expression",
           "named": true
         },
@@ -3243,6 +3247,106 @@
     }
   },
   {
+    "type": "record_declaration",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "record_field",
+          "named": true
+        },
+        {
+          "type": "type_parameters",
+          "named": true
+        },
+        {
+          "type": "visibility",
+          "named": true
+        },
+        {
+          "type": "where_clause",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "record_field",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "type": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "array_type",
+            "named": true
+          },
+          {
+            "type": "function_type",
+            "named": true
+          },
+          {
+            "type": "generic_type",
+            "named": true
+          },
+          {
+            "type": "identifier",
+            "named": true
+          },
+          {
+            "type": "pointer_type",
+            "named": true
+          },
+          {
+            "type": "primitive_type",
+            "named": true
+          },
+          {
+            "type": "slice_type",
+            "named": true
+          },
+          {
+            "type": "trait_object_type",
+            "named": true
+          },
+          {
+            "type": "tuple_type",
+            "named": true
+          },
+          {
+            "type": "unit_type",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "reserved_declaration",
     "named": true,
     "fields": {},
@@ -3525,6 +3629,10 @@
         },
         {
           "type": "machine_declaration",
+          "named": true
+        },
+        {
+          "type": "record_declaration",
           "named": true
         },
         {
@@ -3812,6 +3920,11 @@
         ]
       }
     }
+  },
+  {
+    "type": "supervisor_strategy_value",
+    "named": true,
+    "fields": {}
   },
   {
     "type": "trait_bound",
@@ -4817,10 +4930,6 @@
     "named": false
   },
   {
-    "type": "<-",
-    "named": false
-  },
-  {
     "type": "<<",
     "named": false
   },
@@ -5207,6 +5316,10 @@
     "named": false
   },
   {
+    "type": "mut",
+    "named": false
+  },
+  {
     "type": "none_literal",
     "named": true
   },
@@ -5216,6 +5329,14 @@
   },
   {
     "type": "on",
+    "named": false
+  },
+  {
+    "type": "one_for_all",
+    "named": false
+  },
+  {
+    "type": "one_for_one",
     "named": false
   },
   {
@@ -5243,10 +5364,6 @@
     "named": false
   },
   {
-    "type": "pure",
-    "named": false
-  },
-  {
     "type": "race",
     "named": false
   },
@@ -5259,6 +5376,10 @@
     "named": false
   },
   {
+    "type": "record",
+    "named": false
+  },
+  {
     "type": "reenter",
     "named": false
   },
@@ -5268,6 +5389,10 @@
   },
   {
     "type": "reserved",
+    "named": false
+  },
+  {
+    "type": "rest_for_one",
     "named": false
   },
   {
@@ -5296,6 +5421,10 @@
   },
   {
     "type": "shutdown",
+    "named": false
+  },
+  {
+    "type": "simple_one_for_one",
     "named": false
   },
   {

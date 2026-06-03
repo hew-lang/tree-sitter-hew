@@ -9,7 +9,6 @@
 
 // Precedence levels (from Pratt parser in hew-parser/src/parser.rs)
 const PREC = {
-  SEND: 1,        // <-
   OR: 3,          // || or
   BIT_OR: 4,      // |
   AND: 5,         // && and
@@ -55,6 +54,7 @@ export default grammar({
         $.import_declaration,
         $.const_declaration,
         $.struct_declaration,
+        $.record_declaration,
         $.enum_declaration,
         $.wire_declaration,
         $.trait_declaration,
@@ -120,11 +120,30 @@ export default grammar({
     struct_body: $ => seq('{', repeat($.struct_field), '}'),
 
     struct_field: $ => seq(
-      optional('var'),
       field('name', $.identifier),
       ':',
       field('type', $._type),
       optional(choice(',', ';')),
+    ),
+
+    // record Name { field: T, field: T }  — comma-separated product type.
+    // Spec: grammar.ebnf:47, Hew.g4:155. End-to-end probe OK.
+    record_declaration: $ => seq(
+      optional($.visibility),
+      'record',
+      field('name', $.identifier),
+      optional($.type_parameters),
+      optional($.where_clause),
+      '{',
+      sep1($.record_field, ','),
+      optional(','),
+      '}',
+    ),
+
+    record_field: $ => seq(
+      field('name', $.identifier),
+      ':',
+      field('type', $._type),
     ),
 
     enum_declaration: $ => seq(
@@ -207,7 +226,6 @@ export default grammar({
     ),
 
     trait_function_signature: $ => seq(
-      optional('pure'),
       'fn',
       field('name', $.identifier),
       optional($.type_parameters),
@@ -245,7 +263,6 @@ export default grammar({
 
     function_declaration: $ => seq(
       optional($.visibility),
-      optional('pure'),
       'fn',
       field('name', $.identifier),
       optional($.type_parameters),
@@ -258,7 +275,6 @@ export default grammar({
     ),
 
     gen_function_declaration: $ => seq(
-      optional('pure'),
       'gen',
       'fn',
       field('name', $.identifier),
@@ -369,7 +385,6 @@ export default grammar({
     ),
 
     receive_function: $ => seq(
-      optional('pure'),
       'receive',
       'fn',
       field('name', $.identifier),
@@ -383,7 +398,6 @@ export default grammar({
     ),
 
     receive_gen_function: $ => seq(
-      optional('pure'),
       'receive',
       'gen',
       'fn',
@@ -611,7 +625,8 @@ export default grammar({
 
     function_type: $ => prec(1, seq('fn', '(', optional(sep1($._type, ',')), ')', optional($.return_type))),
 
-    pointer_type: $ => seq('*', optional('var'), $._type),
+    // *const T / *mut T — raw pointer types. Real but FFI/unsafe-scoped; *var T is legacy and rejected.
+    pointer_type: $ => seq('*', choice('const', 'mut'), $._type),
 
     trait_object_type: $ => seq('dyn', choice(
       $.trait_bound,
@@ -742,7 +757,18 @@ export default grammar({
       $.yield_expression,
       $.path_expression,
       $.unsafe_expression,
+      $.supervisor_strategy_value,
       $.reserved_keyword,
+    ),
+
+    // @sync:supervisor_strategies
+    // Real lexer keywords (hew-lexer lex:189-195); used as the value of the
+    // `strategy:` field in a supervisor declaration body.
+    supervisor_strategy_value: $ => choice(
+      'one_for_one',
+      'one_for_all',
+      'rest_for_one',
+      'simple_one_for_one',
     ),
 
     unary_expression: $ => prec(PREC.UNARY, seq(
@@ -751,7 +777,6 @@ export default grammar({
     )),
 
     binary_expression: $ => choice(
-      prec.right(PREC.SEND, seq($.expression, '<-', $.expression)),
       prec.left(PREC.OR, seq($.expression, '||', $.expression)),
       prec.left(PREC.BIT_OR, seq($.expression, '|', $.expression)),
       prec.left(PREC.BIT_XOR, seq($.expression, '^', $.expression)),

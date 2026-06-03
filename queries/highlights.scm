@@ -22,15 +22,13 @@
 "as" @keyword
 
 [
-  "enum" "trait" "impl" "actor" "supervisor" "wire" "machine"
+  "enum" "trait" "impl" "actor" "supervisor" "wire" "machine" "record"
 ] @keyword.type
 
 [
   "state" "on" "when"
   "events" "emits" "reenter" "entry" "exit" "emit" "initial"
 ] @keyword
-
-"pure" @keyword
 
 ; Reserved keywords (future use)
 (reserved_keyword) @keyword.reserved
@@ -173,6 +171,15 @@
 (type_alias
   name: (identifier) @type)
 
+(record_declaration
+  name: (identifier) @type)
+
+(record_field
+  name: (identifier) @property)
+
+; Supervisor strategy enum values (real lexer keywords; hew-lexer lex:189-195)
+(supervisor_strategy_value) @constant.builtin
+
 (variant
   name: (identifier) @constant)
 
@@ -198,7 +205,7 @@
 ; ---- Operators ----
 [
   "+" "-" "*" "/" "%" "!" "=" "==" "!=" "<" "<=" ">" ">=" "&&" "||"
-  "+=" "-=" "*=" "/=" "%=" ".." "..=" "<-" "=>" "->" "?"
+  "+=" "-=" "*=" "/=" "%=" ".." "..=" "=>" "->" "?"
   "<<" ">>" "&=" "|=" "^=" "<<=" ">>="
   "&" "|" "^" "~" "=~" "!~" "is"
 ] @operator

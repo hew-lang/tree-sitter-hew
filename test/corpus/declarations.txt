@@ -291,9 +291,72 @@ supervisor Pool {
     name: (identifier)
     (supervisor_field
       name: (identifier)
-      value: (expression (identifier)))
+      value: (expression (supervisor_strategy_value)))
     (child_spec
       name: (identifier)
       actor: (identifier)
       (call_argument
         (expression (integer_literal))))))
+
+================================================================================
+Supervisor with all strategy values
+================================================================================
+
+supervisor S1 { strategy: one_for_one; }
+supervisor S2 { strategy: one_for_all; }
+supervisor S3 { strategy: rest_for_one; }
+supervisor S4 { strategy: simple_one_for_one; }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (supervisor_declaration
+    name: (identifier)
+    (supervisor_field name: (identifier) value: (expression (supervisor_strategy_value))))
+  (supervisor_declaration
+    name: (identifier)
+    (supervisor_field name: (identifier) value: (expression (supervisor_strategy_value))))
+  (supervisor_declaration
+    name: (identifier)
+    (supervisor_field name: (identifier) value: (expression (supervisor_strategy_value))))
+  (supervisor_declaration
+    name: (identifier)
+    (supervisor_field name: (identifier) value: (expression (supervisor_strategy_value)))))
+
+================================================================================
+Record declaration (comma-separated fields)
+================================================================================
+
+record Point {
+    x: i64,
+    y: i64,
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (record_declaration
+    name: (identifier)
+    (record_field name: (identifier) type: (primitive_type))
+    (record_field name: (identifier) type: (primitive_type))))
+
+================================================================================
+Raw pointer type in extern block (FFI-scoped)
+================================================================================
+
+extern "C" {
+    fn memcpy(dst: *mut u8, src: *const u8, n: usize);
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (extern_block
+    (string_literal
+      (string_content))
+    (extern_function
+      name: (identifier)
+      (parameters
+        (parameter name: (identifier) type: (pointer_type (primitive_type)))
+        (parameter name: (identifier) type: (pointer_type (primitive_type)))
+        (parameter name: (identifier) type: (primitive_type))))))
