@@ -9,7 +9,6 @@
 
 // Precedence levels (from Pratt parser in hew-parser/src/parser.rs)
 const PREC = {
-  SEND: 1,        // <-
   OR: 3,          // || or
   BIT_OR: 4,      // |
   AND: 5,         // && and
@@ -55,6 +54,7 @@ export default grammar({
         $.import_declaration,
         $.const_declaration,
         $.struct_declaration,
+        $.record_declaration,
         $.enum_declaration,
         $.wire_declaration,
         $.trait_declaration,
@@ -120,11 +120,30 @@ export default grammar({
     struct_body: $ => seq('{', repeat($.struct_field), '}'),
 
     struct_field: $ => seq(
-      optional('var'),
       field('name', $.identifier),
       ':',
       field('type', $._type),
       optional(choice(',', ';')),
+    ),
+
+    // record Name { field: T, field: T }  — comma-separated product type.
+    // Spec: grammar.ebnf:47, Hew.g4:155. End-to-end probe OK.
+    record_declaration: $ => seq(
+      optional($.visibility),
+      'record',
+      field('name', $.identifier),
+      optional($.type_parameters),
+      optional($.where_clause),
+      '{',
+      sep1($.record_field, ','),
+      optional(','),
+      '}',
+    ),
+
+    record_field: $ => seq(
+      field('name', $.identifier),
+      ':',
+      field('type', $._type),
     ),
 
     enum_declaration: $ => seq(
@@ -207,7 +226,6 @@ export default grammar({
     ),
 
     trait_function_signature: $ => seq(
-      optional('pure'),
       'fn',
       field('name', $.identifier),
       optional($.type_parameters),
@@ -245,7 +263,6 @@ export default grammar({
 
     function_declaration: $ => seq(
       optional($.visibility),
-      optional('pure'),
       'fn',
       field('name', $.identifier),
       optional($.type_parameters),
@@ -258,7 +275,6 @@ export default grammar({
     ),
 
     gen_function_declaration: $ => seq(
-      optional('pure'),
       'gen',
       'fn',
       field('name', $.identifier),
@@ -369,7 +385,6 @@ export default grammar({
     ),
 
     receive_function: $ => seq(
-      optional('pure'),
       'receive',
       'fn',
       field('name', $.identifier),
@@ -383,7 +398,6 @@ export default grammar({
     ),
 
     receive_gen_function: $ => seq(
-      optional('pure'),
       'receive',
       'gen',
       'fn',
@@ -416,24 +430,27 @@ export default grammar({
     )),
 
     child_spec: $ => seq(
-      'child',
+      // @sync:child_kinds
+      choice('child', 'pool'),
       field('name', $.identifier),
       ':',
       field('actor', $.identifier),
       optional(seq('(', optional(sep1($.call_argument, ',')), ')')),
-      optional($.restart_spec),
+      repeat($.child_clause),
       ';',
     ),
 
-    restart_spec: $ => seq(
-      'restart',
-      '(',
-      // @sync:restart_permanence
-      choice('permanent', 'transient', 'temporary'),
-      ')',
-      optional(seq('budget', '(', $.integer_literal, ',', $.duration_literal, ')')),
-      // @sync:restart_strategies
-      optional(seq('strategy', '(', choice('one_for_one', 'one_for_all', 'rest_for_one'), ')')),
+    child_clause: $ => choice(
+      seq('restart', ':', choice('permanent', 'transient', 'temporary')),
+      seq('shutdown', ':', $.shutdown_directive),
+      seq('wired_to', ':', '{', repeat(seq($.identifier, optional(seq(':', $.identifier)), optional(','))), '}'),
+    ),
+
+    // @sync:shutdown_directives
+    shutdown_directive: $ => choice(
+      $.duration_literal,
+      'brutal_kill',
+      'infinity',
     ),
 
     // @sync:duration_suffixes
@@ -445,50 +462,94 @@ export default grammar({
       optional($.visibility),
       'machine',
       field('name', $.identifier),
+      optional($.type_parameters),
+      optional($.where_clause),
       '{',
+      field('events_header', $.machine_events_header),
+      optional(field('emits_header', $.machine_emits_header)),
       repeat(choice(
         $.machine_state,
-        $.machine_event,
         $.machine_transition,
         $.machine_default,
       )),
       '}',
     ),
 
+    // events { EventDecl* }
+    machine_events_header: $ => seq(
+      'events',
+      '{',
+      repeat($.machine_event_decl),
+      '}',
+    ),
+
+    // EventDecl = Ident ( ";" | "{" { StructField } "}" ";"? )
+    machine_event_decl: $ => seq(
+      field('name', $.identifier),
+      choice(
+        ';',
+        seq('{', repeat($.struct_field), '}', optional(';')),
+      ),
+    ),
+
+    // emits { Ident ";" * }
+    machine_emits_header: $ => seq(
+      'emits',
+      '{',
+      repeat(seq($.identifier, ';')),
+      '}',
+    ),
+
+    // state Ident ;
+    // state Ident { StructFields [entry Block] [exit Block] [CompositeMember*] [TransitionDecl*] } ;?
     machine_state: $ => seq(
       'state',
       field('name', $.identifier),
-      optional(seq('{', repeat($.struct_field), '}')),
+      optional(
+        seq(
+          '{',
+          repeat($.struct_field),
+          optional(seq('entry', field('entry_body', $.block))),
+          optional(seq('exit', field('exit_body', $.block))),
+          repeat($.machine_composite_member),
+          repeat($.machine_transition),
+          '}',
+        ),
+      ),
       optional(';'),
     ),
 
-    machine_event: $ => seq(
-      'event',
-      field('name', $.identifier),
-      optional(seq('{', repeat($.struct_field), '}')),
-      optional(';'),
+    // [ "initial" ] StateDecl  — depth-1 composite substate
+    machine_composite_member: $ => seq(
+      optional('initial'),
+      $.machine_state,
     ),
 
+    // on EventIdent [ "(" Ident { "," Ident } ")" ] : Source => Target
+    //   [ "reenter" ] [ "when" Expr ] TransitionBody
+    // Source/Target = Ident | "_"
     machine_transition: $ => seq(
       'on',
       field('event', $.identifier),
+      optional(seq('(', field('payload_bindings', sep1($.identifier, ',')), ')')),
       ':',
-      field('source', $.identifier),
-      '->',
-      field('target', $.identifier),
+      field('source', choice($.identifier, '_')),
+      '=>',
+      field('target', choice($.identifier, '_')),
+      optional('reenter'),
       optional(seq('when', field('guard', $.expression))),
       choice(
         ';',
-        seq('{', repeat(choice($.field_initializer, $._statement)), '}'),
+        field('body', $.block),
       ),
     ),
 
+    // default { state }  — covers all remaining uncovered (state, event) cells
     machine_default: $ => seq(
       'default',
-      choice(
-        seq('{', repeat($._statement), '}'),
-        ';',
-      ),
+      '{',
+      'state',
+      '}',
     ),
 
     // ---- Extern ----
@@ -565,7 +626,8 @@ export default grammar({
 
     function_type: $ => prec(1, seq('fn', '(', optional(sep1($._type, ',')), ')', optional($.return_type))),
 
-    pointer_type: $ => seq('*', optional('var'), $._type),
+    // *const T / *mut T — raw pointer types. Real but FFI/unsafe-scoped; *var T is legacy and rejected.
+    pointer_type: $ => seq('*', choice('const', 'mut'), $._type),
 
     trait_object_type: $ => seq('dyn', choice(
       $.trait_bound,
@@ -581,6 +643,7 @@ export default grammar({
       $.var_statement,
       $.assignment_statement,
       $.defer_statement,
+      $.emit_statement,
 
       $.for_statement,
       $.while_statement,
@@ -641,6 +704,14 @@ export default grammar({
 
     defer_statement: $ => seq('defer', $.expression, ';'),
 
+    // emit EventName { field: value, … } ;  — Mealy output inside a transition body
+    emit_statement: $ => seq(
+      'emit',
+      field('event', $.identifier),
+      optional(seq('{', optional(seq(sep1($.field_initializer, ','), optional(','))), '}')),
+      ';',
+    ),
+
     expression_statement: $ => seq($.expression, optional(';')),
 
     if_statement: $ => $.if_expression,
@@ -687,7 +758,18 @@ export default grammar({
       $.yield_expression,
       $.path_expression,
       $.unsafe_expression,
+      $.supervisor_strategy_value,
       $.reserved_keyword,
+    ),
+
+    // @sync:supervisor_strategies
+    // Real lexer keywords (hew-lexer lex:189-195); used as the value of the
+    // `strategy:` field in a supervisor declaration body.
+    supervisor_strategy_value: $ => choice(
+      'one_for_one',
+      'one_for_all',
+      'rest_for_one',
+      'simple_one_for_one',
     ),
 
     unary_expression: $ => prec(PREC.UNARY, seq(
@@ -696,13 +778,12 @@ export default grammar({
     )),
 
     binary_expression: $ => choice(
-      prec.right(PREC.SEND, seq($.expression, '<-', $.expression)),
       prec.left(PREC.OR, seq($.expression, '||', $.expression)),
       prec.left(PREC.BIT_OR, seq($.expression, '|', $.expression)),
       prec.left(PREC.BIT_XOR, seq($.expression, '^', $.expression)),
       prec.left(PREC.AND, seq($.expression, '&&', $.expression)),
       prec.left(PREC.BIT_AND, seq($.expression, '&', $.expression)),
-      prec.left(PREC.EQ, seq($.expression, choice('==', '!=', '=~', '!~'), $.expression)),
+      prec.left(PREC.EQ, seq($.expression, choice('==', '!=', '=~', '!~', 'is'), $.expression)),
       prec.left(PREC.REL, seq($.expression, choice('<', '<=', '>', '>='), $.expression)),
       prec.right(PREC.RANGE, seq($.expression, choice('..', '..='), $.expression)),
       prec.left(PREC.SHIFT, seq($.expression, choice('<<', '>>'), $.expression)),

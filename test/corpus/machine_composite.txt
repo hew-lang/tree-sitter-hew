@@ -1,0 +1,76 @@
+================================================================================
+Machine with depth-1 composite state (v0.5)
+================================================================================
+
+machine ConnectionLifecycle {
+    events {
+        Connect;
+        AuthOk;
+        DrainStart;
+        DrainDone;
+        Disconnect;
+    }
+
+    state Disconnected;
+
+    state Connected {
+        initial state Authenticating;
+        state Active;
+        state Draining;
+        on Disconnect: _ => Disconnected;
+    }
+
+    on Connect: Disconnected => Authenticating;
+    on AuthOk: Authenticating => Active;
+    on DrainStart: Active => Draining;
+    on DrainDone: Draining => Disconnected;
+    on Connect: _ => _ {
+        state
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (machine_declaration
+    name: (identifier)
+    events_header: (machine_events_header
+      (machine_event_decl name: (identifier))
+      (machine_event_decl name: (identifier))
+      (machine_event_decl name: (identifier))
+      (machine_event_decl name: (identifier))
+      (machine_event_decl name: (identifier)))
+    (machine_state name: (identifier))
+    (machine_state
+      name: (identifier)
+      (machine_composite_member
+        (machine_state name: (identifier)))
+      (machine_composite_member
+        (machine_state name: (identifier)))
+      (machine_composite_member
+        (machine_state name: (identifier)))
+      (machine_transition
+        event: (identifier)
+        target: (identifier)))
+    (machine_transition
+      event: (identifier)
+      source: (identifier)
+      target: (identifier))
+    (machine_transition
+      event: (identifier)
+      source: (identifier)
+      target: (identifier))
+    (machine_transition
+      event: (identifier)
+      source: (identifier)
+      target: (identifier))
+    (machine_transition
+      event: (identifier)
+      source: (identifier)
+      target: (identifier))
+    (machine_transition
+      event: (identifier)
+      body: (block
+        (expression_statement
+          (expression
+            (identifier)))))))
