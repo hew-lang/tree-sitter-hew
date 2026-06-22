@@ -7,7 +7,7 @@
   "import" "extern" "async" "gen" "yield" "scope" "move" "fork"
   "type" "where" "dyn" "unsafe" "defer"
   "init" "child" "pool" "restart" "shutdown" "wired_to"
-  "package" "super" "after" "from"
+  "package" "after" "from"
   "reserved" "optional" "deprecated" "default"
 ] @keyword
 
@@ -136,10 +136,10 @@
   name: (identifier) @type)
 
 (impl_declaration
-  trait: (identifier) @type)
+  type: (identifier) @type)
 
 (impl_declaration
-  type: (identifier) @type)
+  self_type: (identifier) @type)
 
 (actor_declaration
   name: (identifier) @type)
@@ -230,7 +230,7 @@
   "|" @punctuation.bracket)
 
 ; ---- Fork / scope-deadline ----
-(fork_expression
+(fork_statement
   "fork" @keyword)
 
 (scope_deadline
@@ -239,5 +239,5 @@
   ")" @punctuation.bracket)
 
 ; Fork child binding name
-(fork_expression
+(fork_statement
   binding: (identifier) @variable.definition)

@@ -34,12 +34,12 @@
   pattern: (pattern (identifier) @local.definition))
 
 ; Fork child binding introduces a Task<T> name in the enclosing scope
-(fork_expression
+(fork_statement
   binding: (identifier) @local.definition)
 
 ; Select arm bindings
 (select_arm
-  (identifier) @local.definition)
+  binding: (pattern (identifier) @local.definition))
 
 ; References
 (identifier) @local.reference

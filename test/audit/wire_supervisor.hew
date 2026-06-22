@@ -17,8 +17,7 @@ wire type StatusUpdate {
 
 supervisor CounterPool {
     strategy: one_for_one;
-    max_restarts: 5;
-    window: 60;
+    intensity: 5 within 60s;
 }
 
 fn fibonacci(n: i32) -> i32 {

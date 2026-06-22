@@ -68,7 +68,7 @@ KEYWORDS=(
   state event on when default
 
   # Wire keywords
-  reserved optional deprecated list
+  reserved optional deprecated repeated
 
   # @sync:primitive_types
   i8 i16 i32 i64 u8 u16 u32 u64 isize usize
@@ -84,7 +84,7 @@ KEYWORDS=(
   try catch race foreign
 
   # Other
-  dyn pure
+  dyn
 )
 
 # ---------------------------------------------------------------------------

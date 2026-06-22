@@ -1,21 +1,23 @@
 // Machine declarations and duration literals
 
 machine TrafficLight {
+    events {
+        Timer;
+        Emergency { reason: string }
+    }
+
     state Red;
     state Green;
     state Yellow;
 
-    event Timer;
-    event Emergency { reason: string }
-
-    on Timer: Red -> Green;
-    on Timer: Green -> Yellow;
-    on Timer: Yellow -> Red;
-    on Emergency: Red -> Red {
+    on Timer: Red => Green;
+    on Timer: Green => Yellow;
+    on Timer: Yellow => Red;
+    on Emergency: Red => Red {
         log(event.reason);
     }
 
-    default { self }
+    default { state }
 }
 
 // Duration literals in various forms
@@ -31,8 +33,7 @@ fn duration_demo() {
 // Supervisor with child specs
 supervisor ServiceTree {
     strategy: one_for_one;
-    max_restarts: 5;
-    window: 60;
+    intensity: 5 within 60s;
 
     child counter: Counter(100);
     child debug_log: Logger(1);

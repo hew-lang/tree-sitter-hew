@@ -15,17 +15,22 @@ fn main() {
     name: (identifier)
     body: (block
       (let_statement
-        pattern: (pattern (identifier))
+        pattern: (pattern
+          (identifier))
         value: (expression
           (actor_expression
-            (lambda_parameter name: (identifier) type: (primitive_type))
+            (lambda_parameter
+              name: (identifier)
+              type: (primitive_type))
             body: (block
               (expression_statement
                 (expression
                   (call_expression
-                    function: (expression (identifier))
+                    function: (expression
+                      (identifier))
                     (call_argument
-                      (expression (identifier)))))))))))))
+                      (expression
+                        (identifier)))))))))))))
 
 ================================================================================
 Actor expression — move keyword
@@ -44,17 +49,23 @@ fn main() {
     name: (identifier)
     body: (block
       (let_statement
-        pattern: (pattern (identifier))
+        pattern: (pattern
+          (identifier))
         value: (expression
           (actor_expression
-            (lambda_parameter name: (identifier) type: (primitive_type))
-            (return_type (primitive_type))
+            (lambda_parameter
+              name: (identifier)
+              type: (primitive_type))
+            (return_type
+              (primitive_type))
             body: (block
               (expression_statement
                 (expression
                   (binary_expression
-                    (expression (identifier))
-                    (expression (integer_literal))))))))))))
+                    (expression
+                      (identifier))
+                    (expression
+                      (integer_literal))))))))))))
 
 ================================================================================
 Actor expression — no params
@@ -73,14 +84,16 @@ fn main() {
     name: (identifier)
     body: (block
       (let_statement
-        pattern: (pattern (identifier))
+        pattern: (pattern
+          (identifier))
         value: (expression
           (actor_expression
             body: (block
               (expression_statement
                 (expression
                   (call_expression
-                    function: (expression (identifier))))))))))))
+                    function: (expression
+                      (identifier))))))))))))
 
 ================================================================================
 Scope expression with fork child (named binding)
@@ -101,14 +114,13 @@ fn main() {
       (expression_statement
         (expression
           (scope_expression
-            body: (block
-              (expression_statement
-                (expression
-                  (fork_expression
-                    binding: (identifier)
-                    expr: (expression
-                      (call_expression
-                        function: (expression (identifier))))))))))))))
+            body: (scope_block
+              (fork_statement
+                binding: (identifier)
+                expr: (expression
+                  (call_expression
+                    function: (expression
+                      (identifier))))))))))))
 
 ================================================================================
 Scope expression with bare fork child
@@ -129,13 +141,12 @@ fn main() {
       (expression_statement
         (expression
           (scope_expression
-            body: (block
-              (expression_statement
-                (expression
-                  (fork_expression
-                    expr: (expression
-                      (call_expression
-                        function: (expression (identifier))))))))))))))
+            body: (scope_block
+              (fork_statement
+                expr: (expression
+                  (call_expression
+                    function: (expression
+                      (identifier))))))))))))
 
 ================================================================================
 Scope expression with fork block
@@ -158,15 +169,14 @@ fn main() {
       (expression_statement
         (expression
           (scope_expression
-            body: (block
-              (expression_statement
-                (expression
-                  (fork_expression
-                    body: (block
-                      (expression_statement
-                        (expression
-                          (call_expression
-                            function: (expression (identifier))))))))))))))))
+            body: (scope_block
+              (fork_statement
+                body: (block
+                  (expression_statement
+                    (expression
+                      (call_expression
+                        function: (expression
+                          (identifier))))))))))))))
 
 ================================================================================
 Scope expression with after deadline
@@ -190,22 +200,22 @@ fn main() {
       (expression_statement
         (expression
           (scope_expression
-            body: (block
-              (expression_statement
-                (expression
-                  (fork_expression
-                    expr: (expression
+            body: (scope_block
+              (fork_statement
+                expr: (expression
+                  (call_expression
+                    function: (expression
+                      (identifier)))))
+              (scope_deadline
+                duration: (expression
+                  (duration_literal
+                    (integer_literal)))
+                body: (block
+                  (expression_statement
+                    (expression
                       (call_expression
-                        function: (expression (identifier)))))))
-              (expression_statement
-                (expression
-                  (scope_deadline
-                    duration: (expression (duration_literal (integer_literal)))
-                    body: (block
-                      (expression_statement
-                        (expression
-                          (call_expression
-                            function: (expression (identifier))))))))))))))))
+                        function: (expression
+                          (identifier))))))))))))))
 
 ================================================================================
 Spawn actor by name (v0.5 unchanged)
@@ -222,13 +232,15 @@ fn main() {
     name: (identifier)
     body: (block
       (let_statement
-        pattern: (pattern (identifier))
+        pattern: (pattern
+          (identifier))
         value: (expression
           (spawn_expression
             (actor_spawn
               actor: (identifier)
               (call_argument
-                (expression (integer_literal))))))))))
+                (expression
+                  (integer_literal))))))))))
 
 ================================================================================
 Scope expression (plain, no fork)
@@ -249,11 +261,12 @@ fn main() {
       (expression_statement
         (expression
           (scope_expression
-            body: (block
+            body: (scope_block
               (expression_statement
                 (expression
                   (call_expression
-                    function: (expression (identifier))))))))))))
+                    function: (expression
+                      (identifier))))))))))))
 
 ================================================================================
 Machine with events header and transitions (v0.5)
@@ -275,12 +288,17 @@ machine Counter {
   (machine_declaration
     name: (identifier)
     events_header: (machine_events_header
-      (machine_event_decl name: (identifier))
-      (machine_event_decl name: (identifier)))
-    (machine_state name: (identifier))
+      (machine_event_decl
+        name: (identifier))
+      (machine_event_decl
+        name: (identifier)))
+    (machine_state
+      name: (identifier))
     (machine_state
       name: (identifier)
-      (struct_field name: (identifier) type: (primitive_type)))
+      (struct_field
+        name: (identifier)
+        type: (primitive_type)))
     (machine_transition
       event: (identifier)
       source: (identifier)
@@ -290,7 +308,10 @@ machine Counter {
           (expression
             (struct_init
               name: (identifier)
-              (field_initializer name: (identifier) value: (expression (integer_literal))))))))
+              (field_initializer
+                name: (identifier)
+                value: (expression
+                  (integer_literal))))))))
     (machine_transition
       event: (identifier)
       source: (identifier)
@@ -304,14 +325,21 @@ machine Counter {
                 name: (identifier)
                 value: (expression
                   (binary_expression
-                    (expression (field_expression object: (expression (self)) field: (identifier)))
-                    (expression (integer_literal))))))))))
+                    (expression
+                      (field_expression
+                        object: (expression
+                          (self))
+                        field: (identifier)))
+                    (expression
+                      (integer_literal))))))))))
     (machine_transition
       event: (identifier)
       source: (identifier)
       target: (identifier)
       body: (block
-        (expression_statement (expression (identifier)))))
+        (expression_statement
+          (expression
+            (identifier)))))
     (machine_default)))
 
 ================================================================================
@@ -333,24 +361,37 @@ machine Toggle {
   (machine_declaration
     name: (identifier)
     events_header: (machine_events_header
-      (machine_event_decl name: (identifier))
-      (machine_event_decl name: (identifier)))
-    (machine_state name: (identifier))
-    (machine_state name: (identifier))
+      (machine_event_decl
+        name: (identifier))
+      (machine_event_decl
+        name: (identifier)))
+    (machine_state
+      name: (identifier))
+    (machine_state
+      name: (identifier))
     (machine_transition
       event: (identifier)
       source: (identifier)
       target: (identifier)
-      body: (block (expression_statement (expression (identifier)))))
+      body: (block
+        (expression_statement
+          (expression
+            (identifier)))))
     (machine_transition
       event: (identifier)
       source: (identifier)
       target: (identifier)
-      body: (block (expression_statement (expression (identifier)))))
+      body: (block
+        (expression_statement
+          (expression
+            (identifier)))))
     (machine_transition
       event: (identifier)
       target: (identifier)
-      body: (block (expression_statement (expression (identifier)))))))
+      body: (block
+        (expression_statement
+          (expression
+            (identifier)))))))
 
 ================================================================================
 Machine with emits block and emit statement (v0.5)
@@ -374,18 +415,24 @@ machine Signal {
   (machine_declaration
     name: (identifier)
     events_header: (machine_events_header
-      (machine_event_decl name: (identifier)))
+      (machine_event_decl
+        name: (identifier)))
     emits_header: (machine_emits_header
       (identifier))
-    (machine_state name: (identifier))
-    (machine_state name: (identifier))
+    (machine_state
+      name: (identifier))
+    (machine_state
+      name: (identifier))
     (machine_transition
       event: (identifier)
       source: (identifier)
       target: (identifier)
       body: (block
-        (emit_statement event: (identifier))
-        (expression_statement (expression (identifier)))))
+        (emit_statement
+          event: (identifier))
+        (expression_statement
+          (expression
+            (identifier)))))
     (machine_default)))
 
 ================================================================================
@@ -408,12 +455,18 @@ machine Bucket {
     events_header: (machine_events_header
       (machine_event_decl
         name: (identifier)
-        (struct_field name: (identifier) type: (primitive_type)))
-      (machine_event_decl name: (identifier)))
-    (machine_state name: (identifier))
+        (struct_field
+          name: (identifier)
+          type: (primitive_type)))
+      (machine_event_decl
+        name: (identifier)))
+    (machine_state
+      name: (identifier))
     (machine_state
       name: (identifier)
-      (struct_field name: (identifier) type: (primitive_type)))
+      (struct_field
+        name: (identifier)
+        type: (primitive_type)))
     (machine_transition
       event: (identifier)
       payload_bindings: (identifier)
@@ -421,14 +474,19 @@ machine Bucket {
       target: (identifier)
       guard: (expression
         (binary_expression
-          (expression (identifier))
-          (expression (integer_literal))))
+          (expression
+            (identifier))
+          (expression
+            (integer_literal))))
       body: (block
         (expression_statement
           (expression
             (struct_init
               name: (identifier)
-              (field_initializer name: (identifier) value: (expression (identifier))))))))
+              (field_initializer
+                name: (identifier)
+                value: (expression
+                  (identifier))))))))
     (machine_default)))
 
 ================================================================================
@@ -452,30 +510,47 @@ machine Lamp {
   (machine_declaration
     name: (identifier)
     events_header: (machine_events_header
-      (machine_event_decl name: (identifier))
-      (machine_event_decl name: (identifier)))
+      (machine_event_decl
+        name: (identifier))
+      (machine_event_decl
+        name: (identifier)))
     (machine_state
       name: (identifier)
       entry_body: (block
         (expression_statement
           (expression
             (call_expression
-              function: (expression (identifier))
-              (call_argument (expression (string_literal (string_content))))))))
+              function: (expression
+                (identifier))
+              (call_argument
+                (expression
+                  (string_literal
+                    (string_content))))))))
       exit_body: (block
         (expression_statement
           (expression
             (call_expression
-              function: (expression (identifier))
-              (call_argument (expression (string_literal (string_content)))))))))
-    (machine_state name: (identifier))
+              function: (expression
+                (identifier))
+              (call_argument
+                (expression
+                  (string_literal
+                    (string_content)))))))))
+    (machine_state
+      name: (identifier))
     (machine_transition
       event: (identifier)
       source: (identifier)
       target: (identifier)
-      body: (block (expression_statement (expression (identifier)))))
+      body: (block
+        (expression_statement
+          (expression
+            (identifier)))))
     (machine_transition
       event: (identifier)
       source: (identifier)
       target: (identifier)
-      body: (block (expression_statement (expression (identifier)))))))
+      body: (block
+        (expression_statement
+          (expression
+            (identifier)))))))

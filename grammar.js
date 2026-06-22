@@ -33,14 +33,36 @@ export default grammar({
   word: $ => $.identifier,
 
   conflicts: $ => [
-    [$.expression, $.lambda_parameter],
     [$.if_statement, $.expression],
     [$.match_statement, $.expression],
     [$.expression, $.struct_init],
     [$.actor_spawn],
     [$.trait_bound],
-    [$.expression, $.fork_expression],
-    [$.binary_expression, $.fork_expression],
+    // `expr | …` — at the `|` the parser cannot tell (within LR(1)) whether a
+    // bit-or `expr | expr` or a timeout `expr | after <dur>` follows; the `after`
+    // keyword one token later disambiguates, so GLR explores both branches.
+    [$.binary_expression, $.timeout_expression],
+    [$.binary_expression, $.timeout_expression, $.lambda],
+    // `ident :: …` — ambiguous between a `scoped_expression` (general `::` postfix)
+    // and a `path_expression` used as a path-headed struct-init name; GLR explores
+    // both and struct_init's dynamic precedence commits when a `{ … }` body follows.
+    // `where P , (` — after a where-predicate's trailing comma, a `(` may begin
+    // either another predicate (a parenthesized/tuple type) or a record's tuple
+    // body `( T, … )`; GLR explores both and only the valid continuation lives.
+    [$.where_clause],
+    [$.expression, $.path_expression],
+    // `import a::b::c` — at each `::` the parser cannot tell (within LR(1))
+    // whether another path segment or the import spec follows; GLR explores
+    // both and only the valid continuation survives.
+    [$.module_path],
+    // `expr as Name.Field` — the `.` may extend a qualified (scoped) type or be
+    // a field access on the cast result. The real parser parses the type
+    // greedily (`x as net.NetError`); field access on a cast needs parens.
+    [$._type, $.scoped_type],
+    // `expr as Name.Field<...>` — `<` may open the scoped type's type-arg list
+    // or be a comparison on the cast result; the real parser takes type args
+    // greedily (mirrors generic_type's prec(1)).
+    [$.scoped_type],
   ],
 
   rules: {
@@ -50,10 +72,14 @@ export default grammar({
 
     _item: $ => seq(
       repeat($.attribute),
+      // Visibility is hoisted to item level per spec grammar.ebnf:27
+      //   Item = Attribute* Visibility? ( Import | ConstDecl | ... )
+      optional($.visibility),
       choice(
         $.import_declaration,
         $.const_declaration,
         $.struct_declaration,
+        $.wire_struct_declaration,
         $.record_declaration,
         $.enum_declaration,
         $.wire_declaration,
@@ -73,23 +99,41 @@ export default grammar({
 
     attribute: $ => seq('#', '[', $.identifier, optional(seq('(', optional(sep1(choice($.identifier, $._literal), ',')), ')')), ']'),
 
+    // Import (spec grammar.ebnf:63-68):
+    //   Import     = "import" ( StringLit | ModulePath ( "::" ImportSpec )? ) ";"
+    //   ModulePath = Ident { "::" Ident }
+    //   ImportSpec = "{" ImportName { "," ImportName } "}" | "*"
+    //   ImportName = Ident ( "as" Ident )?
+    // A bare trailing Ident is NOT a valid spec — a single name uses the brace
+    // form `import m::{ Name };`. The path/spec tail is right-recursive so the
+    // token after each `::` (another Ident vs `{`/`*`) disambiguates within
+    // LR(1); a left-recursive sep1 reduces the path too early and breaks
+    // N-segment (>=3) paths.
     import_declaration: $ => seq(
       'import',
-      $.module_path,
-      optional(seq('::', $._import_spec)),
+      choice(
+        $.string_literal,
+        seq($.module_path, optional(seq('::', $._import_spec))),
+      ),
       ';',
     ),
 
-    module_path: $ => prec.left(sep1($.identifier, '::')),
+    module_path: $ => seq(
+      $.identifier,
+      repeat(seq('::', $.identifier)),
+    ),
 
     _import_spec: $ => choice(
-      $.identifier,
-      seq('{', sep1($.identifier, ','), '}'),
+      seq('{', sep1($.import_name, ','), optional(','), '}'),
       '*',
     ),
 
+    import_name: $ => seq(
+      field('name', $.identifier),
+      optional(seq('as', field('alias', $.identifier))),
+    ),
+
     const_declaration: $ => seq(
-      optional($.visibility),
       'const',
       field('name', $.identifier),
       ':',
@@ -108,8 +152,10 @@ export default grammar({
       ';',
     ),
 
+    // TypeDecl (grammar.ebnf:47, 65): `type Name { ... }` whose body may hold
+    // struct fields, variants, AND fn declarations (TypeBody). The alias form
+    // `type Name = Type;` is handled separately by `type_alias`.
     struct_declaration: $ => seq(
-      optional($.visibility),
       'type',
       field('name', $.identifier),
       optional($.type_parameters),
@@ -117,27 +163,56 @@ export default grammar({
       field('body', $.struct_body),
     ),
 
-    struct_body: $ => seq('{', repeat($.struct_field), '}'),
+    struct_body: $ => seq('{', repeat(choice(
+      $.struct_field,
+      seq(optional($.visibility), $.function_declaration),
+    )), '}'),
 
+    // StructFieldDecl (grammar.ebnf:68): `Attribute* Ident ":" Type (";" | ",")`.
     struct_field: $ => seq(
+      repeat($.attribute),
       field('name', $.identifier),
       ':',
       field('type', $._type),
       optional(choice(',', ';')),
     ),
 
-    // record Name { field: T, field: T }  — comma-separated product type.
-    // Spec: grammar.ebnf:47, Hew.g4:155. End-to-end probe OK.
-    record_declaration: $ => seq(
-      optional($.visibility),
-      'record',
+    // WireStructDecl (grammar.ebnf:53-54): `struct Name { Ident ":" Type ("@" IntLit)? WireAttr* ("," | ";") }`.
+    // The literal `struct` keyword (as opposed to `type`) marks a wire struct;
+    // fields may carry an `@N` field tag and trailing wire attributes.
+    wire_struct_declaration: $ => seq(
+      'struct',
       field('name', $.identifier),
       optional($.type_parameters),
       optional($.where_clause),
       '{',
-      sep1($.record_field, ','),
-      optional(','),
+      repeat(choice($.wire_struct_field, $.reserved_declaration)),
       '}',
+    ),
+
+    wire_struct_field: $ => prec.left(seq(
+      repeat($.attribute),
+      field('name', $.identifier),
+      ':',
+      field('type', $._type),
+      optional(seq('@', $.integer_literal)),
+      repeat($.wire_attribute),
+      optional(choice(',', ';')),
+    )),
+
+    // record Name { field: T, field: T }  — comma-separated product type.
+    // Spec: grammar.ebnf:47, Hew.g4:155. End-to-end probe OK.
+    // RecordDecl (grammar.ebnf:47-51): named body `{ field: T, … }` or tuple
+    //   body `( T, … );`. The tuple form is a positional record.
+    record_declaration: $ => seq(
+      'record',
+      field('name', $.identifier),
+      optional($.type_parameters),
+      optional($.where_clause),
+      choice(
+        seq('{', sep1($.record_field, ','), optional(','), '}'),
+        seq('(', sep1($._type, ','), optional(','), ')', ';'),
+      ),
     ),
 
     record_field: $ => seq(
@@ -147,7 +222,6 @@ export default grammar({
     ),
 
     enum_declaration: $ => seq(
-      optional($.visibility),
       optional('indirect'),
       'enum',
       field('name', $.identifier),
@@ -193,7 +267,6 @@ export default grammar({
       'u8', 'u16', 'u32', 'u64', 'i8', 'i16', 'i32', 'i64', 'f32', 'f64', 'bool',
       'bytes', 'string',
       $.identifier,
-      seq('list', '[', $.wire_type, ']'),
     ),
 
     reserved_declaration: $ => seq(
@@ -202,7 +275,7 @@ export default grammar({
 
     // @sync:wire_attributes
     wire_attribute: $ => choice(
-      'optional', 'deprecated',
+      'optional', 'deprecated', 'repeated',
       seq('default', '(', $.expression, ')'),
       seq('reserved', '(', sep1($.integer_literal, ','), ')'),
     ),
@@ -216,7 +289,7 @@ export default grammar({
       optional(seq(':', $.trait_bounds)),
       optional($.where_clause),
       '{',
-      repeat($._trait_item),
+      repeat(seq(repeat($.attribute), $._trait_item)),
       '}',
     ),
 
@@ -233,6 +306,7 @@ export default grammar({
       optional($.parameters),
       ')',
       optional($.return_type),
+      optional($.where_clause),
       choice(';', field('body', $.block)),
     ),
 
@@ -244,16 +318,24 @@ export default grammar({
       ';',
     ),
 
+    // ImplDecl (spec grammar.ebnf:119-120) — trait impls AND inherent impls:
+    //   "impl" TypeParams? TraitBound "for" Type WhereClause? "{" ... "}"
+    //   "impl" TypeParams? Type WhereClause? "{" ... "}"
+    // When `for` is present the first type is the trait and the second is the
+    // self type; otherwise the single type is the inherent self type. Impl-body
+    // fns may carry visibility (hew-parser/src/parser.rs:2939 parse_impl_decl).
     impl_declaration: $ => seq(
       'impl',
       optional($.type_parameters),
-      field('trait', $.identifier),
-      optional($.type_arguments),
-      'for',
       field('type', $._type),
+      optional(seq('for', field('self_type', $._type))),
       optional($.where_clause),
       '{',
-      repeat(choice($.function_declaration, $.associated_type_impl)),
+      repeat(seq(
+        repeat($.attribute),
+        optional($.visibility),
+        choice($.function_declaration, $.associated_type_impl),
+      )),
       '}',
     ),
 
@@ -262,7 +344,6 @@ export default grammar({
     // ---- Functions ----
 
     function_declaration: $ => seq(
-      optional($.visibility),
       'fn',
       field('name', $.identifier),
       optional($.type_parameters),
@@ -318,15 +399,30 @@ export default grammar({
 
     parameters: $ => sep1($.parameter, ','),
 
-    parameter: $ => seq(
-      field('name', choice($.identifier, $.self)),
-      ':',
-      field('type', $._type),
+    // Param (spec grammar.ebnf:191) is `"var"? Ident ":" Type`. In trait/impl
+    // method position a leading bare receiver is also accepted: `self`,
+    // `var self`, or `consuming self` — all without a type annotation, as
+    // `Self`-typed receiver sugar (hew-parser/src/parser.rs:5552 and 5634).
+    parameter: $ => choice(
+      $.self_parameter,
+      seq(
+        optional('var'),
+        field('name', $.identifier),
+        ':',
+        field('type', $._type),
+      ),
+    ),
+
+    self_parameter: $ => seq(
+      optional(choice('var', 'consuming')),
+      $.self,
     ),
 
     return_type: $ => seq('->', $._type),
 
-    visibility: $ => seq('pub', optional(seq('(', choice('package', 'super'), ')'))),
+    // Visibility = "pub" | "package" (spec grammar.ebnf:53; both standalone
+    // keywords per hew-parser/src/parser.rs:1863 parse_visibility).
+    visibility: $ => choice('pub', 'package'),
 
     // ---- Actors ----
 
@@ -375,8 +471,11 @@ export default grammar({
       seq('coalesce', '(', $.identifier, ')', optional(seq('fallback', $.overflow_kind))),
     ),
 
+    // ActorFieldDecl (grammar.ebnf:95-96): ("let"|"var")? Ident ":" Type
+    //   ("=" Expr)? ";". The bare form (no let/var) is immutable (let-like) by
+    //   default; the corpus uses it widely (e.g. examples/mqtt_broker.hew).
     actor_field: $ => seq(
-      choice('let', 'var'),
+      optional(choice('let', 'var')),
       field('name', $.identifier),
       ':',
       field('type', $._type),
@@ -422,12 +521,14 @@ export default grammar({
       '}',
     ),
 
-    supervisor_field: $ => prec(5, seq(
-      field('name', $.identifier),
-      ':',
-      field('value', $.expression),
-      optional(choice(',', ';')),
-    )),
+    // SupervisorField (spec grammar.ebnf:142-144):
+    //   "strategy" ":" SupervisorStrategy
+    //   "intensity" ":" IntLit "within" DurationLit
+    // `within` is a contextual keyword used only here. DurationLit is reused.
+    supervisor_field: $ => choice(
+      seq('strategy', ':', field('strategy', $.supervisor_strategy_value), optional(choice(',', ';'))),
+      seq('intensity', ':', field('restarts', $.integer_literal), 'within', field('window', $.duration_literal), optional(choice(',', ';'))),
+    ),
 
     child_spec: $ => seq(
       // @sync:child_kinds
@@ -459,7 +560,6 @@ export default grammar({
     // ---- Machines ----
 
     machine_declaration: $ => seq(
-      optional($.visibility),
       'machine',
       field('name', $.identifier),
       optional($.type_parameters),
@@ -527,7 +627,10 @@ export default grammar({
 
     // on EventIdent [ "(" Ident { "," Ident } ")" ] : Source => Target
     //   [ "reenter" ] [ "when" Expr ] TransitionBody
-    // Source/Target = Ident | "_"
+    // Source/Target = StatePattern = Ident | "_" (grammar.ebnf:171)
+    // TransitionBody = ";" | "{" FieldInitList "}" | Block (grammar.ebnf:170)
+    //   The `{ FieldInitList }` form supplies the target state's payload, e.g.
+    //   `=> Holding { handle: handle }`.
     machine_transition: $ => seq(
       'on',
       field('event', $.identifier),
@@ -540,6 +643,12 @@ export default grammar({
       optional(seq('when', field('guard', $.expression))),
       choice(
         ';',
+        field('payload', seq(
+          '{',
+          sep1($.field_initializer, ','),
+          optional(','),
+          '}',
+        )),
         field('body', $.block),
       ),
     ),
@@ -582,7 +691,22 @@ export default grammar({
       optional(seq(':', $.trait_bounds)),
     ),
 
-    type_arguments: $ => seq('<', sep1($._type, ','), '>'),
+    type_arguments: $ => seq('<', sep1($._type_argument, ','), '>'),
+
+    // A type argument is a type, or an associated-type binding `Ident = Type`
+    // (e.g. `Iterator<Item = A>`). The binding form is accepted by the real
+    // parser's parse_trait_bound_args (hew-parser/src/parser.rs) for trait
+    // bounds; allowing it in any type-arg list is harmlessly permissive.
+    _type_argument: $ => choice(
+      $._type,
+      $.associated_type_binding,
+    ),
+
+    associated_type_binding: $ => seq(
+      field('name', $.identifier),
+      '=',
+      field('type', $._type),
+    ),
 
     trait_bounds: $ => sep1($.trait_bound, '+'),
 
@@ -591,6 +715,7 @@ export default grammar({
     where_clause: $ => seq(
       'where',
       sep1($.where_predicate, ','),
+      optional(','),
     ),
 
     where_predicate: $ => seq($._type, ':', $.trait_bounds),
@@ -599,11 +724,13 @@ export default grammar({
       $.primitive_type,
       $.identifier,
       $.generic_type,
+      $.scoped_type,
       $.tuple_type,
       $.array_type,
       $.slice_type,
       $.function_type,
       $.pointer_type,
+      $.borrow_type,
       $.trait_object_type,
       $.unit_type,
     ),
@@ -615,6 +742,17 @@ export default grammar({
     ),
 
     generic_type: $ => prec(1, seq($.identifier, $.type_arguments)),
+
+    // Qualified / scoped type name: `mod.Type`, `Self::Msg`, `a::b::C`, with an
+    // optional trailing type-arg list (e.g. `mod.Worker<T>`). The real parser
+    // accepts both `.` and `::` separators in a single chain
+    // (hew-parser/src/parser.rs:5210 parse_type named-type loop). std uses this
+    // heavily for cross-module error types (`net.NetError`, `fs.IoError`).
+    scoped_type: $ => seq(
+      $.identifier,
+      repeat1(seq(choice('.', '::'), $.identifier)),
+      optional($.type_arguments),
+    ),
 
     tuple_type: $ => seq('(', sep1($._type, ','), ')'),
 
@@ -628,6 +766,10 @@ export default grammar({
 
     // *const T / *mut T — raw pointer types. Real but FFI/unsafe-scoped; *var T is legacy and rejected.
     pointer_type: $ => seq('*', choice('const', 'mut'), $._type),
+
+    // &T — immutable non-owning borrow marker (hew-parser/src/parser.rs:5126,
+    // Token::Ampersand → TypeExpr::Borrow). `&mut T` / `&var T` are rejected.
+    borrow_type: $ => seq('&', $._type),
 
     trait_object_type: $ => seq('dyn', choice(
       $.trait_bound,
@@ -658,12 +800,14 @@ export default grammar({
       $.block_statement,
     ),
 
+    // LetStmt (grammar.ebnf): the initializer is optional — `let x: i64;` is a
+    // bare declaration whose definite-assignment is checked later by the move
+    // checker (examples/v05/checked-mir/reject/init_before_use.hew).
     let_statement: $ => seq(
       'let',
       field('pattern', $.pattern),
       optional(seq(':', field('type', $._type))),
-      '=',
-      field('value', $.expression),
+      optional(seq('=', field('value', $.expression))),
       ';',
     ),
 
@@ -717,7 +861,9 @@ export default grammar({
     if_statement: $ => $.if_expression,
     match_statement: $ => $.match_expression,
 
-    block_statement: $ => $.block,
+    // A block used in statement position may carry a trailing `;`
+    // (examples/test_block.hew, examples/lambda_actors.hew).
+    block_statement: $ => seq($.block, optional(';')),
 
     label: $ => /@[a-zA-Z_][a-zA-Z0-9_]*/,
 
@@ -730,6 +876,7 @@ export default grammar({
       $.interpolated_string,
       $.unary_expression,
       $.binary_expression,
+      $.timeout_expression,
       $.call_expression,
       $.method_call_expression,
       $.field_expression,
@@ -737,11 +884,13 @@ export default grammar({
       $.try_expression,
       $.cast_expression,
       $.await_expression,
+      $.clone_expression,
       $.struct_init,
       $.array_expression,
       $.array_repeat,
       $.map_literal,
       $.tuple_expression,
+      $.unit_expression,
       $.parenthesized_expression,
       $.if_expression,
       $.match_expression,
@@ -751,14 +900,15 @@ export default grammar({
       $.select_expression,
       $.join_expression,
       $.scope_expression,
-      $.fork_expression,
-      $.scope_deadline,
       $.cooperate_expression,
       $.this_expression,
       $.yield_expression,
-      $.path_expression,
+      $.gen_block_expression,
+      $.scoped_expression,
+      $.turbofish_expression,
+      $.generic_call_expression,
+      $.byte_array_expression,
       $.unsafe_expression,
-      $.supervisor_strategy_value,
       $.reserved_keyword,
     ),
 
@@ -798,6 +948,45 @@ export default grammar({
       optional(','),
       ')',
     )),
+
+    // Scope resolution `expr :: Ident` (grammar.ebnf:249, PostfixExpr `"::" Ident`).
+    // The real parser folds `::` segments into the path name in parse_primary /
+    // parse_dot_postfix; modelled here as a left postfix so `HashMap::new`,
+    // `Self::Msg`, and `lifecycle.Lifecycle::Created` (field access then `::`) all
+    // parse uniformly. Path-headed struct inits keep using `path_expression`.
+    scoped_expression: $ => prec.left(PREC.POSTFIX, seq(
+      field('path', $.expression),
+      '::',
+      field('name', $.identifier),
+    )),
+
+    // Turbofish `expr "::" TypeArgs` (grammar.ebnf:249 PostfixExpr
+    // `"::" TypeArgs "(" Args? ")"`; hew-parser parse_postfix). Modelled as a
+    // left postfix so it composes with `scoped_expression` and `call_expression`
+    // to cover every corpus shape: `pending::<()>()` (turbofish then call),
+    // `Vec::new::<i64>()` (method then turbofish then call), and
+    // `HashMap::<K, V>::new()` (turbofish then `::method` then call). The `<`
+    // can only follow `::` here, so plain comparisons are unaffected.
+    turbofish_expression: $ => prec.left(PREC.POSTFIX, seq(
+      field('path', $.expression),
+      '::',
+      field('type_arguments', $.type_arguments),
+    )),
+
+    // Generic call `Path::method<Type, …>(args)` (grammar.ebnf:249 / hew-parser
+    // parse_postfix ~6524). Every generic call in the corpus is path-headed
+    // (`HashMap::new<i64>()`, `Vec::new<…>()`), so the callee is restricted to a
+    // `scoped_expression`; this keeps bare-identifier `a < b` unambiguously a
+    // comparison. Dynamic precedence commits the `<` to type-args when a closing
+    // `>` … `(` follows.
+    generic_call_expression: $ => prec.dynamic(1, prec(PREC.POSTFIX, seq(
+      field('function', $.scoped_expression),
+      $.type_arguments,
+      '(',
+      optional(sep1($.call_argument, ',')),
+      optional(','),
+      ')',
+    ))),
 
     call_argument: $ => choice(
       seq(field('name', $.identifier), ':', field('value', $.expression)),
@@ -843,11 +1032,19 @@ export default grammar({
       $.expression,
     )),
 
+    // `clone <operand>` prefix duplication (grammar.ebnf:242-248). Contextual:
+    // `clone` is only a prefix when an operand follows; `x.clone()`, `fn clone()`,
+    // and `clone(args)` keep `clone` as an ordinary identifier (tree-sitter keyword
+    // extraction via word:$.identifier preserves identifier use elsewhere).
+    clone_expression: $ => prec(PREC.UNARY, seq(
+      'clone',
+      $.expression,
+    )),
+
     struct_init: $ => prec.dynamic(1, seq(
-      field('name', $.identifier),
+      field('name', choice($.identifier, $.path_expression)),
       '{',
-      sep1($.field_initializer, ','),
-      optional(','),
+      optional(seq(sep1($.field_initializer, ','), optional(','))),
       '}',
     )),
 
@@ -859,6 +1056,18 @@ export default grammar({
 
     array_expression: $ => seq(
       '[',
+      optional(seq(sep1($.expression, ','), optional(','))),
+      ']',
+    ),
+
+    // Byte array literal `bytes[0x41, 0x42]` (grammar.ebnf:260
+    //   Primary `"bytes" "[" ExprList? "]"`). The opener is a single merged
+    //   `bytes[` token (not a bare `bytes` keyword) so the lexeme reserved is
+    //   `bytes[`, never bare `bytes`; this keeps `bytes` usable as a value path
+    //   (`bytes::new()`, 35× in std) and as the `bytes` primitive type. Requires
+    //   `[` adjacent to `bytes`, which is the only literal form (0 spaced uses).
+    byte_array_expression: $ => seq(
+      token(seq('bytes', '[')),
       optional(seq(sep1($.expression, ','), optional(','))),
       ']',
     ),
@@ -881,6 +1090,11 @@ export default grammar({
     tuple_expression: $ => seq('(', $.expression, ',', optional(sep1($.expression, ',')), ')'),
 
     parenthesized_expression: $ => seq('(', $.expression, ')'),
+
+    // Unit value `()` — the empty tuple expression (hew-parser/src/parser.rs
+    // parse_primary: `( )` → Expr::Tuple(Vec::new())). Distinct from the unit
+    // *type* `()` which appears only in type position.
+    unit_expression: $ => seq('(', ')'),
 
     if_expression: $ => prec.right(choice(
       seq(
@@ -910,14 +1124,37 @@ export default grammar({
       '}',
     ),
 
-    lambda: $ => prec(2, seq(
+    // TimeoutExpr (grammar.ebnf:228-230): `RangeExpr ( "|" "after" Expr )?` — any
+    // expression may carry a trailing `| after <duration>` timeout race (e.g.
+    // `match await f.answer() | after 5s { … }`). The `after` keyword right after
+    // `|` is what distinguishes this from a bit-or; it binds looser than `||`.
+    timeout_expression: $ => prec.left(1, seq(
+      field('expr', $.expression),
+      '|',
+      'after',
+      field('duration', $.expression),
+    )),
+
+    // Closures are PIPE-style (spec grammar.ebnf:288-295):
+    //   Lambda = "move"? "|" LambdaParams? "|" Expr
+    //          | "move"? "||" Expr
+    //          | "move"? "|" LambdaParams? "|" RetType Block ;
+    // The paren-arrow `(params) => body` form was removed in v0.5
+    // (compiler emits E_CLOSURE_PIPE_SYNTAX). An empty parameter list is the
+    // single `||` token because the lexer fuses adjacent pipes; the bracketed
+    // form `|params|` uses two distinct `|` tokens. A return type forces a
+    // braced body (hew-parser/src/parser.rs:7691 parse_pipe_lambda).
+    lambda: $ => prec.right(2, seq(
       optional('move'),
-      '(',
-      optional(sep1($.lambda_parameter, ',')),
-      ')',
-      optional($.return_type),
-      '=>',
-      choice($.expression, $.block),
+      field('parameters', choice(
+        '||',
+        seq('|', optional(sep1($.lambda_parameter, ',')), '|'),
+      )),
+      choice(
+        seq($.return_type, field('body', $.block)),
+        field('body', $.block),
+        field('body', $.expression),
+      ),
     )),
 
     lambda_parameter: $ => seq(
@@ -959,17 +1196,22 @@ export default grammar({
       '}',
     ),
 
+    // SelectArm (grammar.ebnf:306-307): `Pattern "from" Expr "=>" Expr ","?` and
+    // the timeout arm `"after" Expr "=>" Expr ","?`. The arm body may be a block
+    // (examples/channel/select_recv.hew) and the trailing comma is optional.
     select_arm: $ => choice(
-      seq($.identifier, 'from', $.expression, '=>', $.expression, ','),
-      seq('after', $.expression, '=>', $.expression, ','),
+      seq(field('binding', $.pattern), 'from', field('channel', $.expression), '=>', field('body', choice($.block, $.expression)), optional(',')),
+      seq('after', field('duration', $.expression), '=>', field('body', choice($.block, $.expression)), optional(',')),
     ),
 
+    // JoinExpr (grammar.ebnf:309): "join" ("{" | "(") Expr {"," Expr} ","?
+    //   ("}" | ")"). Both the brace and paren delimiters are accepted.
     join_expression: $ => seq(
       'join',
-      '{',
-      sep1($.expression, ','),
-      optional(','),
-      '}',
+      choice(
+        seq('{', sep1($.expression, ','), optional(','), '}'),
+        seq('(', sep1($.expression, ','), optional(','), ')'),
+      ),
     ),
 
     loop_statement: $ => prec(10, seq(
@@ -1005,35 +1247,71 @@ export default grammar({
       field('body', $.block),
     )),
 
+    // ScopeExpr (grammar.ebnf:317): `scope Block`. The structured-concurrency
+    // body additionally admits `fork`/`after(d)` child & deadline statements,
+    // which are ONLY legal inside a scope (grammar.ebnf:313-319). Keeping them
+    // out of the general expression set is what lets `after`/`fork` stay usable
+    // as ordinary identifiers everywhere else.
     scope_expression: $ => seq(
       'scope',
+      field('body', $.scope_block),
+    ),
+
+    // Gen-block expression `gen { … }` (hew-parser/src/parser.rs:7433
+    //   `Token::Gen` immediately followed by `{` → `Expr::GenBlock`). Distinct
+    //   from the item-level `gen fn`; the body is an ordinary block whose
+    //   statements may include `yield`. Corpus: examples/machine/
+    //   reject_gen_in_transition.hew, tests/vertical-slice/accept/gen_block_*.hew.
+    gen_block_expression: $ => seq(
+      'gen',
       field('body', $.block),
     ),
 
-    // fork { body } — anonymous child-task block inside a scope.
-    // fork [name =] expr — named or bare child-task launch inside a scope.
-    fork_expression: $ => choice(
-      prec(2, seq('fork', field('body', $.block))),
-      prec.dynamic(10, seq('fork', field('binding', $.identifier), '=', field('expr', $.expression))),
-      prec(1, seq('fork', field('expr', $.expression))),
+    scope_block: $ => seq('{', repeat($._scope_statement), '}'),
+
+    _scope_statement: $ => choice(
+      $.fork_statement,
+      $.scope_deadline,
+      $._statement,
     ),
 
-    // after(duration) { body } — deadline clause inside a scope block.
+    // ForkChild (grammar.ebnf:320): `fork (Ident "=")? Expr`, plus the block form
+    // `fork { ... }`. Statement-positioned inside a scope body.
+    fork_statement: $ => choice(
+      seq('fork', field('body', $.block), optional(';')),
+      prec.dynamic(10, seq('fork', field('binding', $.identifier), '=', field('expr', $.expression), ';')),
+      seq('fork', field('expr', $.expression), ';'),
+    ),
+
+    // ScopeDeadline (grammar.ebnf:318): `after "(" Expr ")" Block`, statement-only
+    // inside a scope body.
     scope_deadline: $ => seq(
       'after',
       '(',
       field('duration', $.expression),
       ')',
       field('body', $.block),
+      optional(';'),
     ),
 
     cooperate_expression: $ => 'cooperate',
     this_expression: $ => 'this',
-    yield_expression: $ => seq('yield', $.expression),
+    // YieldExpr (grammar.ebnf:322): "yield" Expr? — the operand is optional, so
+    //   bare `yield;` is valid (yields Unit). `prec.right` makes `yield expr`
+    //   greedily consume the operand rather than reduce `yield` on its own.
+    yield_expression: $ => prec.right(seq('yield', optional($.expression))),
 
     unsafe_expression: $ => seq('unsafe', $.block),
 
-    path_expression: $ => seq($.identifier, '::', $.identifier),
+    // Path expression — N-segment `A::B::C`, and mixed `mod.Type::Variant`
+    // (hew-parser/src/parser.rs parse_primary + parse_dot_postfix accumulate both
+    // `::segment` and `.segment` into the path head). Used as a value path, in
+    // patterns, and as a struct-init head (`Enum::Variant { .. }`,
+    // `mod.Type::Variant { .. }`).
+    path_expression: $ => prec.left(seq(
+      $.identifier,
+      repeat1(seq(choice('::', '.'), $.identifier)),
+    )),
 
 
 
@@ -1053,7 +1331,7 @@ export default grammar({
     tuple_pattern: $ => seq('(', sep1($.pattern, ','), ')'),
 
     struct_pattern: $ => seq(
-      field('name', $.identifier),
+      field('name', choice($.identifier, $.path_expression)),
       '{',
       optional(seq(sep1($.pattern_field, ','), optional(','))),
       '}',
@@ -1110,11 +1388,17 @@ export default grammar({
 
     string_content: $ => token.immediate(prec(1, /[^"\\]+/)),
 
+    // Escapes mirror the real lexer, which accepts `\` + any char (hew-lexer
+    // regex `\\.` and the interpolated-string scanner's `\\` => skip-2). The
+    // `\u{..}` and `\xHH` branches are split out so they form one token (and so
+    // an `\u{..}` inside an f-string is not mistaken for an interpolation); the
+    // `/./` fallback covers `\n \r \t \\ \" \' \0 \{ \}` and any other escape.
     escape_sequence: $ => token.immediate(seq(
       '\\',
       choice(
-        /[nrt\\"0]/,
+        /u\{[0-9a-fA-F]{1,6}\}/,
         /x[0-9a-fA-F]{2}/,
+        /./,
       ),
     )),
 
@@ -1130,7 +1414,10 @@ export default grammar({
 
     fstring_start: $ => token(prec(2, /f"/)),
 
-    interpolated_string_content: $ => token.immediate(prec(1, /[^"\{]+/)),
+    // Exclude `\` (as well as `"` and `{`) so escape sequences like `\"` are
+    // not swallowed into content — this is what lets escapes resume correctly
+    // after an interpolation closes (spec grammar.ebnf:385-386, InterpPart).
+    interpolated_string_content: $ => token.immediate(prec(1, /[^"\\{]+/)),
 
     interpolation: $ => seq(
       token.immediate('{'),
@@ -1150,14 +1437,9 @@ export default grammar({
       '"',
     )),
 
-    char_literal: $ => token(seq(
-      '\'',
-      choice(
-        /[^'\\]/,
-        seq('\\', /./),
-      ),
-      '\'',
-    )),
+    // Char literal — ported from the hew-lexer regex (hew-lexer/src/lib.rs:502):
+    //   '([^'\\]|\\u\{[0-9a-fA-F]{1,6}\}|\\x[0-9a-fA-F][0-9a-fA-F]|\\.)'
+    char_literal: $ => token(/'([^'\\]|\\u\{[0-9a-fA-F]{1,6}\}|\\x[0-9a-fA-F][0-9a-fA-F]|\\.)'/),
 
     regex_literal: $ => token(seq(
       're"',
