@@ -13,7 +13,7 @@ indirect enum Expr {
 
 // Trait with bounds and associated type
 trait Serializable {
-    fn serialize(self: Serializable) -> bytes;
+    fn serialize(self) -> bytes;
     type Output;
 }
 
@@ -36,7 +36,7 @@ actor BufferedWorker {
 
 // Scope expression with binding
 fn test_scope() {
-    let result = scope |s| {
+    let result = scope {
         let a = 10;
         let b = 20;
         a + b
@@ -46,7 +46,7 @@ fn test_scope() {
 
 // Lambda actors
 fn test_lambda_actors() {
-    let doubler = spawn (x: int) => {
+    let doubler = actor |x: int| {
         println(x * 2);
     };
     doubler.send(21);
@@ -90,8 +90,8 @@ wire struct Packet {
 
 // Extern block
 extern "C" {
-    fn malloc(size: usize) -> *void;
-    fn free(ptr: *void);
+    fn malloc(size: usize) -> *mut u8;
+    fn free(ptr: *mut u8);
 }
 
 // Const declarations
@@ -163,8 +163,8 @@ fn test_compound_assign() {
 // Visibility modifiers
 pub fn public_fn() {}
 
-// Pure functions
-pure fn add(a: i32, b: i32) -> i32 {
+// Plain function
+fn add(a: i32, b: i32) -> i32 {
     a + b
 }
 

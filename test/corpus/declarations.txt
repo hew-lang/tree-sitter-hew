@@ -13,8 +13,12 @@ type Point {
   (struct_declaration
     name: (identifier)
     body: (struct_body
-      (struct_field name: (identifier) type: (primitive_type))
-      (struct_field name: (identifier) type: (primitive_type)))))
+      (struct_field
+        name: (identifier)
+        type: (primitive_type))
+      (struct_field
+        name: (identifier)
+        type: (primitive_type)))))
 
 ================================================================================
 Enum declaration
@@ -32,9 +36,12 @@ enum Color {
   (enum_declaration
     name: (identifier)
     body: (enum_body
-      (variant name: (identifier))
-      (variant name: (identifier))
-      (variant name: (identifier)))))
+      (variant
+        name: (identifier))
+      (variant
+        name: (identifier))
+      (variant
+        name: (identifier)))))
 
 ================================================================================
 Indirect enum declaration
@@ -52,16 +59,23 @@ indirect enum Expr {
   (enum_declaration
     name: (identifier)
     body: (enum_body
-      (variant name: (identifier) (primitive_type))
-      (variant name: (identifier) (identifier) (identifier))
-      (variant name: (identifier) (identifier)))))
+      (variant
+        name: (identifier)
+        (primitive_type))
+      (variant
+        name: (identifier)
+        (identifier)
+        (identifier))
+      (variant
+        name: (identifier)
+        (identifier)))))
 
 ================================================================================
 Trait declaration
 ================================================================================
 
 trait Printable {
-    fn print(self: Printable) -> i32;
+    fn print(self) -> i32;
 }
 
 --------------------------------------------------------------------------------
@@ -72,15 +86,18 @@ trait Printable {
     (trait_function_signature
       name: (identifier)
       (parameters
-        (parameter name: (self) type: (identifier)))
-      (return_type (primitive_type)))))
+        (parameter
+          (self_parameter
+            (self))))
+      (return_type
+        (primitive_type)))))
 
 ================================================================================
 Impl block
 ================================================================================
 
 impl Printable for Point {
-    fn print(self: Point) -> i32 {
+    fn print(self) -> i32 {
         self.x
     }
 }
@@ -89,18 +106,22 @@ impl Printable for Point {
 
 (source_file
   (impl_declaration
-    trait: (identifier)
     type: (identifier)
+    self_type: (identifier)
     (function_declaration
       name: (identifier)
       (parameters
-        (parameter name: (self) type: (identifier)))
-      (return_type (primitive_type))
+        (parameter
+          (self_parameter
+            (self))))
+      (return_type
+        (primitive_type))
       body: (block
         (expression_statement
           (expression
             (field_expression
-              object: (expression (self))
+              object: (expression
+                (self))
               field: (identifier))))))))
 
 ================================================================================
@@ -120,22 +141,27 @@ actor Counter {
 (source_file
   (actor_declaration
     name: (identifier)
-    (actor_field name: (identifier) type: (primitive_type))
+    (actor_field
+      name: (identifier)
+      type: (primitive_type))
     (receive_function
       name: (identifier)
       body: (block
         (assignment_statement
           left: (expression
             (field_expression
-              object: (expression (self))
+              object: (expression
+                (self))
               field: (identifier)))
           right: (expression
             (binary_expression
               (expression
                 (field_expression
-                  object: (expression (self))
+                  object: (expression
+                    (self))
                   field: (identifier)))
-              (expression (integer_literal)))))))))
+              (expression
+                (integer_literal)))))))))
 
 ================================================================================
 Machine declaration (v0.5)
@@ -168,31 +194,43 @@ machine TrafficLight {
   (machine_declaration
     name: (identifier)
     events_header: (machine_events_header
-      (machine_event_decl name: (identifier))
+      (machine_event_decl
+        name: (identifier))
       (machine_event_decl
         name: (identifier)
-        (struct_field name: (identifier) type: (primitive_type))))
-    (machine_state name: (identifier))
-    (machine_state name: (identifier))
-    (machine_state name: (identifier))
+        (struct_field
+          name: (identifier)
+          type: (primitive_type))))
+    (machine_state
+      name: (identifier))
+    (machine_state
+      name: (identifier))
+    (machine_state
+      name: (identifier))
     (machine_transition
       event: (identifier)
       source: (identifier)
       target: (identifier)
       body: (block
-        (expression_statement (expression (identifier)))))
+        (expression_statement
+          (expression
+            (identifier)))))
     (machine_transition
       event: (identifier)
       source: (identifier)
       target: (identifier)
       body: (block
-        (expression_statement (expression (identifier)))))
+        (expression_statement
+          (expression
+            (identifier)))))
     (machine_transition
       event: (identifier)
       source: (identifier)
       target: (identifier)
       body: (block
-        (expression_statement (expression (identifier)))))
+        (expression_statement
+          (expression
+            (identifier)))))
     (machine_transition
       event: (identifier)
       source: (identifier)
@@ -201,13 +239,17 @@ machine TrafficLight {
         (expression_statement
           (expression
             (call_expression
-              function: (expression (identifier))
+              function: (expression
+                (identifier))
               (call_argument
                 (expression
                   (field_expression
-                    object: (expression (identifier))
+                    object: (expression
+                      (identifier))
                     field: (identifier)))))))
-        (expression_statement (expression (identifier)))))
+        (expression_statement
+          (expression
+            (identifier)))))
     (machine_default)))
 
 ================================================================================
@@ -226,7 +268,9 @@ actor Worker {
 (source_file
   (actor_declaration
     name: (identifier)
-    (attribute (identifier) (identifier))
+    (attribute
+      (identifier)
+      (identifier))
     (function_declaration
       name: (identifier)
       body: (block
@@ -259,21 +303,31 @@ actor Counter {
 (source_file
   (actor_declaration
     name: (identifier)
-    (actor_field name: (identifier) type: (primitive_type))
-    (attribute (identifier) (identifier))
+    (actor_field
+      name: (identifier)
+      type: (primitive_type))
+    (attribute
+      (identifier)
+      (identifier))
     (function_declaration
       name: (identifier)
       body: (block
         (assignment_statement
-          left: (expression (identifier))
-          right: (expression (integer_literal)))))
-    (attribute (identifier) (identifier))
+          left: (expression
+            (identifier))
+          right: (expression
+            (integer_literal)))))
+    (attribute
+      (identifier)
+      (identifier))
     (function_declaration
       name: (identifier)
       body: (block
         (assignment_statement
-          left: (expression (identifier))
-          right: (expression (integer_literal)))))))
+          left: (expression
+            (identifier))
+          right: (expression
+            (integer_literal)))))))
 
 ================================================================================
 Supervisor with child arguments
@@ -290,13 +344,13 @@ supervisor Pool {
   (supervisor_declaration
     name: (identifier)
     (supervisor_field
-      name: (identifier)
-      value: (expression (supervisor_strategy_value)))
+      strategy: (supervisor_strategy_value))
     (child_spec
       name: (identifier)
       actor: (identifier)
       (call_argument
-        (expression (integer_literal))))))
+        (expression
+          (integer_literal))))))
 
 ================================================================================
 Supervisor with all strategy values
@@ -312,16 +366,20 @@ supervisor S4 { strategy: simple_one_for_one; }
 (source_file
   (supervisor_declaration
     name: (identifier)
-    (supervisor_field name: (identifier) value: (expression (supervisor_strategy_value))))
+    (supervisor_field
+      strategy: (supervisor_strategy_value)))
   (supervisor_declaration
     name: (identifier)
-    (supervisor_field name: (identifier) value: (expression (supervisor_strategy_value))))
+    (supervisor_field
+      strategy: (supervisor_strategy_value)))
   (supervisor_declaration
     name: (identifier)
-    (supervisor_field name: (identifier) value: (expression (supervisor_strategy_value))))
+    (supervisor_field
+      strategy: (supervisor_strategy_value)))
   (supervisor_declaration
     name: (identifier)
-    (supervisor_field name: (identifier) value: (expression (supervisor_strategy_value)))))
+    (supervisor_field
+      strategy: (supervisor_strategy_value))))
 
 ================================================================================
 Record declaration (comma-separated fields)
@@ -337,8 +395,12 @@ record Point {
 (source_file
   (record_declaration
     name: (identifier)
-    (record_field name: (identifier) type: (primitive_type))
-    (record_field name: (identifier) type: (primitive_type))))
+    (record_field
+      name: (identifier)
+      type: (primitive_type))
+    (record_field
+      name: (identifier)
+      type: (primitive_type))))
 
 ================================================================================
 Raw pointer type in extern block (FFI-scoped)
@@ -357,6 +419,14 @@ extern "C" {
     (extern_function
       name: (identifier)
       (parameters
-        (parameter name: (identifier) type: (pointer_type (primitive_type)))
-        (parameter name: (identifier) type: (pointer_type (primitive_type)))
-        (parameter name: (identifier) type: (primitive_type))))))
+        (parameter
+          name: (identifier)
+          type: (pointer_type
+            (primitive_type)))
+        (parameter
+          name: (identifier)
+          type: (pointer_type
+            (primitive_type)))
+        (parameter
+          name: (identifier)
+          type: (primitive_type))))))

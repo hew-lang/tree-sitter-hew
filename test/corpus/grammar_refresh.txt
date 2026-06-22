@@ -1,0 +1,617 @@
+================================================================================
+G1 Pipe closure — identity and multi-argument
+================================================================================
+
+fn m() {
+    let id = |x| x;
+    let add = |a, b| a + b;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (lambda
+            (lambda_parameter
+              (identifier))
+            (expression
+              (identifier)))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (lambda
+            (lambda_parameter
+              (identifier))
+            (lambda_parameter
+              (identifier))
+            (expression
+              (binary_expression
+                (expression
+                  (identifier))
+                (expression
+                  (identifier))))))))))
+
+================================================================================
+G1 Pipe closure — typed params, return type, block body
+================================================================================
+
+fn m() {
+    let f = |x: i64| -> i64 { x * 2 };
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (lambda
+            (lambda_parameter
+              (identifier)
+              (primitive_type))
+            (return_type
+              (primitive_type))
+            (block
+              (expression_statement
+                (expression
+                  (binary_expression
+                    (expression
+                      (identifier))
+                    (expression
+                      (integer_literal))))))))))))
+
+================================================================================
+G1 Pipe closure — move capture
+================================================================================
+
+fn m() {
+    let f = move |y| y + 1;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (lambda
+            (lambda_parameter
+              (identifier))
+            (expression
+              (binary_expression
+                (expression
+                  (identifier))
+                (expression
+                  (integer_literal))))))))))
+
+================================================================================
+G1 Pipe closure — empty params (nullary)
+================================================================================
+
+fn m() {
+    let f = || 42;
+    let g = a || b;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (lambda
+            (expression
+              (integer_literal)))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (binary_expression
+            (expression
+              (identifier))
+            (expression
+              (identifier))))))))
+
+================================================================================
+G2 Import — multi-segment module path
+================================================================================
+
+import std::collections::HashMap;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (import_declaration
+    (module_path
+      (identifier)
+      (identifier)
+      (identifier))))
+
+================================================================================
+G2 Import — grouped names with alias
+================================================================================
+
+import std::collections::{HashMap, HashSet as Set};
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (import_declaration
+    (module_path
+      (identifier)
+      (identifier))
+    (import_name
+      (identifier))
+    (import_name
+      (identifier)
+      (identifier))))
+
+================================================================================
+G2 Import — glob
+================================================================================
+
+import std::prelude::*;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (import_declaration
+    (module_path
+      (identifier)
+      (identifier))))
+
+================================================================================
+G2 Import — string path
+================================================================================
+
+import "some/path/mod.hew";
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (import_declaration
+    (string_literal
+      (string_content))))
+
+================================================================================
+G3 Visibility — pub trait
+================================================================================
+
+pub trait Show {
+    fn show(self) -> string;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (visibility)
+  (trait_declaration
+    (identifier)
+    (trait_function_signature
+      (identifier)
+      (parameters
+        (parameter
+          (self_parameter
+            (self))))
+      (return_type
+        (primitive_type)))))
+
+================================================================================
+G3 Visibility — pub type and pub enum
+================================================================================
+
+pub type Point {
+    x: i64;
+    y: i64;
+}
+
+pub enum Color {
+    Red;
+    Green;
+    Blue;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (visibility)
+  (struct_declaration
+    (identifier)
+    (struct_body
+      (struct_field
+        (identifier)
+        (primitive_type))
+      (struct_field
+        (identifier)
+        (primitive_type))))
+  (visibility)
+  (enum_declaration
+    (identifier)
+    (enum_body
+      (variant
+        (identifier))
+      (variant
+        (identifier))
+      (variant
+        (identifier)))))
+
+================================================================================
+G3 Visibility — package function
+================================================================================
+
+package fn helper() {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (visibility)
+  (function_declaration
+    (identifier)
+    (block)))
+
+================================================================================
+G4 Inherent impl (no trait)
+================================================================================
+
+impl Point {
+    fn origin() -> Point {
+        Point { x: 0, y: 0 }
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (impl_declaration
+    (identifier)
+    (function_declaration
+      (identifier)
+      (return_type
+        (identifier))
+      (block
+        (expression_statement
+          (expression
+            (struct_init
+              (identifier)
+              (field_initializer
+                (identifier)
+                (expression
+                  (integer_literal)))
+              (field_initializer
+                (identifier)
+                (expression
+                  (integer_literal))))))))))
+
+================================================================================
+G5 Supervisor — intensity within duration
+================================================================================
+
+supervisor Sup {
+    strategy: one_for_all;
+    intensity: 5 within 10s;
+    child w: Worker;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (supervisor_declaration
+    (identifier)
+    (supervisor_field
+      (supervisor_strategy_value))
+    (supervisor_field
+      (integer_literal)
+      (duration_literal
+        (integer_literal)))
+    (child_spec
+      (identifier)
+      (identifier))))
+
+================================================================================
+G6 F-string — escaped braces and quotes
+================================================================================
+
+fn m() {
+    let a = f"escaped \{ and \}";
+    let b = f"quote \" inside";
+    let c = f"value {x} and \{literal\}";
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (interpolated_string
+            (fstring_start)
+            (string_content)
+            (escape_sequence)
+            (string_content)
+            (escape_sequence))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (interpolated_string
+            (fstring_start)
+            (string_content)
+            (escape_sequence)
+            (string_content))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (interpolated_string
+            (fstring_start)
+            (string_content)
+            (interpolation
+              (expression
+                (identifier)))
+            (string_content)
+            (escape_sequence)
+            (string_content)
+            (escape_sequence)))))))
+
+================================================================================
+A1 Gen-block expression — yield items
+================================================================================
+
+fn m() {
+    let g = gen {
+        yield Open;
+        yield Closed;
+    };
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (gen_block_expression
+            (block
+              (expression_statement
+                (expression
+                  (yield_expression
+                    (expression
+                      (identifier)))))
+              (expression_statement
+                (expression
+                  (yield_expression
+                    (expression
+                      (identifier))))))))))))
+
+================================================================================
+A2 Actor field — bare, let, and var forms
+================================================================================
+
+actor Counter {
+    count: i64;
+    let label: string;
+    var total: i64 = 0;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (actor_declaration
+    (identifier)
+    (actor_field
+      (identifier)
+      (primitive_type))
+    (actor_field
+      (identifier)
+      (primitive_type))
+    (actor_field
+      (identifier)
+      (primitive_type)
+      (expression
+        (integer_literal)))))
+
+================================================================================
+A3 Turbofish — type-segment and method-segment forms
+================================================================================
+
+fn m() {
+    let a = HashMap::<Key, i64>::new();
+    let b = Vec::new::<i64>();
+    let c = pending::<()>();
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (call_expression
+            (expression
+              (scoped_expression
+                (expression
+                  (turbofish_expression
+                    (expression
+                      (identifier))
+                    (type_arguments
+                      (identifier)
+                      (primitive_type))))
+                (identifier))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (call_expression
+            (expression
+              (turbofish_expression
+                (expression
+                  (scoped_expression
+                    (expression
+                      (identifier))
+                    (identifier)))
+                (type_arguments
+                  (primitive_type)))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (call_expression
+            (expression
+              (turbofish_expression
+                (expression
+                  (identifier))
+                (type_arguments
+                  (unit_type))))))))))
+
+================================================================================
+A4 Record — tuple (positional) body
+================================================================================
+
+record Pair(i64, i64);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (record_declaration
+    (identifier)
+    (primitive_type)
+    (primitive_type)))
+
+================================================================================
+A5 Join — parenthesized form
+================================================================================
+
+fn m() {
+    let r = join(a(), b());
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (join_expression
+            (expression
+              (call_expression
+                (expression
+                  (identifier))))
+            (expression
+              (call_expression
+                (expression
+                  (identifier))))))))))
+
+================================================================================
+A6 Byte array literal
+================================================================================
+
+fn m() {
+    let b = bytes[0x41, 0x42];
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (byte_array_expression
+            (expression
+              (integer_literal))
+            (expression
+              (integer_literal))))))))
+
+================================================================================
+A7 Yield — bare (no operand) and with operand
+================================================================================
+
+fn m() {
+    let g = gen {
+        yield;
+        yield 1;
+    };
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (gen_block_expression
+            (block
+              (expression_statement
+                (expression
+                  (yield_expression)))
+              (expression_statement
+                (expression
+                  (yield_expression
+                    (expression
+                      (integer_literal))))))))))))
+
+================================================================================
+Wire field with repeated attribute (list[T] removed as compiler-rejected)
+================================================================================
+
+wire type Telemetry {
+    samples: f64 repeated;
+    label: string optional;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (wire_declaration
+    (identifier)
+    (wire_body
+      (wire_field
+        (identifier)
+        (wire_type)
+        (wire_attribute))
+      (wire_field
+        (identifier)
+        (wire_type)
+        (wire_attribute)))))
