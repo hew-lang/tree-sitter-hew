@@ -12,7 +12,7 @@
   (impl_declaration)
   (actor_declaration)
   (supervisor_declaration)
-  (wire_declaration)
+  (wire_struct_declaration)
   (extern_block)
   (receive_function)
   (receive_gen_function)

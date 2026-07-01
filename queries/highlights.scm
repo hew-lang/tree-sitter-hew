@@ -3,7 +3,7 @@
 ; ---- Keywords ----
 [
   "fn" "let" "var" "const" "pub" "return" "if" "else" "match" "for" "while"
-  "loop" "break" "continue" "in" "spawn" "await" "select" "join"
+  "loop" "break" "continue" "in" "spawn" "await" "await_restart" "select" "join"
   "import" "extern" "async" "gen" "yield" "scope" "move" "fork"
   "type" "where" "dyn" "unsafe" "defer"
   "init" "child" "pool" "restart" "shutdown" "wired_to"
@@ -13,8 +13,6 @@
 
 "receive" @keyword
 
-(cooperate_expression) @keyword
-
 (this_expression) @keyword
 
 "indirect" @keyword
@@ -22,16 +20,13 @@
 "as" @keyword
 
 [
-  "enum" "trait" "impl" "actor" "supervisor" "wire" "machine" "record"
+  "enum" "trait" "impl" "actor" "supervisor" "machine" "record"
 ] @keyword.type
 
 [
   "state" "on" "when"
   "events" "emits" "reenter" "entry" "exit" "emit" "initial"
 ] @keyword
-
-; Reserved keywords (future use)
-(reserved_keyword) @keyword.reserved
 
 [
   "permanent" "transient" "temporary"
@@ -145,9 +140,6 @@
   name: (identifier) @type)
 
 (supervisor_declaration
-  name: (identifier) @type)
-
-(wire_declaration
   name: (identifier) @type)
 
 (machine_declaration

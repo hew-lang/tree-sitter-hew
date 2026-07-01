@@ -1,0 +1,220 @@
+================================================================================
+let-else and let-propagate (let r? = expr;)
+================================================================================
+
+fn f(x: Option<i64>) -> i64 {
+  let Some(y) = x else { return 0; };
+  let z? = g();
+  y
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    (parameters
+      (parameter
+        name: (identifier)
+        type: (generic_type
+          (identifier)
+          (type_arguments
+            (primitive_type)))))
+    (return_type
+      (primitive_type))
+    body: (block
+      (let_statement
+        pattern: (pattern
+          (constructor_pattern
+            name: (identifier)
+            (pattern
+              (identifier))))
+        value: (expression
+          (identifier))
+        else: (block
+          (expression_statement
+            (expression
+              (return_expression
+                (expression
+                  (integer_literal)))))))
+      (let_statement
+        pattern: (pattern
+          (identifier))
+        value: (expression
+          (call_expression
+            function: (expression
+              (identifier)))))
+      (expression_statement
+        (expression
+          (identifier))))))
+
+================================================================================
+Return as an expression (in a binary operand and an if branch)
+================================================================================
+
+fn f(b: bool) -> i64 {
+    let x = b || return 0;
+    g(if b { 1 } else { return 2 })
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    (parameters
+      (parameter
+        name: (identifier)
+        type: (primitive_type)))
+    (return_type
+      (primitive_type))
+    body: (block
+      (let_statement
+        pattern: (pattern
+          (identifier))
+        value: (expression
+          (binary_expression
+            (expression
+              (identifier))
+            (expression
+              (return_expression
+                (expression
+                  (integer_literal)))))))
+      (expression_statement
+        (expression
+          (call_expression
+            function: (expression
+              (identifier))
+            (call_argument
+              (expression
+                (if_expression
+                  condition: (expression
+                    (identifier))
+                  consequence: (block
+                    (expression_statement
+                      (expression
+                        (integer_literal))))
+                  alternative: (else_clause
+                    (block
+                      (expression_statement
+                        (expression
+                          (return_expression
+                            (expression
+                              (integer_literal))))))))))))))))
+
+================================================================================
+await_restart on a supervised-child accessor
+================================================================================
+
+fn f() {
+    await_restart sup.child;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (expression_statement
+        (expression
+          (await_restart_expression
+            (expression
+              (field_expression
+                object: (expression
+                  (identifier))
+                field: (identifier)))))))))
+
+================================================================================
+Leading-dot variant patterns in match arms
+================================================================================
+
+fn f(c: Shape) -> i64 {
+    match c {
+        .Circle(r) => r,
+        .Rect { w: a, h } => a,
+        .Unit => 0,
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    (parameters
+      (parameter
+        name: (identifier)
+        type: (identifier)))
+    (return_type
+      (primitive_type))
+    body: (block
+      (expression_statement
+        (expression
+          (match_expression
+            value: (expression
+              (identifier))
+            (match_arm
+              pattern: (pattern
+                (variant_pattern
+                  name: (identifier)
+                  (pattern
+                    (identifier))))
+              value: (expression
+                (identifier)))
+            (match_arm
+              pattern: (pattern
+                (variant_pattern
+                  name: (identifier)
+                  (pattern_field
+                    name: (identifier)
+                    pattern: (pattern
+                      (identifier)))
+                  (pattern_field
+                    name: (identifier))))
+              value: (expression
+                (identifier)))
+            (match_arm
+              pattern: (pattern
+                (variant_pattern
+                  name: (identifier)))
+              value: (expression
+                (integer_literal)))))))))
+
+================================================================================
+Shorthand record destructure (let { a, b } = rec)
+================================================================================
+
+fn f(rect: Rect) -> i64 {
+    let { width, height } = rect;
+    width + height
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    (parameters
+      (parameter
+        name: (identifier)
+        type: (identifier)))
+    (return_type
+      (primitive_type))
+    body: (block
+      (let_statement
+        pattern: (pattern
+          (record_pattern
+            (pattern_field
+              name: (identifier))
+            (pattern_field
+              name: (identifier))))
+        value: (expression
+          (identifier)))
+      (expression_statement
+        (expression
+          (binary_expression
+            (expression
+              (identifier))
+            (expression
+              (identifier))))))))

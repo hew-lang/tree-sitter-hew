@@ -593,25 +593,34 @@ fn m() {
                       (integer_literal))))))))))))
 
 ================================================================================
-Wire field with repeated attribute (list[T] removed as compiler-rejected)
+Wire struct — #[wire] attribute, @N field numbers, modifiers, reserved
 ================================================================================
 
-wire type Telemetry {
-    samples: f64 repeated;
-    label: string optional;
+#[wire(version = 2)] struct Telemetry {
+    samples: f64 @1 repeated,
+    label: string @2 optional,
+    reserved @3, @4;
 }
 
 --------------------------------------------------------------------------------
 
 (source_file
-  (wire_declaration
+  (attribute
     (identifier)
-    (wire_body
-      (wire_field
-        (identifier)
-        (wire_type)
-        (wire_attribute))
-      (wire_field
-        (identifier)
-        (wire_type)
-        (wire_attribute)))))
+    (identifier)
+    (integer_literal))
+  (wire_struct_declaration
+    name: (identifier)
+    (wire_struct_field
+      name: (identifier)
+      type: (primitive_type)
+      (integer_literal)
+      (wire_attribute))
+    (wire_struct_field
+      name: (identifier)
+      type: (primitive_type)
+      (integer_literal)
+      (wire_attribute))
+    (reserved_declaration
+      (integer_literal)
+      (integer_literal))))
