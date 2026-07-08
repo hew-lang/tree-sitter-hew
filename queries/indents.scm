@@ -3,11 +3,13 @@
 [
   (block)
   (struct_declaration)
+  (record_declaration)
   (enum_declaration)
   (trait_declaration)
   (impl_declaration)
   (actor_declaration)
   (supervisor_declaration)
+  (machine_declaration)
   (extern_block)
   (match_expression)
   (select_expression)
