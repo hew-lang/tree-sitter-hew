@@ -499,6 +499,11 @@ export default grammar({
     supervisor_declaration: $ => seq(
       'supervisor',
       field('name', $.identifier),
+      optional(seq(
+        '(',
+        optional($.parameters),
+        ')',
+      )),
       '{',
       repeat(choice($.child_spec, $.supervisor_field)),
       '}',
@@ -721,7 +726,7 @@ export default grammar({
     // @sync:primitive_types
     primitive_type: $ => choice(
       'i8', 'i16', 'i32', 'i64', 'u8', 'u16', 'u32', 'u64', 'isize', 'usize',
-      'f32', 'f64', 'bool', 'char', 'string', 'bytes', 'void', 'duration',
+      'f32', 'f64', 'bool', 'char', 'string', 'bytes', 'void', 'duration', 'instant',
     ),
 
     generic_type: $ => prec(1, seq($.identifier, $.type_arguments)),

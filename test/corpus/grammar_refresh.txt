@@ -327,6 +327,27 @@ supervisor Sup {
       (identifier))))
 
 ================================================================================
+G5 Supervisor — construction-time params
+================================================================================
+
+supervisor App(config: AppConfig) {
+    child worker: Worker;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (supervisor_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (identifier)))
+    (child_spec
+      (identifier)
+      (identifier))))
+
+================================================================================
 G6 F-string — escaped braces and quotes
 ================================================================================
 
