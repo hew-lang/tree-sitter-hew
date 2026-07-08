@@ -79,10 +79,8 @@ export default grammar({
         $.import_declaration,
         $.const_declaration,
         $.struct_declaration,
-        $.wire_struct_declaration,
         $.record_declaration,
         $.enum_declaration,
-        $.wire_declaration,
         $.trait_declaration,
         $.impl_declaration,
         $.function_declaration,
@@ -97,7 +95,17 @@ export default grammar({
       ),
     ),
 
-    attribute: $ => seq('#', '[', $.identifier, optional(seq('(', optional(sep1(choice($.identifier, $._literal), ',')), ')')), ']'),
+    // Attribute args accept both a positional list (`#[derive(Debug, Clone)]`)
+    // and `key = value` pairs (`#[wire(version = 2, min_version = 1)]`), matching
+    // the real parser's AttributeArg::{Ident, Literal, KeyValue} (hew-parser wire.rs
+    // reads `version`/`min_version` as KeyValue args).
+    attribute: $ => seq('#', '[', $.identifier, optional(seq('(', optional(sep1($._attribute_arg, ',')), ')')), ']'),
+
+    _attribute_arg: $ => choice(
+      seq($.identifier, '=', choice($.identifier, $._literal)),
+      $.identifier,
+      $._literal,
+    ),
 
     // Import (spec grammar.ebnf:63-68):
     //   Import     = "import" ( StringLit | ModulePath ( "::" ImportSpec )? ) ";"
@@ -165,32 +173,15 @@ export default grammar({
 
     struct_body: $ => seq('{', repeat(choice(
       $.struct_field,
+      $.reserved_declaration,
       seq(optional($.visibility), $.function_declaration),
     )), '}'),
 
-    // StructFieldDecl (grammar.ebnf:68): `Attribute* Ident ":" Type (";" | ",")`.
+    // StructFieldDecl / WireStructFieldDecl (grammar.ebnf:68, 76):
+    // `Attribute* Ident ":" Type ("@" IntLit)? WireAttr* (";" | ",")`.
+    // The real parser attaches `@N` tags and trailing wire modifiers to a normal
+    // `type` declaration when a `#[wire]` attribute is present.
     struct_field: $ => seq(
-      repeat($.attribute),
-      field('name', $.identifier),
-      ':',
-      field('type', $._type),
-      optional(choice(',', ';')),
-    ),
-
-    // WireStructDecl (grammar.ebnf:53-54): `struct Name { Ident ":" Type ("@" IntLit)? WireAttr* ("," | ";") }`.
-    // The literal `struct` keyword (as opposed to `type`) marks a wire struct;
-    // fields may carry an `@N` field tag and trailing wire attributes.
-    wire_struct_declaration: $ => seq(
-      'struct',
-      field('name', $.identifier),
-      optional($.type_parameters),
-      optional($.where_clause),
-      '{',
-      repeat(choice($.wire_struct_field, $.reserved_declaration)),
-      '}',
-    ),
-
-    wire_struct_field: $ => prec.left(seq(
       repeat($.attribute),
       field('name', $.identifier),
       ':',
@@ -198,7 +189,7 @@ export default grammar({
       optional(seq('@', $.integer_literal)),
       repeat($.wire_attribute),
       optional(choice(',', ';')),
-    )),
+    ),
 
     // record Name { field: T, field: T }  — comma-separated product type.
     // Spec: grammar.ebnf:47, Hew.g4:155. End-to-end probe OK.
@@ -238,46 +229,38 @@ export default grammar({
         seq('(', sep1($._type, ','), ')'),
         seq('{', repeat($.struct_field), '}'),
       )),
-      optional(choice(',', ';')),
+      // Enum variants are `;`-separated (a `,` separator is rejected by the real
+      // parser: "use `;` instead of `,` to separate variants"). The last variant
+      // may omit the trailing `;`.
+      optional(';'),
     ),
 
-    // "type X { ... }" is a struct alias form
-    // handled by struct_declaration with choice('struct', 'type')
+    // NOTE: the legacy bare `wire` keyword item form (`wire struct/enum/type
+    // Name { … }`) was removed from the compiler in hew commit 60c50daef
+    // ("refactor(parser): remove the wire keyword surface in favor of #[wire]").
+    // The current surface is `#[wire] type Name { … }` / `#[wire] enum Name { … }`:
+    // both struct-shaped and enum-shaped wire types use the generic `#[wire]`
+    // attribute on ordinary `type` / `enum` declarations.
 
-    wire_declaration: $ => seq(
-      'wire',
-      choice('struct', 'enum', 'type'),
-      field('name', $.identifier),
-      field('body', $.wire_body),
-    ),
-
-    wire_body: $ => seq('{', repeat(choice($.wire_field, $.variant, $.reserved_declaration)), '}'),
-
-    wire_field: $ => prec.left(seq(
-      field('name', $.identifier),
-      ':',
-      field('type', $.wire_type),
-      optional(seq('@', $.integer_literal)),
-      repeat($.wire_attribute),
-      optional(choice(',', ';')),
-    )),
-
-    // @sync:wire_types
-    wire_type: $ => choice(
-      'u8', 'u16', 'u32', 'u64', 'i8', 'i16', 'i32', 'i64', 'f32', 'f64', 'bool',
-      'bytes', 'string',
-      $.identifier,
-    ),
-
+    // `reserved @N, @M;` inside a `#[wire] type` body reserves wire field
+    // numbers (hew-parser wire.rs:222-248 expects `@` markers, comma-separated,
+    // terminated by `;`). The old parenthesised `reserved(N, M);` form is not
+    // accepted by the compiler.
     reserved_declaration: $ => seq(
-      'reserved', '(', sep1($.integer_literal, ','), ')', ';',
+      'reserved', sep1(seq('@', $.integer_literal), ','), ';',
     ),
 
-    // @sync:wire_attributes
+    // @sync:wire_attributes — per-field modifiers on a `#[wire] type` field
+    // (hew-parser wire.rs:53-117). `optional`/`deprecated` are real keyword
+    // tokens; `repeated`/`since`/`json`/`yaml`/`json_name`/`yaml_name` are
+    // contextual identifiers recognised only in wire-field modifier position.
     wire_attribute: $ => choice(
       'optional', 'deprecated', 'repeated',
-      seq('default', '(', $.expression, ')'),
-      seq('reserved', '(', sep1($.integer_literal, ','), ')'),
+      seq('since', $.integer_literal),
+      seq('json', '(', $.string_literal, ')'),
+      seq('yaml', '(', $.string_literal, ')'),
+      seq('json_name', '=', $.string_literal),
+      seq('yaml_name', '=', $.string_literal),
     ),
 
     // ---- Traits & Impls ----
@@ -793,7 +776,6 @@ export default grammar({
       $.loop_statement,
       $.break_statement,
       $.continue_statement,
-      $.return_statement,
       $.expression_statement,
       $.if_statement,
       $.match_statement,
@@ -806,8 +788,14 @@ export default grammar({
     let_statement: $ => seq(
       'let',
       field('pattern', $.pattern),
+      // `let r? = expr;` is sugar for `let r = expr?;` (hew-parser statements.rs:260).
+      // The `?` is only valid after a simple identifier pattern.
+      optional('?'),
       optional(seq(':', field('type', $._type))),
       optional(seq('=', field('value', $.expression))),
+      // let-else: `let Pat = expr else { <diverging block> };`
+      // (hew-parser statements.rs:312-341).
+      optional(seq('else', field('else', $.block))),
       ';',
     ),
 
@@ -844,7 +832,12 @@ export default grammar({
 
     continue_statement: $ => seq('continue', optional($.label), ';'),
 
-    return_statement: $ => seq('return', optional($.expression), ';'),
+    // `return [expr]` is an expression (Never-typed) in Hew, not a statement:
+    // it is valid in tail position without `;` and inside larger expressions
+    // (`b || return 0`, `g(if c { 1 } else { return 0 })`). See hew commit
+    // 480456ec5 (return-as-expression) and hew-parser expressions.rs:1125-1150.
+    // Statement position is handled by `expression_statement` (optional `;`).
+    return_expression: $ => prec.right(seq('return', optional($.expression))),
 
     defer_statement: $ => seq('defer', $.expression, ';'),
 
@@ -884,6 +877,7 @@ export default grammar({
       $.try_expression,
       $.cast_expression,
       $.await_expression,
+      $.await_restart_expression,
       $.clone_expression,
       $.struct_init,
       $.array_expression,
@@ -900,16 +894,15 @@ export default grammar({
       $.select_expression,
       $.join_expression,
       $.scope_expression,
-      $.cooperate_expression,
       $.this_expression,
       $.yield_expression,
+      $.return_expression,
       $.gen_block_expression,
       $.scoped_expression,
       $.turbofish_expression,
       $.generic_call_expression,
       $.byte_array_expression,
       $.unsafe_expression,
-      $.reserved_keyword,
     ),
 
     // @sync:supervisor_strategies
@@ -1029,6 +1022,14 @@ export default grammar({
 
     await_expression: $ => prec(PREC.UNARY, seq(
       'await',
+      $.expression,
+    )),
+
+    // `await_restart <supervised-child accessor>` suspends until a supervised
+    // child restarts (hew commit 82015e997; expressions.rs:134-138). Prefix
+    // operator, same shape/precedence as `await`.
+    await_restart_expression: $ => prec(PREC.UNARY, seq(
+      'await_restart',
       $.expression,
     )),
 
@@ -1294,7 +1295,6 @@ export default grammar({
       optional(';'),
     ),
 
-    cooperate_expression: $ => 'cooperate',
     this_expression: $ => 'this',
     // YieldExpr (grammar.ebnf:322): "yield" Expr? — the operand is optional, so
     //   bare `yield;` is valid (yields Unit). `prec.right` makes `yield expr`
@@ -1324,11 +1324,34 @@ export default grammar({
       $._literal,
       $.tuple_pattern,
       $.struct_pattern,
+      $.record_pattern,
+      $.variant_pattern,
       $.constructor_pattern,
       $.or_pattern,
     ),
 
     tuple_pattern: $ => seq('(', sep1($.pattern, ','), ')'),
+
+    // Shorthand record destructure `{ a, b }` / `{ a: p, b }` with no type name
+    // (hew commit 6098d7ef9; hew-parser patterns.rs:190-213). The record type is
+    // inferred from the scrutinee.
+    record_pattern: $ => seq(
+      '{',
+      optional(seq(sep1($.pattern_field, ','), optional(','))),
+      '}',
+    ),
+
+    // Leading-dot variant pattern `.Variant`, `.Variant(p, …)`, `.Variant { f: p }`
+    // (hew commit 99913e044; hew-parser patterns.rs:67-113). The enum type is left
+    // implicit and resolved against the match scrutinee.
+    variant_pattern: $ => seq(
+      '.',
+      field('name', $.identifier),
+      optional(choice(
+        seq('(', optional(seq(sep1($.pattern, ','), optional(','))), ')'),
+        seq('{', optional(seq(sep1($.pattern_field, ','), optional(','))), '}'),
+      )),
+    ),
 
     struct_pattern: $ => seq(
       field('name', choice($.identifier, $.path_expression)),
@@ -1461,9 +1484,6 @@ export default grammar({
     block_comment: $ => token(seq('/*', /[^*]*\*+([^/*][^*]*\*+)*/, '/')),
 
     // ---- Identifiers ----
-
-    // @sync:reserved_unused
-    reserved_keyword: $ => choice('try', 'catch', 'race', 'foreign'),
 
     identifier: $ => /[a-zA-Z_][a-zA-Z0-9_]*/,
   },

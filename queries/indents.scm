@@ -8,7 +8,6 @@
   (impl_declaration)
   (actor_declaration)
   (supervisor_declaration)
-  (wire_declaration)
   (extern_block)
   (match_expression)
   (select_expression)

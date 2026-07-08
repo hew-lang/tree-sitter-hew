@@ -39,7 +39,7 @@ fi
 
 KEYWORDS=(
   # Declaration keywords
-  import const type struct enum wire trait impl fn gen async extern
+  import const type enum trait impl fn gen async extern
   actor supervisor machine pub package super where for indirect
 
   # Statement / control-flow keywords
@@ -47,7 +47,7 @@ KEYWORDS=(
   loop while in scope cooperate yield unsafe
 
   # Expression keywords
-  as await spawn select join after from move this self
+  as await await_restart spawn select join after from move this self
 
   # Actor keywords
   init mailbox overflow receive
