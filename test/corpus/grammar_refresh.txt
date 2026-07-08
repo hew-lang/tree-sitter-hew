@@ -596,7 +596,7 @@ fn m() {
 Wire struct — #[wire] attribute, @N field numbers, modifiers, reserved
 ================================================================================
 
-#[wire(version = 2)] struct Telemetry {
+#[wire(version = 2)] type Telemetry {
     samples: f64 @1 repeated,
     label: string @2 optional,
     reserved @3, @4;
@@ -609,18 +609,19 @@ Wire struct — #[wire] attribute, @N field numbers, modifiers, reserved
     (identifier)
     (identifier)
     (integer_literal))
-  (wire_struct_declaration
+  (struct_declaration
     name: (identifier)
-    (wire_struct_field
+    body: (struct_body
+      (struct_field
       name: (identifier)
       type: (primitive_type)
       (integer_literal)
       (wire_attribute))
-    (wire_struct_field
+      (struct_field
       name: (identifier)
       type: (primitive_type)
       (integer_literal)
       (wire_attribute))
-    (reserved_declaration
-      (integer_literal)
-      (integer_literal))))
+      (reserved_declaration
+        (integer_literal)
+        (integer_literal)))))

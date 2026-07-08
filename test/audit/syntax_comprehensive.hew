@@ -35,13 +35,15 @@ impl Drawable for Point {
 }
 
 // === Wire Types ===
-wire type UserMessage {
+#[wire]
+type UserMessage {
     name: String @1;
     age: u32 @2 optional;
     email: String @3 deprecated;
 }
 
-wire enum Command {
+#[wire]
+enum Command {
     Start;
     Stop;
     Pause;

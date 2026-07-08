@@ -2,7 +2,7 @@
 
 ; ---- Keywords ----
 [
-  "fn" "let" "var" "const" "pub" "return" "if" "else" "match" "for" "while"
+  "fn" "let" "var" "const" "mut" "pub" "return" "if" "else" "match" "for" "while"
   "loop" "break" "continue" "in" "spawn" "await" "await_restart" "select" "join"
   "import" "extern" "async" "gen" "yield" "scope" "move" "fork"
   "type" "where" "dyn" "unsafe" "defer"

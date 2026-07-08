@@ -4385,10 +4385,6 @@
         {
           "type": "visibility",
           "named": true
-        },
-        {
-          "type": "wire_struct_declaration",
-          "named": true
         }
       ]
     }
@@ -4437,6 +4433,10 @@
       "types": [
         {
           "type": "function_declaration",
+          "named": true
+        },
+        {
+          "type": "reserved_declaration",
           "named": true
         },
         {
@@ -4565,6 +4565,14 @@
       "types": [
         {
           "type": "attribute",
+          "named": true
+        },
+        {
+          "type": "integer_literal",
+          "named": true
+        },
+        {
+          "type": "wire_attribute",
           "named": true
         }
       ]
@@ -5609,132 +5617,6 @@
     }
   },
   {
-    "type": "wire_struct_declaration",
-    "named": true,
-    "fields": {
-      "name": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "identifier",
-            "named": true
-          }
-        ]
-      }
-    },
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "reserved_declaration",
-          "named": true
-        },
-        {
-          "type": "type_parameters",
-          "named": true
-        },
-        {
-          "type": "where_clause",
-          "named": true
-        },
-        {
-          "type": "wire_struct_field",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "wire_struct_field",
-    "named": true,
-    "fields": {
-      "name": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "identifier",
-            "named": true
-          }
-        ]
-      },
-      "type": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "array_type",
-            "named": true
-          },
-          {
-            "type": "borrow_type",
-            "named": true
-          },
-          {
-            "type": "function_type",
-            "named": true
-          },
-          {
-            "type": "generic_type",
-            "named": true
-          },
-          {
-            "type": "identifier",
-            "named": true
-          },
-          {
-            "type": "pointer_type",
-            "named": true
-          },
-          {
-            "type": "primitive_type",
-            "named": true
-          },
-          {
-            "type": "scoped_type",
-            "named": true
-          },
-          {
-            "type": "slice_type",
-            "named": true
-          },
-          {
-            "type": "trait_object_type",
-            "named": true
-          },
-          {
-            "type": "tuple_type",
-            "named": true
-          },
-          {
-            "type": "unit_type",
-            "named": true
-          }
-        ]
-      }
-    },
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "attribute",
-          "named": true
-        },
-        {
-          "type": "integer_literal",
-          "named": true
-        },
-        {
-          "type": "wire_attribute",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "yield_expression",
     "named": true,
     "fields": {},
@@ -6398,10 +6280,6 @@
   {
     "type": "string_content",
     "named": true
-  },
-  {
-    "type": "struct",
-    "named": false
   },
   {
     "type": "supervisor",

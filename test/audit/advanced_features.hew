@@ -6,9 +6,9 @@ type IntPair = (i32, i32);
 
 // Indirect enum (recursive)
 indirect enum Expr {
-    Lit(i32),
-    Add(Expr, Expr),
-    Neg(Expr),
+    Lit(i32);
+    Add(Expr, Expr);
+    Neg(Expr);
 }
 
 // Trait with bounds and associated type
@@ -74,18 +74,20 @@ fn test_unsafe() {
 }
 
 // Wire enum
-wire enum Command {
+#[wire]
+enum Command {
     Start;
     Stop;
     Pause;
 }
 
 // Wire struct with all features
-wire struct Packet {
+#[wire]
+type Packet {
     header: u32 @1;
     payload: bytes @2 optional;
     version: u16 @3 deprecated;
-    reserved(10, 11, 12);
+    reserved @10, @11, @12;
 }
 
 // Extern block

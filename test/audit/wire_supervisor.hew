@@ -9,7 +9,8 @@ actor Counter {
     }
 }
 
-wire type StatusUpdate {
+#[wire]
+type StatusUpdate {
     actor_id: u32 @1;
     count: i32 @2;
     message: String @3;

@@ -79,7 +79,6 @@ export default grammar({
         $.import_declaration,
         $.const_declaration,
         $.struct_declaration,
-        $.wire_struct_declaration,
         $.record_declaration,
         $.enum_declaration,
         $.trait_declaration,
@@ -174,32 +173,15 @@ export default grammar({
 
     struct_body: $ => seq('{', repeat(choice(
       $.struct_field,
+      $.reserved_declaration,
       seq(optional($.visibility), $.function_declaration),
     )), '}'),
 
-    // StructFieldDecl (grammar.ebnf:68): `Attribute* Ident ":" Type (";" | ",")`.
+    // StructFieldDecl / WireStructFieldDecl (grammar.ebnf:68, 76):
+    // `Attribute* Ident ":" Type ("@" IntLit)? WireAttr* (";" | ",")`.
+    // The real parser attaches `@N` tags and trailing wire modifiers to a normal
+    // `type` declaration when a `#[wire]` attribute is present.
     struct_field: $ => seq(
-      repeat($.attribute),
-      field('name', $.identifier),
-      ':',
-      field('type', $._type),
-      optional(choice(',', ';')),
-    ),
-
-    // WireStructDecl (grammar.ebnf:53-54): `struct Name { Ident ":" Type ("@" IntLit)? WireAttr* ("," | ";") }`.
-    // The literal `struct` keyword (as opposed to `type`) marks a wire struct;
-    // fields may carry an `@N` field tag and trailing wire attributes.
-    wire_struct_declaration: $ => seq(
-      'struct',
-      field('name', $.identifier),
-      optional($.type_parameters),
-      optional($.where_clause),
-      '{',
-      repeat(choice($.wire_struct_field, $.reserved_declaration)),
-      '}',
-    ),
-
-    wire_struct_field: $ => prec.left(seq(
       repeat($.attribute),
       field('name', $.identifier),
       ':',
@@ -207,7 +189,7 @@ export default grammar({
       optional(seq('@', $.integer_literal)),
       repeat($.wire_attribute),
       optional(choice(',', ';')),
-    )),
+    ),
 
     // record Name { field: T, field: T }  — comma-separated product type.
     // Spec: grammar.ebnf:47, Hew.g4:155. End-to-end probe OK.
@@ -256,11 +238,11 @@ export default grammar({
     // NOTE: the legacy bare `wire` keyword item form (`wire struct/enum/type
     // Name { … }`) was removed from the compiler in hew commit 60c50daef
     // ("refactor(parser): remove the wire keyword surface in favor of #[wire]").
-    // The current surface is `#[wire] struct Name { … }` / `#[wire] enum Name { … }`,
-    // modelled by `wire_struct_declaration` (the `struct` keyword) and a normal
-    // `enum_declaration` prefixed with the generic `#[wire]` attribute.
+    // The current surface is `#[wire] type Name { … }` / `#[wire] enum Name { … }`:
+    // both struct-shaped and enum-shaped wire types use the generic `#[wire]`
+    // attribute on ordinary `type` / `enum` declarations.
 
-    // `reserved @N, @M;` inside a `#[wire] struct` body reserves wire field
+    // `reserved @N, @M;` inside a `#[wire] type` body reserves wire field
     // numbers (hew-parser wire.rs:222-248 expects `@` markers, comma-separated,
     // terminated by `;`). The old parenthesised `reserved(N, M);` form is not
     // accepted by the compiler.
@@ -268,7 +250,7 @@ export default grammar({
       'reserved', sep1(seq('@', $.integer_literal), ','), ';',
     ),
 
-    // @sync:wire_attributes — per-field modifiers on a `#[wire] struct` field
+    // @sync:wire_attributes — per-field modifiers on a `#[wire] type` field
     // (hew-parser wire.rs:53-117). `optional`/`deprecated` are real keyword
     // tokens; `repeated`/`since`/`json`/`yaml`/`json_name`/`yaml_name` are
     // contextual identifiers recognised only in wire-field modifier position.
