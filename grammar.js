@@ -14,12 +14,12 @@ const PREC = {
   AND: 5,         // && and
   BIT_AND: 6,     // &
   BIT_XOR: 6,     // ^
-  EQ: 7,          // == != =~ !~
+  EQ: 7,          // == != is
   REL: 9,         // < <= > >=
   RANGE: 11,      // .. ..=
   SHIFT: 12,      // << >>
-  ADD: 13,        // + -
-  MUL: 15,        // * / %
+  ADD: 13,        // + - &+ &-
+  MUL: 15,        // * / % &*
   UNARY: 17,      // ! - ~ await
   POSTFIX: 19,    // . () [] ?
   FIELD: 20,      // field access
@@ -726,7 +726,8 @@ export default grammar({
     // @sync:primitive_types
     primitive_type: $ => choice(
       'i8', 'i16', 'i32', 'i64', 'u8', 'u16', 'u32', 'u64', 'isize', 'usize',
-      'f32', 'f64', 'bool', 'char', 'string', 'bytes', 'void', 'duration', 'instant',
+      'f32', 'f64', 'bool', 'char', 'string', 'bytes', 'void', 'duration',
+      'instant',
     ),
 
     generic_type: $ => prec(1, seq($.identifier, $.type_arguments)),
@@ -931,12 +932,15 @@ export default grammar({
       prec.left(PREC.BIT_XOR, seq($.expression, '^', $.expression)),
       prec.left(PREC.AND, seq($.expression, '&&', $.expression)),
       prec.left(PREC.BIT_AND, seq($.expression, '&', $.expression)),
-      prec.left(PREC.EQ, seq($.expression, choice('==', '!=', '=~', '!~', 'is'), $.expression)),
+      prec.left(PREC.EQ, seq($.expression, choice('==', '!=', 'is'), $.expression)),
       prec.left(PREC.REL, seq($.expression, choice('<', '<=', '>', '>='), $.expression)),
       prec.right(PREC.RANGE, seq($.expression, choice('..', '..='), $.expression)),
       prec.left(PREC.SHIFT, seq($.expression, choice('<<', '>>'), $.expression)),
-      prec.left(PREC.ADD, seq($.expression, choice('+', '-'), $.expression)),
-      prec.left(PREC.MUL, seq($.expression, choice('*', '/', '%'), $.expression)),
+      // '+' also concatenates strings; '&+'/'&-' are two's-complement wrapping
+      // forms (grammar.ebnf:233, Hew.g4:658).
+      prec.left(PREC.ADD, seq($.expression, choice('+', '-', '&+', '&-'), $.expression)),
+      // '&*' is two's-complement wrapping multiply (grammar.ebnf:234, Hew.g4:663).
+      prec.left(PREC.MUL, seq($.expression, choice('*', '/', '%', '&*'), $.expression)),
     ),
 
     call_expression: $ => prec(PREC.POSTFIX, seq(
