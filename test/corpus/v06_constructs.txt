@@ -218,3 +218,77 @@ fn f(rect: Rect) -> i64 {
               (identifier))
             (expression
               (identifier))))))))
+
+================================================================================
+Wrapping arithmetic operators (&+ &- &*)
+================================================================================
+
+fn f(a: i64, b: i64, c: i64) -> i64 {
+    a &+ b &- c &* b
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    (parameters
+      (parameter
+        name: (identifier)
+        type: (primitive_type))
+      (parameter
+        name: (identifier)
+        type: (primitive_type))
+      (parameter
+        name: (identifier)
+        type: (primitive_type)))
+    (return_type
+      (primitive_type))
+    body: (block
+      (expression_statement
+        (expression
+          (binary_expression
+            (expression
+              (binary_expression
+                (expression
+                  (identifier))
+                (expression
+                  (identifier))))
+            (expression
+              (binary_expression
+                (expression
+                  (identifier))
+                (expression
+                  (identifier))))))))))
+
+================================================================================
+Removed regex-match operators (=~ / !~) no longer parse
+================================================================================
+
+fn f(a: string, b: string) -> bool {
+    a =~ b
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    (parameters
+      (parameter
+        name: (identifier)
+        type: (primitive_type))
+      (parameter
+        name: (identifier)
+        type: (primitive_type)))
+    (return_type
+      (primitive_type))
+    body: (block
+      (assignment_statement
+        left: (expression
+          (identifier))
+        right: (expression
+          (unary_expression
+            operand: (expression
+              (identifier))))
+        (MISSING ";")))))

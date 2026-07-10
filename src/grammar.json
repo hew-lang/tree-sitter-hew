@@ -5391,14 +5391,6 @@
                   },
                   {
                     "type": "STRING",
-                    "value": "=~"
-                  },
-                  {
-                    "type": "STRING",
-                    "value": "!~"
-                  },
-                  {
-                    "type": "STRING",
                     "value": "is"
                   }
                 ]
@@ -5528,6 +5520,14 @@
                   {
                     "type": "STRING",
                     "value": "-"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "&+"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "&-"
                   }
                 ]
               },
@@ -5562,6 +5562,10 @@
                   {
                     "type": "STRING",
                     "value": "%"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "&*"
                   }
                 ]
               },
