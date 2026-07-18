@@ -1,0 +1,71 @@
+================================================================================
+Clone prefix expression
+================================================================================
+
+fn main() {
+    let b = clone a;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (let_statement
+        pattern: (pattern
+          (identifier))
+        value: (expression
+          (clone_expression
+            (expression
+              (identifier))))))))
+
+================================================================================
+Clone prefix binds the whole postfix chain
+================================================================================
+
+fn main() {
+    let b = clone a.field;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (let_statement
+        pattern: (pattern
+          (identifier))
+        value: (expression
+          (clone_expression
+            (expression
+              (field_expression
+                object: (expression
+                  (identifier))
+                field: (identifier)))))))))
+
+================================================================================
+clone as an ordinary identifier (method call, not a prefix)
+================================================================================
+
+fn main() {
+    let b = a.clone();
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (let_statement
+        pattern: (pattern
+          (identifier))
+        value: (expression
+          (call_expression
+            function: (expression
+              (field_expression
+                object: (expression
+                  (identifier))
+                field: (identifier)))))))))

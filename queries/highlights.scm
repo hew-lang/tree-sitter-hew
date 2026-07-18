@@ -11,6 +11,13 @@
   "reserved" "optional" "deprecated" "default"
 ] @keyword
 
+; `clone <operand>` — the eager copy-on-write cost operation (a contextual
+; prefix operator, not a reserved word). The grammar only builds a
+; `clone_expression` when `clone` is in prefix position, so colouring the
+; anonymous token here never touches `x.clone()`, `fn clone()`, or `clone(args)`,
+; where `clone` stays an ordinary identifier.
+(clone_expression "clone" @keyword.operator)
+
 "receive" @keyword
 
 (this_expression) @keyword
