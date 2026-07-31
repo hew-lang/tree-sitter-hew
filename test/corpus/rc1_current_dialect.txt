@@ -199,3 +199,146 @@ fn main() -> i64 {
                   (pattern)))
               (expression
                 (integer_literal)))))))))
+
+================================================================================
+RC1 grammar parity: rest patterns, spaced bytes, block conditions, and handlers
+================================================================================
+
+type Inner { a: i64; b: i64; }
+type Outer { inner: Inner; tag: i64; }
+enum Event { Data { inner: Inner; tag: i64; }; }
+
+actor Pulse {
+    #[every(1s)]
+    receive fn tick() {}
+
+    #[stream]
+    receive gen fn readings() -> i64 { yield 1; }
+}
+
+fn main() {
+    let data = bytes [0x01, 0x02];
+    if { true } {}
+    let outer = Outer { inner: Inner { a: 1, b: 2 }, tag: 3 };
+    match outer {
+        Outer { inner: Inner { a, .. }, .. } => f"{255u8}",
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (struct_declaration
+    (identifier)
+    (struct_body
+      (struct_field
+        (identifier)
+        (primitive_type))
+      (struct_field
+        (identifier)
+        (primitive_type))))
+  (struct_declaration
+    (identifier)
+    (struct_body
+      (struct_field
+        (identifier)
+        (identifier))
+      (struct_field
+        (identifier)
+        (primitive_type))))
+  (enum_declaration
+    (identifier)
+    (enum_body
+      (variant
+        (identifier)
+        (struct_field
+          (identifier)
+          (identifier))
+        (struct_field
+          (identifier)
+          (primitive_type)))))
+  (actor_declaration
+    (identifier)
+    (attribute
+      (identifier)
+      (duration_literal
+        (integer_literal)))
+    (receive_function
+      (identifier)
+      (block))
+    (attribute
+      (identifier))
+    (receive_gen_function
+      (identifier)
+      (primitive_type)
+      (block
+        (expression_statement
+          (expression
+            (yield_expression
+              (expression
+                (integer_literal))))))))
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (byte_array_expression
+            (expression
+              (integer_literal))
+            (expression
+              (integer_literal)))))
+      (expression_statement
+        (expression
+          (if_expression
+            (block
+              (expression_statement
+                (expression
+                  (boolean_literal))))
+            (block))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (struct_init
+            (identifier)
+            (field_initializer
+              (identifier)
+              (expression
+                (struct_init
+                  (identifier)
+                  (field_initializer
+                    (identifier)
+                    (expression
+                      (integer_literal)))
+                  (field_initializer
+                    (identifier)
+                    (expression
+                      (integer_literal))))))
+            (field_initializer
+              (identifier)
+              (expression
+                (integer_literal))))))
+      (expression_statement
+        (expression
+          (match_expression
+            (expression
+              (identifier))
+            (match_arm
+              (pattern
+                (struct_pattern
+                  (identifier)
+                  (pattern_field
+                    (identifier)
+                    (pattern
+                      (struct_pattern
+                        (identifier)
+                        (pattern_field
+                          (identifier)))))))
+              (expression
+                (interpolated_string
+                  (fstring_start)
+                  (interpolation
+                    (expression
+                      (integer_literal))))))))))))

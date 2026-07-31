@@ -428,8 +428,13 @@ export default grammar({
         $.actor_init,
         $.actor_field,
         $.mailbox_declaration,
-        $.receive_function,
-        $.receive_gen_function,
+        // Receive handlers carry the same declaration attributes as actor
+        // methods (for example, `#[every(1s)] receive fn tick() { ... }`).
+        // Keep the attributes at the actor-member boundary: the real parser
+        // stores them on the handler declaration rather than treating them as
+        // standalone items.
+        seq(repeat($.attribute), $.receive_function),
+        seq(repeat($.attribute), $.receive_gen_function),
         seq(repeat($.attribute), $.function_declaration),
         seq(repeat($.attribute), $.gen_function_declaration),
       )),
@@ -1140,8 +1145,12 @@ export default grammar({
     //   `bytes[`, never bare `bytes`; this keeps `bytes` usable as a value path
     //   (`bytes::new()`, 35× in std) and as the `bytes` primitive type. Requires
     //   `[` adjacent to `bytes`, which is the only literal form (0 spaced uses).
+    // The compiler also accepts ordinary whitespace between the keyword and
+    // opener.  Keep the opener merged so bare `bytes` remains usable as a path
+    // or primitive type; splitting it into `bytes`, `[` would reserve every
+    // `bytes::new()` expression as the start of this literal.
     byte_array_expression: $ => seq(
-      token(seq('bytes', '[')),
+      token(choice(seq('bytes', '['), /bytes[ \t\r\n]+\[/)),
       optional(seq(sep1($.expression, ','), optional(','))),
       ']',
     ),
@@ -1172,7 +1181,7 @@ export default grammar({
     if_expression: $ => prec.right(choice(
       seq(
         'if',
-        field('condition', $.expression),
+        field('condition', choice($.expression, $.block)),
         field('consequence', $.block),
         optional(field('alternative', $.else_clause)),
       ),
@@ -1306,7 +1315,7 @@ export default grammar({
     while_statement: $ => prec(10, seq(
       optional(seq($.label, ':')),
       'while',
-      field('condition', $.expression),
+      field('condition', choice($.expression, $.block)),
       field('body', $.block),
     )),
 
@@ -1411,7 +1420,7 @@ export default grammar({
     // inferred from the scrutinee.
     record_pattern: $ => seq(
       '{',
-      optional(seq(sep1($.pattern_field, ','), optional(','))),
+      optional($._record_pattern_fields),
       '}',
     ),
 
@@ -1423,15 +1432,25 @@ export default grammar({
       field('name', $.identifier),
       optional(choice(
         seq('(', optional(seq(sep1($.pattern, ','), optional(','))), ')'),
-        seq('{', optional(seq(sep1($.pattern_field, ','), optional(','))), '}'),
+        seq('{', optional($._record_pattern_fields), '}'),
       )),
     ),
 
     struct_pattern: $ => seq(
       field('name', choice($.identifier, $.path_expression)),
       '{',
-      optional(seq(sep1($.pattern_field, ','), optional(','))),
+      optional($._record_pattern_fields),
       '}',
+    ),
+
+    // A record-like pattern may end with `..` to ignore all unlisted fields.
+    // Keeping rest terminal-only matches the compiler's `Pattern::{Struct,
+    // RecordShorthand}` parser and admits nested/rest-only forms through the
+    // recursive `pattern_field` production.
+    _record_pattern_fields: $ => choice(
+      '..',
+      seq(sep1($.pattern_field, ','), ',', '..', optional(',')),
+      seq(sep1($.pattern_field, ','), optional(',')),
     ),
 
     pattern_field: $ => seq(
@@ -1463,11 +1482,15 @@ export default grammar({
       $.none_literal,
     ),
 
+    // The active interpolation suite exercises integer-width spellings (for
+    // example `f"{255u8}"`). Treat each as one literal token so highlighting
+    // and ast-grep preserve the expression boundary instead of showing a
+    // literal followed by an identifier.
     integer_literal: $ => token(choice(
-      /0[xX][0-9a-fA-F][0-9a-fA-F_]*/,
-      /0[bB][01][01_]*/,
-      /0[oO][0-7][0-7_]*/,
-      /[0-9][0-9_]*/,
+      /0[xX][0-9a-fA-F][0-9a-fA-F_]*(i8|i16|i32|i64|isize|u8|u16|u32|u64|usize)?/,
+      /0[bB][01][01_]*(i8|i16|i32|i64|isize|u8|u16|u32|u64|usize)?/,
+      /0[oO][0-7][0-7_]*(i8|i16|i32|i64|isize|u8|u16|u32|u64|usize)?/,
+      /[0-9][0-9_]*(i8|i16|i32|i64|isize|u8|u16|u32|u64|usize)?/,
     )),
 
     float_literal: $ => token(

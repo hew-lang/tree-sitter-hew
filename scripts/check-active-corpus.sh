@@ -16,12 +16,34 @@ check_floor() {
     fi
 }
 
+parse_paths() {
+    local path_list="$1"
+    local output
+    if ! output="$("$ts_cli" parse --rebuild --quiet --paths "$path_list" 2>&1)"; then
+        printf '%s\n' "$output" >&2
+        return 1
+    fi
+    if [[ "$output" =~ \(ERROR|\(MISSING ]]; then
+        printf '%s\n' "$output" >&2
+        return 1
+    fi
+}
+
 if [[ "${1:-}" == "--self-test" ]]; then
-    if check_floor 882 883 synthetic >/dev/null 2>&1; then
+    if check_floor 1137 1138 synthetic >/dev/null 2>&1; then
         echo "active-corpus self-test failed: shrink was accepted" >&2
         exit 1
     fi
-    echo "active-corpus self-test: shrink rejected"
+    malformed="$(mktemp "${TMPDIR:-/tmp}/hew-active-corpus-red.XXXXXX")"
+    malformed_paths="$(mktemp "${TMPDIR:-/tmp}/hew-active-corpus-red-paths.XXXXXX")"
+    trap 'rm -f "$malformed" "$malformed_paths"' EXIT
+    printf 'fn main( {\n' > "$malformed"
+    printf '%s\n' "$malformed" > "$malformed_paths"
+    if parse_paths "$malformed_paths"; then
+        echo "active-corpus self-test failed: parser diagnostics were accepted" >&2
+        exit 1
+    fi
+    echo "active-corpus self-test: shrink and parser diagnostics rejected"
     exit 0
 fi
 
@@ -34,26 +56,48 @@ paths="$(mktemp "${TMPDIR:-/tmp}/hew-active-corpus.XXXXXX")"
 trap 'rm -f "$paths"' EXIT
 
 total=0
-while IFS=$'\t' read -r root floor provenance; do
-    [[ -z "$root" || "$root" == \#* ]] && continue
-    source_root="$hew_root/$root"
-    if [[ ! -d "$source_root" ]]; then
-        echo "active-corpus root missing: $root ($provenance)" >&2
-        exit 1
-    fi
-    count="$(find "$source_root" -type f -name '*.hew' -print | wc -l | tr -d ' ')"
-    check_floor "$count" "$floor" "$root"
-    find "$source_root" -type f -name '*.hew' -print >> "$paths"
+while IFS=$'\t' read -r selection source floor provenance; do
+    [[ -z "$selection" || "$selection" == \#* ]] && continue
+    source_path="$hew_root/$source"
+    case "$selection" in
+        tree)
+            if [[ ! -d "$source_path" ]]; then
+                echo "active-corpus root missing: $source ($provenance)" >&2
+                exit 1
+            fi
+            count="$(find "$source_path" -type f -name '*.hew' -print | tee -a "$paths" | wc -l | tr -d ' ')"
+            ;;
+        flat)
+            if [[ ! -d "$source_path" ]]; then
+                echo "active-corpus root missing: $source ($provenance)" >&2
+                exit 1
+            fi
+            count="$(find "$source_path" -maxdepth 1 -type f -name '*.hew' -print | tee -a "$paths" | wc -l | tr -d ' ')"
+            ;;
+        file)
+            if [[ ! -f "$source_path" || "$source_path" != *.hew ]]; then
+                echo "active-corpus file missing or not Hew: $source ($provenance)" >&2
+                exit 1
+            fi
+            printf '%s\n' "$source_path" >> "$paths"
+            count=1
+            ;;
+        *)
+            echo "active-corpus unknown selection '$selection' for $source" >&2
+            exit 1
+            ;;
+    esac
+    check_floor "$count" "$floor" "$source"
     total=$((total + count))
 done < "$manifest"
 
 sort -u -o "$paths" "$paths"
 unique_count="$(wc -l < "$paths" | tr -d ' ')"
-check_floor "$unique_count" 883 total
+check_floor "$unique_count" 1138 total
 if (( unique_count != total )); then
     echo "active-corpus roots overlap: $total rows, $unique_count unique paths" >&2
     exit 1
 fi
 
-"$ts_cli" parse --rebuild --quiet --paths "$paths"
+parse_paths "$paths"
 echo "active-corpus: $unique_count files; 0 ERROR/MISSING"
