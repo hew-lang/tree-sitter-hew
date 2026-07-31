@@ -1948,8 +1948,17 @@
               "type": "CHOICE",
               "members": [
                 {
-                  "type": "STRING",
-                  "value": "var"
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": "var"
+                    },
+                    {
+                      "type": "STRING",
+                      "value": "consume"
+                    }
+                  ]
                 },
                 {
                   "type": "BLANK"
@@ -3602,8 +3611,20 @@
         {
           "type": "REPEAT",
           "content": {
-            "type": "SYMBOL",
-            "name": "extern_function"
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "REPEAT",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "attribute"
+                }
+              },
+              {
+                "type": "SYMBOL",
+                "name": "extern_function"
+              }
+            ]
           }
         },
         {

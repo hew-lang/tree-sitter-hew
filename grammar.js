@@ -382,14 +382,16 @@ export default grammar({
 
     parameters: $ => sep1($.parameter, ','),
 
-    // Param (spec grammar.ebnf:191) is `"var"? Ident ":" Type`. In trait/impl
-    // method position a leading bare receiver is also accepted: `self`,
-    // `var self`, or `consuming self` — all without a type annotation, as
+    // Param (hew-parser `parse_param_decl`) admits `var` or `consume` before
+    // an ordinary named parameter. `consume` is the affine FFI/resource
+    // ownership modifier, e.g. `fn hew_handle_free(consume h: Handle);`.
+    // In trait/impl method position a leading bare receiver is also accepted:
+    // `self`, `var self`, or `consuming self` — all without a type annotation, as
     // `Self`-typed receiver sugar (hew-parser/src/parser.rs:5552 and 5634).
     parameter: $ => choice(
       $.self_parameter,
       seq(
-        optional('var'),
+        optional(choice('var', 'consume')),
         field('name', $.identifier),
         ':',
         field('type', $._type),
@@ -655,7 +657,10 @@ export default grammar({
       'extern',
       $.string_literal,
       '{',
-      repeat($.extern_function),
+      // Current stdlib extern blocks permit function attributes such as
+      // `#[runtime_capability(...)]`; keeping attributes inside the block is
+      // necessary for ast-grep's dialect to parse the generated FFI surface.
+      repeat(seq(repeat($.attribute), $.extern_function)),
       '}',
     ),
 

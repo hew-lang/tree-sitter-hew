@@ -1,0 +1,88 @@
+================================================================================
+Consume parameters in extern, trait, and implementation signatures
+================================================================================
+
+extern "C" {
+    fn hew_string_drop(consume s: string);
+}
+
+trait Sink {
+    fn put(self, consume item: Sticky) -> i64;
+}
+
+impl Sink for Queue {
+    fn put(self, consume item: Sticky) -> i64 {
+        0
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (extern_block
+    (string_literal
+      (string_content))
+    (extern_function
+      name: (identifier)
+      (parameters
+        (parameter
+          name: (identifier)
+          type: (primitive_type)))))
+  (trait_declaration
+    name: (identifier)
+    (trait_function_signature
+      name: (identifier)
+      (parameters
+        (parameter
+          (self_parameter
+            (self)))
+        (parameter
+          name: (identifier)
+          type: (identifier)))
+      (return_type
+        (primitive_type))))
+  (impl_declaration
+    type: (identifier)
+    self_type: (identifier)
+    (function_declaration
+      name: (identifier)
+      (parameters
+        (parameter
+          (self_parameter
+            (self)))
+        (parameter
+          name: (identifier)
+          type: (identifier)))
+      (return_type
+        (primitive_type))
+      body: (block
+        (expression_statement
+          (expression
+            (integer_literal)))))))
+
+================================================================================
+Runtime capability attribute inside an extern block
+================================================================================
+
+extern "C" {
+    #[runtime_capability(blocking_offload)]
+    fn hew_blocking_connect(addr: string) -> i64;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (extern_block
+    (string_literal
+      (string_content))
+    (attribute
+      (identifier)
+      (identifier))
+    (extern_function
+      name: (identifier)
+      (parameters
+        (parameter
+          name: (identifier)
+          type: (primitive_type)))
+      (return_type
+        (primitive_type)))))

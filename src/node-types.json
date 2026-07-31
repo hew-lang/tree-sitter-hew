@@ -1718,6 +1718,10 @@
       "required": true,
       "types": [
         {
+          "type": "attribute",
+          "named": true
+        },
+        {
           "type": "extern_function",
           "named": true
         },
@@ -5906,6 +5910,10 @@
   },
   {
     "type": "const",
+    "named": false
+  },
+  {
+    "type": "consume",
     "named": false
   },
   {
