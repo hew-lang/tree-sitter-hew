@@ -1,0 +1,9 @@
+# root	minimum .hew files	provenance
+std	74	production standard library
+tests/vertical-slice/accept	668	explicit compiler-accepted vertical-slice fixtures
+tests/pkg-import	141	package-import syntax fixtures and their package sources
+
+# Excluded by provenance:
+# tests/vertical-slice/reject: explicit compiler-rejection fixtures.
+# Other tests and examples are not part of the positive harness manifest; add
+# them only when their owning harness provides an explicit accepted inventory.

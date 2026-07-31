@@ -11,10 +11,12 @@ fn main() -> i32 {
 (source_file
   (function_declaration
     name: (identifier)
-    (return_type (primitive_type))
+    (return_type
+      (primitive_type))
     body: (block
       (expression_statement
-        (expression (integer_literal))))))
+        (expression
+          (integer_literal))))))
 
 ================================================================================
 Function with parameters
@@ -30,15 +32,22 @@ fn add(x: i32, y: i32) -> i32 {
   (function_declaration
     name: (identifier)
     (parameters
-      (parameter name: (identifier) type: (primitive_type))
-      (parameter name: (identifier) type: (primitive_type)))
-    (return_type (primitive_type))
+      (parameter
+        name: (identifier)
+        type: (primitive_type))
+      (parameter
+        name: (identifier)
+        type: (primitive_type)))
+    (return_type
+      (primitive_type))
     body: (block
       (expression_statement
         (expression
           (binary_expression
-            (expression (identifier))
-            (expression (identifier))))))))
+            (expression
+              (identifier))
+            (expression
+              (identifier))))))))
 
 ================================================================================
 Let binding
@@ -55,8 +64,10 @@ fn main() {
     name: (identifier)
     body: (block
       (let_statement
-        pattern: (pattern (identifier))
-        value: (expression (integer_literal))))))
+        pattern: (pattern
+          (identifier))
+        value: (expression
+          (integer_literal))))))
 
 ================================================================================
 Var binding
@@ -75,7 +86,8 @@ fn main() {
       (var_statement
         name: (identifier)
         type: (primitive_type)
-        value: (expression (integer_literal))))))
+        value: (expression
+          (integer_literal))))))
 
 ================================================================================
 If expression
@@ -90,19 +102,23 @@ fn main() -> i32 {
 (source_file
   (function_declaration
     name: (identifier)
-    (return_type (primitive_type))
+    (return_type
+      (primitive_type))
     body: (block
       (expression_statement
         (expression
           (if_expression
-            condition: (expression (boolean_literal))
+            condition: (expression
+              (boolean_literal))
             consequence: (block
               (expression_statement
-                (expression (integer_literal))))
+                (expression
+                  (integer_literal))))
             alternative: (else_clause
               (block
                 (expression_statement
-                  (expression (integer_literal)))))))))))
+                  (expression
+                    (integer_literal)))))))))))
 
 ================================================================================
 Match expression
@@ -120,18 +136,23 @@ fn main() -> i32 {
 (source_file
   (function_declaration
     name: (identifier)
-    (return_type (primitive_type))
+    (return_type
+      (primitive_type))
     body: (block
       (expression_statement
         (expression
           (match_expression
-            value: (expression (identifier))
+            value: (expression
+              (identifier))
             (match_arm
-              pattern: (pattern (integer_literal))
-              value: (expression (integer_literal)))
+              pattern: (pattern
+                (integer_literal))
+              value: (expression
+                (integer_literal)))
             (match_arm
               pattern: (pattern)
-              value: (expression (integer_literal)))))))))
+              value: (expression
+                (integer_literal)))))))))
 
 ================================================================================
 Map literal
@@ -148,15 +169,24 @@ fn main() {
     name: (identifier)
     body: (block
       (let_statement
-        pattern: (pattern (identifier))
+        pattern: (pattern
+          (identifier))
         value: (expression
           (map_literal
             (map_entry
-              key: (expression (string_literal (string_content)))
-              value: (expression (string_literal (string_content))))
+              key: (expression
+                (string_literal
+                  (string_content)))
+              value: (expression
+                (string_literal
+                  (string_content))))
             (map_entry
-              key: (expression (string_literal (string_content)))
-              value: (expression (string_literal (string_content))))))))))
+              key: (expression
+                (string_literal
+                  (string_content)))
+              value: (expression
+                (string_literal
+                  (string_content))))))))))
 
 ================================================================================
 Byte string literal
@@ -173,8 +203,10 @@ fn main() {
     name: (identifier)
     body: (block
       (let_statement
-        pattern: (pattern (identifier))
-        value: (expression (byte_string_literal))))))
+        pattern: (pattern
+          (identifier))
+        value: (expression
+          (byte_string_literal))))))
 
 ================================================================================
 While let statement
@@ -196,20 +228,21 @@ fn main() {
         pattern: (pattern
           (constructor_pattern
             name: (identifier)
-            (pattern (identifier))))
+            (pattern
+              (identifier))))
         value: (expression
-          (call_expression
-            function: (expression
-              (field_expression
-                object: (expression (identifier))
-                field: (identifier)))))
+          (method_call_expression
+            object: (identifier)
+            method: (identifier)))
         body: (block
           (expression_statement
             (expression
               (call_expression
-                function: (expression (identifier))
+                function: (expression
+                  (identifier))
                 (call_argument
-                  (expression (identifier)))))))))))
+                  (expression
+                    (identifier)))))))))))
 
 ================================================================================
 Cast expression
@@ -226,10 +259,12 @@ fn main() {
     name: (identifier)
     body: (block
       (let_statement
-        pattern: (pattern (identifier))
+        pattern: (pattern
+          (identifier))
         value: (expression
           (cast_expression
-            value: (expression (identifier))
+            value: (expression
+              (identifier))
             type: (primitive_type)))))))
 
 ================================================================================
@@ -248,11 +283,15 @@ fn main() {
     name: (identifier)
     body: (block
       (let_statement
-        pattern: (pattern (identifier))
-        value: (expression (char_literal)))
+        pattern: (pattern
+          (identifier))
+        value: (expression
+          (char_literal)))
       (let_statement
-        pattern: (pattern (identifier))
-        value: (expression (char_literal))))))
+        pattern: (pattern
+          (identifier))
+        value: (expression
+          (char_literal))))))
 
 ================================================================================
 Char literal in pattern position
@@ -274,13 +313,17 @@ fn main() {
       (expression_statement
         (expression
           (match_expression
-            value: (expression (identifier))
+            value: (expression
+              (identifier))
             (match_arm
-              pattern: (pattern (char_literal))
-              value: (expression (integer_literal)))
+              pattern: (pattern
+                (char_literal))
+              value: (expression
+                (integer_literal)))
             (match_arm
               pattern: (pattern)
-              value: (expression (integer_literal)))))))))
+              value: (expression
+                (integer_literal)))))))))
 
 ================================================================================
 If let expression
@@ -306,23 +349,29 @@ fn main() {
             pattern: (pattern
               (constructor_pattern
                 name: (identifier)
-                (pattern (identifier))))
-            value: (expression (identifier))
+                (pattern
+                  (identifier))))
+            value: (expression
+              (identifier))
             consequence: (block
               (expression_statement
                 (expression
                   (call_expression
-                    function: (expression (identifier))
+                    function: (expression
+                      (identifier))
                     (call_argument
-                      (expression (identifier)))))))
+                      (expression
+                        (identifier)))))))
             alternative: (else_clause
               (block
                 (expression_statement
                   (expression
                     (call_expression
-                      function: (expression (identifier))
+                      function: (expression
+                        (identifier))
                       (call_argument
-                        (expression (integer_literal))))))))))))))
+                        (expression
+                          (integer_literal))))))))))))))
 
 ================================================================================
 If let as expression
@@ -339,18 +388,23 @@ fn main() {
     name: (identifier)
     body: (block
       (let_statement
-        pattern: (pattern (identifier))
+        pattern: (pattern
+          (identifier))
         value: (expression
           (if_expression
             pattern: (pattern
               (constructor_pattern
                 name: (identifier)
-                (pattern (identifier))))
-            value: (expression (identifier))
+                (pattern
+                  (identifier))))
+            value: (expression
+              (identifier))
             consequence: (block
               (expression_statement
-                (expression (identifier))))
+                (expression
+                  (identifier))))
             alternative: (else_clause
               (block
                 (expression_statement
-                  (expression (integer_literal)))))))))))
+                  (expression
+                    (integer_literal)))))))))))

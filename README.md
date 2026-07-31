@@ -49,7 +49,14 @@ npx tree-sitter test
 
 # Parse a file
 npx tree-sitter parse example.hew
+
+# Check the non-shrinking active Hew corpus in a sibling checkout
+make test-active-corpus
 ```
+
+`test/active-corpus.tsv` records the accepted source roots, per-root floors,
+and exclusion provenance. Set `HEW_REPO` when the Hew checkout is not the
+default sibling directory.
 
 ## Highlight Queries
 

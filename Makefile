@@ -112,4 +112,7 @@ clean:
 test:
 	$(TS) test
 
-.PHONY: all install uninstall clean test
+test-active-corpus:
+	bash scripts/check-active-corpus.sh
+
+.PHONY: all install uninstall clean test test-active-corpus

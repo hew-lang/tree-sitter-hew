@@ -22,7 +22,7 @@ const PREC = {
   MUL: 15,        // * / % &*
   UNARY: 17,      // ! - ~ await
   POSTFIX: 19,    // . () [] ?
-  FIELD: 20,      // field access
+  FIELD: 19,      // field access (same left-associative postfix tier)
 };
 
 export default grammar({
@@ -36,6 +36,9 @@ export default grammar({
     [$.if_statement, $.expression],
     [$.match_statement, $.expression],
     [$.expression, $.struct_init],
+    [$.block, $.map_literal],
+    [$.expression, $._member_object, $.path_expression],
+    [$.expression, $._member_object],
     [$.actor_spawn],
     [$.trait_bound],
     // `expr | …` — at the `|` the parser cannot tell (within LR(1)) whether a
@@ -103,6 +106,9 @@ export default grammar({
 
     _attribute_arg: $ => choice(
       seq($.identifier, '=', choice($.identifier, $._literal)),
+      // Unit-bearing limits such as `#[max_heap(64 kb)]` are accepted by the
+      // compiler as one attribute argument.
+      seq($.integer_literal, $.identifier),
       $.identifier,
       $._literal,
     ),
@@ -803,7 +809,7 @@ export default grammar({
       // The `?` is only valid after a simple identifier pattern.
       optional('?'),
       optional(seq(':', field('type', $._type))),
-      optional(seq('=', field('value', $.expression))),
+      optional(seq('=', field('value', choice($.expression, $.block)))),
       // let-else: `let Pat = expr else { <diverging block> };`
       // (hew-parser statements.rs:312-341).
       optional(seq('else', field('else', $.block))),
@@ -850,7 +856,8 @@ export default grammar({
     // Statement position is handled by `expression_statement` (optional `;`).
     return_expression: $ => prec.right(seq('return', optional($.expression))),
 
-    defer_statement: $ => seq('defer', $.expression, ';'),
+    // Deferred cleanup may be an expression statement or a scoped block.
+    defer_statement: $ => seq('defer', choice($.expression, $.block), ';'),
 
     // emit EventName { field: value, … } ;  — Mealy output inside a transition body
     emit_statement: $ => seq(
@@ -891,6 +898,7 @@ export default grammar({
       $.await_restart_expression,
       $.clone_expression,
       $.struct_init,
+      $.generic_struct_init,
       $.array_expression,
       $.array_repeat,
       $.map_literal,
@@ -912,6 +920,7 @@ export default grammar({
       $.scoped_expression,
       $.turbofish_expression,
       $.generic_call_expression,
+      $.bare_generic_call_expression,
       $.byte_array_expression,
       $.unsafe_expression,
     ),
@@ -948,13 +957,40 @@ export default grammar({
       prec.left(PREC.MUL, seq($.expression, choice('*', '/', '%', '&*'), $.expression)),
     ),
 
-    call_expression: $ => prec(PREC.POSTFIX, seq(
+    // Left associativity keeps postfix calls composable after a completed
+    // field/call chain (`value.slice(...).to_lower()`).
+    call_expression: $ => prec.left(PREC.FIELD + 1, seq(
       field('function', $.expression),
       '(',
       optional(sep1($.call_argument, ',')),
       optional(','),
       ')',
     )),
+
+    // A member call must remain a single postfix expression even where `(`
+    // could begin the following match pattern. Its function is structurally a
+    // field expression, so this does not overlap plain calls or grouping.
+    method_call_expression: $ => prec.dynamic(2, prec.left(PREC.FIELD + 2, seq(
+      field('object', $._member_object),
+      '.',
+      field('method', $.identifier),
+      '(',
+      optional(sep1($.call_argument, ',')),
+      optional(','),
+      ')',
+    ))),
+
+    _member_object: $ => choice(
+      $.identifier,
+      $.self,
+      $._literal,
+      $.parenthesized_expression,
+      $.scoped_expression,
+      $.call_expression,
+      $.field_expression,
+      $.index_expression,
+      $.method_call_expression,
+    ),
 
     // Scope resolution `expr :: Ident` (grammar.ebnf:249, PostfixExpr `"::" Ident`).
     // The real parser folds `::` segments into the path name in parse_primary /
@@ -995,20 +1031,25 @@ export default grammar({
       ')',
     ))),
 
+    // A bare generic call is lexically ambiguous with comparison. Current
+    // accepted source spells its type-argument opener adjacent to the callee,
+    // which is also the compiler's canonical formatter output. Requiring that
+    // adjacency keeps `i < n` and `a < b` unambiguously binary expressions.
+    bare_generic_call_expression: $ => prec(PREC.POSTFIX, seq(
+      field('function', $.identifier),
+      token.immediate('<'),
+      sep1($._type, ','),
+      '>',
+      '(',
+      optional(sep1($.call_argument, ',')),
+      optional(','),
+      ')',
+    )),
+
     call_argument: $ => choice(
       seq(field('name', $.identifier), ':', field('value', $.expression)),
       $.expression,
     ),
-
-    method_call_expression: $ => prec(PREC.POSTFIX, seq(
-      field('object', $.expression),
-      '.',
-      field('method', $.identifier),
-      '(',
-      optional(sep1($.expression, ',')),
-      optional(','),
-      ')',
-    )),
 
     field_expression: $ => prec(PREC.FIELD, seq(
       field('object', $.expression),
@@ -1019,7 +1060,12 @@ export default grammar({
     index_expression: $ => prec(PREC.POSTFIX, seq(
       field('object', $.expression),
       '[',
-      field('index', $.expression),
+      // Indexing and range slicing share the postfix brackets. Both range
+      // endpoints are optional (`[..]`, `[..end]`, `[start..]`).
+      choice(
+        field('index', $.expression),
+        seq(optional(field('start', $.expression)), choice('..', '..='), optional(field('end', $.expression))),
+      ),
       ']',
     )),
 
@@ -1036,7 +1082,7 @@ export default grammar({
 
     await_expression: $ => prec(PREC.UNARY, seq(
       'await',
-      $.expression,
+      choice($.expression, $.block),
     )),
 
     // `await_restart <supervised-child accessor>` suspends until a supervised
@@ -1063,10 +1109,23 @@ export default grammar({
       '}',
     )),
 
-    field_initializer: $ => seq(
+    // As with a bare generic call, adjacency of `<` distinguishes a generic
+    // constructor from comparison while preserving `i < n`.
+    generic_struct_init: $ => prec.dynamic(2, seq(
       field('name', $.identifier),
-      ':',
-      field('value', $.expression),
+      token.immediate('<'),
+      sep1($._type, ','),
+      '>',
+      '{',
+      optional(seq(sep1($.field_initializer, ','), optional(','))),
+      '}',
+    )),
+
+    field_initializer: $ => seq(
+      choice(
+        seq(field('name', $.identifier), ':', field('value', $.expression)),
+        seq('..', field('spread', $.expression)),
+      ),
     ),
 
     array_expression: $ => seq(
@@ -1091,8 +1150,7 @@ export default grammar({
 
     map_literal: $ => seq(
       '{',
-      sep1($.map_entry, ','),
-      optional(','),
+      optional(seq(sep1($.map_entry, ','), optional(','))),
       '}',
     ),
 
@@ -1241,7 +1299,7 @@ export default grammar({
       optional('await'),
       field('pattern', $.pattern),
       'in',
-      field('iterable', $.expression),
+      field('iterable', choice($.expression, $.block)),
       field('body', $.block),
     )),
 
@@ -1336,6 +1394,8 @@ export default grammar({
       $.identifier,
       $.path_expression,
       $._literal,
+      seq('-', $.integer_literal),
+      '()',
       $.tuple_pattern,
       $.struct_pattern,
       $.record_pattern,
