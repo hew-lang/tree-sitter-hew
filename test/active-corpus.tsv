@@ -1,0 +1,21 @@
+# selection	path	minimum .hew files	provenance
+# `tree` recurses, `flat` selects only direct child files, and `file` is one
+# compiler-gated fixture.  The selection shape is part of the acceptance
+# contract: it prevents a future reject fixture below a positive directory from
+# silently becoming grammar input.
+tree	std	74	production standard library
+tree	tests/vertical-slice/accept	668	explicit compiler-accepted vertical-slice fixtures
+tree	tests/pkg-import	141	package-import syntax fixtures and their package sources
+tree	tests/hew	157	compiler `hew test tests/hew` acceptance suite
+flat	examples/v05/checked-mir	57	checked-MIR run/verify top-level positive fixtures
+tree	examples/ux	15	Makefile compiler-check UX examples
+tree	examples/progressive	12	Makefile compiler-check progressive examples
+tree	examples/v05/surfaces	13	Makefile compiler-check v0.5 surface examples
+file	examples/net/http_await_service.hew	1	Makefile compiler-check network await-service example
+
+# Explicit exclusions by provenance:
+# tests/vertical-slice/reject: compiler-rejection fixtures.
+# examples/v05/checked-mir/reject: checked-MIR rejection fixtures.
+# tests/corpus/v05-value-model: documented future/not-runnable fixtures.
+# tests/fixtures/vm: handcrafted pending VM emitter/parser fixtures.
+# hew-lsp/tests/fixtures/v05: editor parity fixtures listed as compiler failures.

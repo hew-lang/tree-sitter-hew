@@ -1,0 +1,344 @@
+================================================================================
+Consume parameters in extern, trait, and implementation signatures
+================================================================================
+
+extern "C" {
+    fn hew_string_drop(consume s: string);
+}
+
+trait Sink {
+    fn put(self, consume item: Sticky) -> i64;
+}
+
+impl Sink for Queue {
+    fn put(self, consume item: Sticky) -> i64 {
+        0
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (extern_block
+    (string_literal
+      (string_content))
+    (extern_function
+      name: (identifier)
+      (parameters
+        (parameter
+          name: (identifier)
+          type: (primitive_type)))))
+  (trait_declaration
+    name: (identifier)
+    (trait_function_signature
+      name: (identifier)
+      (parameters
+        (parameter
+          (self_parameter
+            (self)))
+        (parameter
+          name: (identifier)
+          type: (identifier)))
+      (return_type
+        (primitive_type))))
+  (impl_declaration
+    type: (identifier)
+    self_type: (identifier)
+    (function_declaration
+      name: (identifier)
+      (parameters
+        (parameter
+          (self_parameter
+            (self)))
+        (parameter
+          name: (identifier)
+          type: (identifier)))
+      (return_type
+        (primitive_type))
+      body: (block
+        (expression_statement
+          (expression
+            (integer_literal)))))))
+
+================================================================================
+Runtime capability attribute inside an extern block
+================================================================================
+
+extern "C" {
+    #[runtime_capability(blocking_offload)]
+    fn hew_blocking_connect(addr: string) -> i64;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (extern_block
+    (string_literal
+      (string_content))
+    (attribute
+      (identifier)
+      (identifier))
+    (extern_function
+      name: (identifier)
+      (parameters
+        (parameter
+          name: (identifier)
+          type: (primitive_type)))
+      (return_type
+        (primitive_type)))))
+
+================================================================================
+Accepted RC1 blocks, slices, unit attributes, generic calls, and patterns
+================================================================================
+
+#[max_heap(64 kb)]
+actor Counter {}
+
+fn main() -> i64 {
+    let data: bytes = bytes[1, 2, 3];
+    let part: bytes = data[..];
+    let value = {
+        defer { println("done"); };
+        duplex_pair<i64, i64>(4)
+    };
+    let map: HashMap<string, i64> = {};
+    match Ok(()) {
+        Ok(()) => 0,
+        Err(_) => 1,
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (attribute
+    (identifier)
+    (integer_literal)
+    (identifier))
+  (actor_declaration
+    (identifier))
+  (function_declaration
+    (identifier)
+    (return_type
+      (primitive_type))
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (primitive_type)
+        (expression
+          (byte_array_expression
+            (expression
+              (integer_literal))
+            (expression
+              (integer_literal))
+            (expression
+              (integer_literal)))))
+      (let_statement
+        (pattern
+          (identifier))
+        (primitive_type)
+        (expression
+          (index_expression
+            (expression
+              (identifier)))))
+      (let_statement
+        (pattern
+          (identifier))
+        (block
+          (defer_statement
+            (block
+              (expression_statement
+                (expression
+                  (call_expression
+                    (expression
+                      (identifier))
+                    (call_argument
+                      (expression
+                        (string_literal
+                          (string_content)))))))))
+          (expression_statement
+            (expression
+              (bare_generic_call_expression
+                (identifier)
+                (primitive_type)
+                (primitive_type)
+                (call_argument
+                  (expression
+                    (integer_literal))))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (generic_type
+          (identifier)
+          (type_arguments
+            (primitive_type)
+            (primitive_type)))
+        (block))
+      (expression_statement
+        (expression
+          (match_expression
+            (expression
+              (call_expression
+                (expression
+                  (identifier))
+                (call_argument
+                  (expression
+                    (unit_expression)))))
+            (match_arm
+              (pattern
+                (constructor_pattern
+                  (identifier)
+                  (pattern)))
+              (expression
+                (integer_literal)))
+            (match_arm
+              (pattern
+                (constructor_pattern
+                  (identifier)
+                  (pattern)))
+              (expression
+                (integer_literal)))))))))
+
+================================================================================
+RC1 grammar parity: rest patterns, spaced bytes, block conditions, and handlers
+================================================================================
+
+type Inner { a: i64; b: i64; }
+type Outer { inner: Inner; tag: i64; }
+enum Event { Data { inner: Inner; tag: i64; }; }
+
+actor Pulse {
+    #[every(1s)]
+    receive fn tick() {}
+
+    #[stream]
+    receive gen fn readings() -> i64 { yield 1; }
+}
+
+fn main() {
+    let data = bytes [0x01, 0x02];
+    if { true } {}
+    let outer = Outer { inner: Inner { a: 1, b: 2 }, tag: 3 };
+    match outer {
+        Outer { inner: Inner { a, .. }, .. } => f"{255u8}",
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (struct_declaration
+    (identifier)
+    (struct_body
+      (struct_field
+        (identifier)
+        (primitive_type))
+      (struct_field
+        (identifier)
+        (primitive_type))))
+  (struct_declaration
+    (identifier)
+    (struct_body
+      (struct_field
+        (identifier)
+        (identifier))
+      (struct_field
+        (identifier)
+        (primitive_type))))
+  (enum_declaration
+    (identifier)
+    (enum_body
+      (variant
+        (identifier)
+        (struct_field
+          (identifier)
+          (identifier))
+        (struct_field
+          (identifier)
+          (primitive_type)))))
+  (actor_declaration
+    (identifier)
+    (attribute
+      (identifier)
+      (duration_literal
+        (integer_literal)))
+    (receive_function
+      (identifier)
+      (block))
+    (attribute
+      (identifier))
+    (receive_gen_function
+      (identifier)
+      (primitive_type)
+      (block
+        (expression_statement
+          (expression
+            (yield_expression
+              (expression
+                (integer_literal))))))))
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (byte_array_expression
+            (expression
+              (integer_literal))
+            (expression
+              (integer_literal)))))
+      (expression_statement
+        (expression
+          (if_expression
+            (block
+              (expression_statement
+                (expression
+                  (boolean_literal))))
+            (block))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (struct_init
+            (identifier)
+            (field_initializer
+              (identifier)
+              (expression
+                (struct_init
+                  (identifier)
+                  (field_initializer
+                    (identifier)
+                    (expression
+                      (integer_literal)))
+                  (field_initializer
+                    (identifier)
+                    (expression
+                      (integer_literal))))))
+            (field_initializer
+              (identifier)
+              (expression
+                (integer_literal))))))
+      (expression_statement
+        (expression
+          (match_expression
+            (expression
+              (identifier))
+            (match_arm
+              (pattern
+                (struct_pattern
+                  (identifier)
+                  (pattern_field
+                    (identifier)
+                    (pattern
+                      (struct_pattern
+                        (identifier)
+                        (pattern_field
+                          (identifier)))))))
+              (expression
+                (interpolated_string
+                  (fstring_start)
+                  (interpolation
+                    (expression
+                      (integer_literal))))))))))))
