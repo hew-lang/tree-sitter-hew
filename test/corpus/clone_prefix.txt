@@ -63,9 +63,6 @@ fn main() {
         pattern: (pattern
           (identifier))
         value: (expression
-          (call_expression
-            function: (expression
-              (field_expression
-                object: (expression
-                  (identifier))
-                field: (identifier)))))))))
+          (method_call_expression
+            object: (identifier)
+            method: (identifier)))))))
