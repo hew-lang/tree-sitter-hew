@@ -39,6 +39,8 @@ export default grammar({
     [$.block, $.map_literal],
     [$.expression, $._member_object, $.path_expression],
     [$.expression, $._member_object],
+    [$.qualified_expression, $.field_expression],
+    [$.generic_apply_expression, $.bare_generic_call_expression],
     [$.actor_spawn],
     [$.trait_bound],
     // `expr | …` — at the `|` the parser cannot tell (within LR(1)) whether a
@@ -46,16 +48,12 @@ export default grammar({
     // keyword one token later disambiguates, so GLR explores both branches.
     [$.binary_expression, $.timeout_expression],
     [$.binary_expression, $.timeout_expression, $.lambda],
-    // `ident :: …` — ambiguous between a `scoped_expression` (general `::` postfix)
-    // and a `path_expression` used as a path-headed struct-init name; GLR explores
-    // both and struct_init's dynamic precedence commits when a `{ … }` body follows.
     // `where P , (` — after a where-predicate's trailing comma, a `(` may begin
     // either another predicate (a parenthesized/tuple type) or a record's tuple
     // body `( T, … )`; GLR explores both and only the valid continuation lives.
     [$.where_clause],
-    [$.expression, $.path_expression],
-    // `import a::b::c` — at each `::` the parser cannot tell (within LR(1))
-    // whether another path segment or the import spec follows; GLR explores
+    // `import a.b.c` — at each `.` the parser cannot tell (within LR(1))
+    // whether another path segment or the import selection follows; GLR explores
     // both and only the valid continuation survives.
     [$.module_path],
     // `expr as Name.Field` — the `.` may extend a qualified (scoped) type or be
@@ -100,7 +98,7 @@ export default grammar({
 
     // Attribute args accept both a positional list (`#[derive(Debug, Clone)]`)
     // and `key = value` pairs (`#[wire(version = 2, min_version = 1)]`), matching
-    // the real parser's AttributeArg::{Ident, Literal, KeyValue} (hew-parser wire.rs
+    // the real parser's AttributeArg forms (hew-parser wire.rs
     // reads `version`/`min_version` as KeyValue args).
     attribute: $ => seq('#', '[', $.identifier, optional(seq('(', optional(sep1($._attribute_arg, ',')), ')')), ']'),
 
@@ -114,33 +112,33 @@ export default grammar({
     ),
 
     // Import (spec grammar.ebnf:63-68):
-    //   Import     = "import" ( StringLit | ModulePath ( "::" ImportSpec )? ) ";"
-    //   ModulePath = Ident { "::" Ident }
-    //   ImportSpec = "{" ImportName { "," ImportName } "}" | "*"
+    //   Import     = "import" ( StringLit | ModulePath ( "." ImportSelection )? ) ";"
+    //   ModulePath = Ident { "." Ident }
+    //   ImportSelection = "{" ImportName { "," ImportName } "}"
     //   ImportName = Ident ( "as" Ident )?
     // A bare trailing Ident is NOT a valid spec — a single name uses the brace
-    // form `import m::{ Name };`. The path/spec tail is right-recursive so the
-    // token after each `::` (another Ident vs `{`/`*`) disambiguates within
+    // form `import m.{ Name };`. The path/selection tail is right-recursive so the
+    // token after each `.` (another Ident vs `{`) disambiguates within
     // LR(1); a left-recursive sep1 reduces the path too early and breaks
     // N-segment (>=3) paths.
     import_declaration: $ => seq(
       'import',
       choice(
         $.string_literal,
-        seq($.module_path, optional(seq('::', $._import_spec))),
+        seq($.module_path, optional(seq('.', $._import_selection))),
       ),
+      // A complete module path may carry an alias (`import a.b as c`).
+      // Explicit selection members carry their own aliases instead.
+      optional(seq('as', field('alias', $.identifier))),
       ';',
     ),
 
     module_path: $ => seq(
       $.identifier,
-      repeat(seq('::', $.identifier)),
+      repeat(seq('.', $.identifier)),
     ),
 
-    _import_spec: $ => choice(
-      seq('{', sep1($.import_name, ','), optional(','), '}'),
-      '*',
-    ),
+    _import_selection: $ => seq('{', sep1($.import_name, ','), optional(','), '}'),
 
     import_name: $ => seq(
       field('name', $.identifier),
@@ -748,14 +746,12 @@ export default grammar({
 
     generic_type: $ => prec(1, seq($.identifier, $.type_arguments)),
 
-    // Qualified / scoped type name: `mod.Type`, `Self::Msg`, `a::b::C`, with an
-    // optional trailing type-arg list (e.g. `mod.Worker<T>`). The real parser
-    // accepts both `.` and `::` separators in a single chain
-    // (hew-parser/src/parser.rs:5210 parse_type named-type loop). std uses this
-    // heavily for cross-module error types (`net.NetError`, `fs.IoError`).
+    // Qualified type name: `mod.Type` or `a.b.C`, with an optional trailing
+    // type-arg list (e.g. `mod.Worker<T>`). Dotted paths are used throughout
+    // the current surface for cross-module types (`net.NetError`, `fs.IoError`).
     scoped_type: $ => seq(
       $.identifier,
-      repeat1(seq(choice('.', '::'), $.identifier)),
+      repeat1(seq('.', $.identifier)),
       optional($.type_arguments),
     ),
 
@@ -840,7 +836,8 @@ export default grammar({
 
     match_arm: $ => prec(3, seq(
       field('pattern', $.pattern),
-      optional(seq('if', field('guard', $.expression))),
+      // The compiler accepts a block-valued, including diverging, match guard.
+      optional(seq('if', field('guard', choice($.expression, $.block)))),
       '=>',
       field('value', choice(
         seq($.block, optional(',')),
@@ -904,6 +901,9 @@ export default grammar({
       $.clone_expression,
       $.struct_init,
       $.generic_struct_init,
+      $.contextual_variant_expression,
+      $.contextual_variant_record_init,
+      $.generic_apply_expression,
       $.array_expression,
       $.array_repeat,
       $.map_literal,
@@ -922,8 +922,7 @@ export default grammar({
       $.yield_expression,
       $.return_expression,
       $.gen_block_expression,
-      $.scoped_expression,
-      $.turbofish_expression,
+      $.qualified_expression,
       $.generic_call_expression,
       $.bare_generic_call_expression,
       $.byte_array_expression,
@@ -990,50 +989,41 @@ export default grammar({
       $.self,
       $._literal,
       $.parenthesized_expression,
-      $.scoped_expression,
+      $.qualified_expression,
       $.call_expression,
       $.field_expression,
       $.index_expression,
       $.method_call_expression,
+      $.generic_apply_expression,
     ),
 
-    // Scope resolution `expr :: Ident` (grammar.ebnf:249, PostfixExpr `"::" Ident`).
-    // The real parser folds `::` segments into the path name in parse_primary /
-    // parse_dot_postfix; modelled here as a left postfix so `HashMap::new`,
-    // `Self::Msg`, and `lifecycle.Lifecycle::Created` (field access then `::`) all
-    // parse uniformly. Path-headed struct inits keep using `path_expression`.
-    scoped_expression: $ => prec.left(PREC.POSTFIX, seq(
+    // Dotted path expression `path.name`. It composes with calls and the generic
+    // call form below while keeping path-headed struct inits separate.
+    qualified_expression: $ => prec.left(PREC.POSTFIX, seq(
       field('path', $.expression),
-      '::',
+      '.',
       field('name', $.identifier),
     )),
 
-    // Turbofish `expr "::" TypeArgs` (grammar.ebnf:249 PostfixExpr
-    // `"::" TypeArgs "(" Args? ")"`; hew-parser parse_postfix). Modelled as a
-    // left postfix so it composes with `scoped_expression` and `call_expression`
-    // to cover every corpus shape: `pending::<()>()` (turbofish then call),
-    // `Vec::new::<i64>()` (method then turbofish then call), and
-    // `HashMap::<K, V>::new()` (turbofish then `::method` then call). The `<`
-    // can only follow `::` here, so plain comparisons are unaffected.
-    turbofish_expression: $ => prec.left(PREC.POSTFIX, seq(
-      field('path', $.expression),
-      '::',
-      field('type_arguments', $.type_arguments),
-    )),
-
-    // Generic call `Path::method<Type, …>(args)` (grammar.ebnf:249 / hew-parser
-    // parse_postfix ~6524). Every generic call in the corpus is path-headed
-    // (`HashMap::new<i64>()`, `Vec::new<…>()`), so the callee is restricted to a
-    // `scoped_expression`; this keeps bare-identifier `a < b` unambiguously a
-    // comparison. Dynamic precedence commits the `<` to type-args when a closing
-    // `>` … `(` follows.
+    // Generic call `path.method<Type, …>(args)`. Restrict the callee to a dotted
+    // path so `a < b` stays unambiguously a comparison. Dynamic precedence commits
+    // the `<` to type arguments when a closing `>` and call opener follow.
     generic_call_expression: $ => prec.dynamic(1, prec(PREC.POSTFIX, seq(
-      field('function', $.scoped_expression),
+      field('function', $.qualified_expression),
       $.type_arguments,
       '(',
       optional(sep1($.call_argument, ',')),
       optional(','),
       ')',
+    ))),
+
+    // The compiler accepts a type application before later postfixes, so
+    // `Vec<i64>.new()` is distinct from a generic call such as `f<i64>()`.
+    generic_apply_expression: $ => prec.dynamic(-1, prec(PREC.POSTFIX, seq(
+      field('target', choice($.identifier, $.qualified_expression)),
+      token.immediate('<'),
+      sep1($._type, ','),
+      '>',
     ))),
 
     // A bare generic call is lexically ambiguous with comparison. Current
@@ -1117,10 +1107,25 @@ export default grammar({
     // As with a bare generic call, adjacency of `<` distinguishes a generic
     // constructor from comparison while preserving `i < n`.
     generic_struct_init: $ => prec.dynamic(2, seq(
-      field('name', $.identifier),
+      field('name', choice($.identifier, $.path_expression)),
       token.immediate('<'),
       sep1($._type, ','),
       '>',
+      '{',
+      optional(seq(sep1($.field_initializer, ','), optional(','))),
+      '}',
+    )),
+
+    // Expected-type contextual enum constructors are valid expressions in all
+    // three payload forms: `.None`, `.Some(value)`, and `.Ready { value }`.
+    contextual_variant_expression: $ => prec(PREC.POSTFIX, seq(
+      '.',
+      field('name', $.identifier),
+    )),
+
+    contextual_variant_record_init: $ => prec.dynamic(2, seq(
+      '.',
+      field('name', $.identifier),
       '{',
       optional(seq(sep1($.field_initializer, ','), optional(','))),
       '}',
@@ -1143,12 +1148,12 @@ export default grammar({
     //   Primary `"bytes" "[" ExprList? "]"`). The opener is a single merged
     //   `bytes[` token (not a bare `bytes` keyword) so the lexeme reserved is
     //   `bytes[`, never bare `bytes`; this keeps `bytes` usable as a value path
-    //   (`bytes::new()`, 35× in std) and as the `bytes` primitive type. Requires
+    //   (`bytes.new()`, 35× in std) and as the `bytes` primitive type. Requires
     //   `[` adjacent to `bytes`, which is the only literal form (0 spaced uses).
     // The compiler also accepts ordinary whitespace between the keyword and
     // opener.  Keep the opener merged so bare `bytes` remains usable as a path
     // or primitive type; splitting it into `bytes`, `[` would reserve every
-    // `bytes::new()` expression as the start of this literal.
+    // `bytes.new()` expression as the start of this literal.
     byte_array_expression: $ => seq(
       token(choice(seq('bytes', '['), /bytes[ \t\r\n]+\[/)),
       optional(seq(sep1($.expression, ','), optional(','))),
@@ -1384,14 +1389,11 @@ export default grammar({
 
     unsafe_expression: $ => seq('unsafe', $.block),
 
-    // Path expression — N-segment `A::B::C`, and mixed `mod.Type::Variant`
-    // (hew-parser/src/parser.rs parse_primary + parse_dot_postfix accumulate both
-    // `::segment` and `.segment` into the path head). Used as a value path, in
-    // patterns, and as a struct-init head (`Enum::Variant { .. }`,
-    // `mod.Type::Variant { .. }`).
+    // Path expression — N-segment `a.b.C`. Used as a value path, in patterns,
+    // and as a struct-init head (`Enum.Variant { .. }`, `mod.Type.Variant { .. }`).
     path_expression: $ => prec.left(seq(
       $.identifier,
-      repeat1(seq(choice('::', '.'), $.identifier)),
+      repeat1(seq('.', $.identifier)),
     )),
 
 

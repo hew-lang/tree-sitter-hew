@@ -135,7 +135,7 @@ fn m() {
 G2 Import — multi-segment module path
 ================================================================================
 
-import std::collections::HashMap;
+import std.collections.HashMap;
 
 --------------------------------------------------------------------------------
 
@@ -150,7 +150,7 @@ import std::collections::HashMap;
 G2 Import — grouped names with alias
 ================================================================================
 
-import std::collections::{HashMap, HashSet as Set};
+import std.collections.{HashMap, HashSet as Set};
 
 --------------------------------------------------------------------------------
 
@@ -166,10 +166,10 @@ import std::collections::{HashMap, HashSet as Set};
       (identifier))))
 
 ================================================================================
-G2 Import — glob
+G2 Import — explicit selection
 ================================================================================
 
-import std::prelude::*;
+import std.prelude.{Option, Result};
 
 --------------------------------------------------------------------------------
 
@@ -177,6 +177,10 @@ import std::prelude::*;
   (import_declaration
     (module_path
       (identifier)
+      (identifier))
+    (import_name
+      (identifier))
+    (import_name
       (identifier))))
 
 ================================================================================
@@ -459,13 +463,13 @@ actor Counter {
         (integer_literal)))))
 
 ================================================================================
-A3 Turbofish — type-segment and method-segment forms
+A3 Dotted generic calls
 ================================================================================
 
 fn m() {
-    let a = HashMap::<Key, i64>::new();
-    let b = Vec::new::<i64>();
-    let c = pending::<()>();
+    let a = HashMap.new<Key, i64>();
+    let b = Vec.new<i64>();
+    let c = pending<i64>();
 }
 
 --------------------------------------------------------------------------------
@@ -480,40 +484,32 @@ fn m() {
         (expression
           (call_expression
             (expression
-              (scoped_expression
-                (expression
-                  (turbofish_expression
-                    (expression
-                      (identifier))
-                    (type_arguments
-                      (identifier)
-                      (primitive_type))))
-                (identifier))))))
-      (let_statement
-        (pattern
-          (identifier))
-        (expression
-          (call_expression
-            (expression
-              (turbofish_expression
-                (expression
-                  (scoped_expression
-                    (expression
-                      (identifier))
-                    (identifier)))
-                (type_arguments
-                  (primitive_type)))))))
-      (let_statement
-        (pattern
-          (identifier))
-        (expression
-          (call_expression
-            (expression
-              (turbofish_expression
-                (expression
+              (generic_apply_expression
+                (qualified_expression
+                  (expression
+                    (identifier))
                   (identifier))
-                (type_arguments
-                  (unit_type))))))))))
+                (identifier)
+                (primitive_type))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (call_expression
+            (expression
+              (generic_apply_expression
+                (qualified_expression
+                  (expression
+                    (identifier))
+                  (identifier))
+                (primitive_type))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (bare_generic_call_expression
+            (identifier)
+            (primitive_type)))))))
 
 ================================================================================
 A4 Record — tuple (positional) body

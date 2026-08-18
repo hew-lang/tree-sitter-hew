@@ -67,6 +67,11 @@
 (line_comment) @comment
 (block_comment) @comment
 
+; Retired path separators, glob imports, and turbofish forms recover as parser
+; errors. The compiler owns their diagnostic codes; this grammar highlights the
+; error nodes it produces.
+(ERROR) @error
+
 ; ---- Types ----
 (primitive_type) @type.builtin
 
@@ -194,6 +199,9 @@
   (identifier) @type
   (identifier) @property)
 
+(qualified_expression
+  name: (identifier) @property)
+
 ; ---- Patterns ----
 (constructor_pattern
   name: (identifier) @constructor)
@@ -212,7 +220,7 @@
 ; ---- Punctuation ----
 ["(" ")" "[" "]" "{" "}"] @punctuation.bracket
 
-["," ";" ":" "::" "." "@"] @punctuation.delimiter
+["," ";" ":" "." "@"] @punctuation.delimiter
 
 ; ---- Labels ----
 (label) @label

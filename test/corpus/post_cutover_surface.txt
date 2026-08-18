@@ -1,0 +1,161 @@
+================================================================================
+Current dotted paths, selections, generic calls, and contextual variants
+================================================================================
+
+import net.io.{Client as NetClient, Server};
+
+fn current(value: Outcome) -> net.Result<string> {
+    let client = net.Client.new<string>();
+    match value {
+        .Ready => net.Result.Ok,
+        .Closed => net.Result.Err,
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (import_declaration
+    (module_path
+      (identifier)
+      (identifier))
+    (import_name
+      (identifier)
+      (identifier))
+    (import_name
+      (identifier)))
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (identifier)))
+    (return_type
+      (scoped_type
+        (identifier)
+        (identifier)
+        (type_arguments
+          (primitive_type))))
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (call_expression
+            (expression
+              (generic_apply_expression
+                (qualified_expression
+                  (expression
+                    (field_expression
+                      (expression
+                        (identifier))
+                      (identifier)))
+                  (identifier))
+                (primitive_type))))))
+      (expression_statement
+        (expression
+          (match_expression
+            (expression
+              (identifier))
+            (match_arm
+              (pattern
+                (variant_pattern
+                  (identifier)))
+              (expression
+                (field_expression
+                  (expression
+                    (field_expression
+                      (expression
+                        (identifier))
+                      (identifier)))
+                  (identifier))))
+            (match_arm
+              (pattern
+                (variant_pattern
+                  (identifier)))
+              (expression
+                (field_expression
+                  (expression
+                    (field_expression
+                      (expression
+                        (identifier))
+                      (identifier)))
+                  (identifier))))))))))
+
+================================================================================
+Legacy path separators are rejected
+================================================================================
+
+import net::io;
+
+fn legacy() {
+    net::Result::Ok;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (import_declaration
+    (module_path
+      (identifier))
+    (ERROR
+      (identifier)))
+  (function_declaration
+    (identifier)
+    (block
+      (expression_statement
+        (expression
+          (identifier)))
+      (ERROR)
+      (expression_statement
+        (expression
+          (identifier)))
+      (ERROR)
+      (expression_statement
+        (expression
+          (identifier))))))
+
+================================================================================
+Glob imports are rejected
+================================================================================
+
+import net.io.*;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (import_declaration
+    (module_path
+      (identifier)
+      (identifier))
+    (ERROR)))
+
+================================================================================
+Turbofish forms are rejected
+================================================================================
+
+fn legacy() {
+    net::Client::<string>::new();
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (expression_statement
+        (expression
+          (identifier)))
+      (ERROR)
+      (expression_statement
+        (expression
+          (binary_expression
+            (expression
+              (identifier))
+            (ERROR)
+            (ERROR)
+            (expression
+              (call_expression
+                (expression
+                  (identifier))))))))))

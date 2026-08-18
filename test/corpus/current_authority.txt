@@ -1,0 +1,270 @@
+================================================================================
+Current authority: contextual variants in expressions and record fields
+================================================================================
+
+enum Mode {
+    SplitWords;
+    Lit(i64);
+    Compute { value: i64; };
+}
+
+type Job { mode: Mode; }
+
+fn modes() -> Mode {
+    let job = Job { mode: .Compute { value: 7 } };
+    if true {
+        .Lit(job.mode.value)
+    } else {
+        .SplitWords
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (enum_declaration
+    (identifier)
+    (enum_body
+      (variant
+        (identifier))
+      (variant
+        (identifier)
+        (primitive_type))
+      (variant
+        (identifier)
+        (struct_field
+          (identifier)
+          (primitive_type)))))
+  (struct_declaration
+    (identifier)
+    (struct_body
+      (struct_field
+        (identifier)
+        (identifier))))
+  (function_declaration
+    (identifier)
+    (return_type
+      (identifier))
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (struct_init
+            (identifier)
+            (field_initializer
+              (identifier)
+              (expression
+                (contextual_variant_record_init
+                  (identifier)
+                  (field_initializer
+                    (identifier)
+                    (expression
+                      (integer_literal)))))))))
+      (expression_statement
+        (expression
+          (if_expression
+            (expression
+              (boolean_literal))
+            (block
+              (expression_statement
+                (expression
+                  (call_expression
+                    (expression
+                      (contextual_variant_expression
+                        (identifier)))
+                    (call_argument
+                      (expression
+                        (field_expression
+                          (expression
+                            (field_expression
+                              (expression
+                                (identifier))
+                              (identifier)))
+                          (identifier))))))))
+            (else_clause
+              (block
+                (expression_statement
+                  (expression
+                    (contextual_variant_expression
+                      (identifier))))))))))))
+
+================================================================================
+Current authority: whole-module aliases
+================================================================================
+
+import left.render as left_render;
+import std.math as math;
+
+fn module_aliases() {
+    left_render.draw(math.abs(1));
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (import_declaration
+    (module_path
+      (identifier)
+      (identifier))
+    (identifier))
+  (import_declaration
+    (module_path
+      (identifier)
+      (identifier))
+    (identifier))
+  (function_declaration
+    (identifier)
+    (block
+      (expression_statement
+        (expression
+          (method_call_expression
+            (identifier)
+            (identifier)
+            (call_argument
+              (expression
+                (method_call_expression
+                  (identifier)
+                  (identifier)
+                  (call_argument
+                    (expression
+                      (integer_literal))))))))))))
+
+================================================================================
+Current authority: explicit generic constructors
+================================================================================
+
+fn constructors() {
+    let values = Vec<i64>.new();
+    let set = HashSet<string>.new();
+    let map = HashMap<string, i64>.new();
+    values.push(1);
+    set.insert("one");
+    map.insert("one", 1);
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (method_call_expression
+            (generic_apply_expression
+              (identifier)
+              (primitive_type))
+            (identifier))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (method_call_expression
+            (generic_apply_expression
+              (identifier)
+              (primitive_type))
+            (identifier))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (method_call_expression
+            (generic_apply_expression
+              (identifier)
+              (primitive_type)
+              (primitive_type))
+            (identifier))))
+      (expression_statement
+        (expression
+          (method_call_expression
+            (identifier)
+            (identifier)
+            (call_argument
+              (expression
+                (integer_literal))))))
+      (expression_statement
+        (expression
+          (method_call_expression
+            (identifier)
+            (identifier)
+            (call_argument
+              (expression
+                (string_literal
+                  (string_content)))))))
+      (expression_statement
+        (expression
+          (method_call_expression
+            (identifier)
+            (identifier)
+            (call_argument
+              (expression
+                (string_literal
+                  (string_content))))
+            (call_argument
+              (expression
+                (integer_literal)))))))))
+
+================================================================================
+Current authority: block-valued Result guard
+================================================================================
+
+fn guard(value: Result<i64, string>) -> i64 {
+    match value {
+        Ok(number) if { return number; } => 0,
+        Err(_) => 1,
+        Ok(_) => 2,
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (generic_type
+          (identifier)
+          (type_arguments
+            (primitive_type)
+            (primitive_type)))))
+    (return_type
+      (primitive_type))
+    (block
+      (expression_statement
+        (expression
+          (match_expression
+            (expression
+              (identifier))
+            (match_arm
+              (pattern
+                (constructor_pattern
+                  (identifier)
+                  (pattern
+                    (identifier))))
+              (block
+                (expression_statement
+                  (expression
+                    (return_expression
+                      (expression
+                        (identifier))))))
+              (expression
+                (integer_literal)))
+            (match_arm
+              (pattern
+                (constructor_pattern
+                  (identifier)
+                  (pattern)))
+              (expression
+                (integer_literal)))
+            (match_arm
+              (pattern
+                (constructor_pattern
+                  (identifier)
+                  (pattern)))
+              (expression
+                (integer_literal)))))))))

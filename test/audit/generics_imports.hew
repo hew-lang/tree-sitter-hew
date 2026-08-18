@@ -1,7 +1,7 @@
-//! Tests for the std::option helper functions.
+//! Tests for the std.option helper functions.
 
-import std::option;
-import std::testing;
+import std.option;
+import std.testing;
 
 #[test]
 fn test_is_some_int_with_value() {
