@@ -41,16 +41,17 @@ fn current(value: Outcome) -> net.Result<string> {
         (pattern
           (identifier))
         (expression
-          (generic_call_expression
-            (qualified_expression
-              (expression
-                (field_expression
+          (call_expression
+            (expression
+              (generic_apply_expression
+                (qualified_expression
                   (expression
-                    (identifier))
-                  (identifier)))
-              (identifier))
-            (type_arguments
-              (primitive_type)))))
+                    (field_expression
+                      (expression
+                        (identifier))
+                      (identifier)))
+                  (identifier))
+                (primitive_type))))))
       (expression_statement
         (expression
           (match_expression

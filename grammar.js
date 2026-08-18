@@ -40,6 +40,7 @@ export default grammar({
     [$.expression, $._member_object, $.path_expression],
     [$.expression, $._member_object],
     [$.qualified_expression, $.field_expression],
+    [$.generic_apply_expression, $.bare_generic_call_expression],
     [$.actor_spawn],
     [$.trait_bound],
     // `expr | …` — at the `|` the parser cannot tell (within LR(1)) whether a
@@ -126,6 +127,9 @@ export default grammar({
         $.string_literal,
         seq($.module_path, optional(seq('.', $._import_selection))),
       ),
+      // A complete module path may carry an alias (`import a.b as c`).
+      // Explicit selection members carry their own aliases instead.
+      optional(seq('as', field('alias', $.identifier))),
       ';',
     ),
 
@@ -832,7 +836,8 @@ export default grammar({
 
     match_arm: $ => prec(3, seq(
       field('pattern', $.pattern),
-      optional(seq('if', field('guard', $.expression))),
+      // The compiler accepts a block-valued, including diverging, match guard.
+      optional(seq('if', field('guard', choice($.expression, $.block)))),
       '=>',
       field('value', choice(
         seq($.block, optional(',')),
@@ -896,6 +901,9 @@ export default grammar({
       $.clone_expression,
       $.struct_init,
       $.generic_struct_init,
+      $.contextual_variant_expression,
+      $.contextual_variant_record_init,
+      $.generic_apply_expression,
       $.array_expression,
       $.array_repeat,
       $.map_literal,
@@ -986,6 +994,7 @@ export default grammar({
       $.field_expression,
       $.index_expression,
       $.method_call_expression,
+      $.generic_apply_expression,
     ),
 
     // Dotted path expression `path.name`. It composes with calls and the generic
@@ -1006,6 +1015,15 @@ export default grammar({
       optional(sep1($.call_argument, ',')),
       optional(','),
       ')',
+    ))),
+
+    // The compiler accepts a type application before later postfixes, so
+    // `Vec<i64>.new()` is distinct from a generic call such as `f<i64>()`.
+    generic_apply_expression: $ => prec.dynamic(-1, prec(PREC.POSTFIX, seq(
+      field('target', choice($.identifier, $.qualified_expression)),
+      token.immediate('<'),
+      sep1($._type, ','),
+      '>',
     ))),
 
     // A bare generic call is lexically ambiguous with comparison. Current
@@ -1093,6 +1111,21 @@ export default grammar({
       token.immediate('<'),
       sep1($._type, ','),
       '>',
+      '{',
+      optional(seq(sep1($.field_initializer, ','), optional(','))),
+      '}',
+    )),
+
+    // Expected-type contextual enum constructors are valid expressions in all
+    // three payload forms: `.None`, `.Some(value)`, and `.Ready { value }`.
+    contextual_variant_expression: $ => prec(PREC.POSTFIX, seq(
+      '.',
+      field('name', $.identifier),
+    )),
+
+    contextual_variant_record_init: $ => prec.dynamic(2, seq(
+      '.',
+      field('name', $.identifier),
       '{',
       optional(seq(sep1($.field_initializer, ','), optional(','))),
       '}',

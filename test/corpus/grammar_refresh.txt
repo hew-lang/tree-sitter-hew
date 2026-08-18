@@ -482,25 +482,27 @@ fn m() {
         (pattern
           (identifier))
         (expression
-          (generic_call_expression
-            (qualified_expression
-              (expression
-                (identifier))
-              (identifier))
-            (type_arguments
-              (identifier)
-              (primitive_type)))))
+          (call_expression
+            (expression
+              (generic_apply_expression
+                (qualified_expression
+                  (expression
+                    (identifier))
+                  (identifier))
+                (identifier)
+                (primitive_type))))))
       (let_statement
         (pattern
           (identifier))
         (expression
-          (generic_call_expression
-            (qualified_expression
-              (expression
-                (identifier))
-              (identifier))
-            (type_arguments
-              (primitive_type)))))
+          (call_expression
+            (expression
+              (generic_apply_expression
+                (qualified_expression
+                  (expression
+                    (identifier))
+                  (identifier))
+                (primitive_type))))))
       (let_statement
         (pattern
           (identifier))
