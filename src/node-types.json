@@ -1706,6 +1706,10 @@
           "named": true
         },
         {
+          "type": "qualified_expression",
+          "named": true
+        },
+        {
           "type": "raw_string_literal",
           "named": true
         },
@@ -1719,10 +1723,6 @@
         },
         {
           "type": "scope_expression",
-          "named": true
-        },
-        {
-          "type": "scoped_expression",
           "named": true
         },
         {
@@ -1759,10 +1759,6 @@
         },
         {
           "type": "tuple_expression",
-          "named": true
-        },
-        {
-          "type": "turbofish_expression",
           "named": true
         },
         {
@@ -2238,7 +2234,7 @@
         "required": true,
         "types": [
           {
-            "type": "scoped_expression",
+            "type": "qualified_expression",
             "named": true
           }
         ]
@@ -2269,6 +2265,10 @@
         "types": [
           {
             "type": "identifier",
+            "named": true
+          },
+          {
+            "type": "path_expression",
             "named": true
           }
         ]
@@ -3466,15 +3466,15 @@
             "named": true
           },
           {
+            "type": "qualified_expression",
+            "named": true
+          },
+          {
             "type": "raw_string_literal",
             "named": true
           },
           {
             "type": "regex_literal",
-            "named": true
-          },
-          {
-            "type": "scoped_expression",
             "named": true
           },
           {
@@ -3860,6 +3860,32 @@
     "type": "primitive_type",
     "named": true,
     "fields": {}
+  },
+  {
+    "type": "qualified_expression",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "path": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      }
+    }
   },
   {
     "type": "receive_function",
@@ -4378,32 +4404,6 @@
         "types": [
           {
             "type": "scope_block",
-            "named": true
-          }
-        ]
-      }
-    }
-  },
-  {
-    "type": "scoped_expression",
-    "named": true,
-    "fields": {
-      "name": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "identifier",
-            "named": true
-          }
-        ]
-      },
-      "path": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "expression",
             "named": true
           }
         ]
@@ -5269,32 +5269,6 @@
     }
   },
   {
-    "type": "turbofish_expression",
-    "named": true,
-    "fields": {
-      "path": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "expression",
-            "named": true
-          }
-        ]
-      },
-      "type_arguments": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "type_arguments",
-            "named": true
-          }
-        ]
-      }
-    }
-  },
-  {
     "type": "type_alias",
     "named": true,
     "fields": {
@@ -6035,10 +6009,6 @@
   },
   {
     "type": ":",
-    "named": false
-  },
-  {
-    "type": "::",
     "named": false
   },
   {
