@@ -382,10 +382,10 @@ supervisor S4 { strategy: simple_one_for_one; }
       strategy: (supervisor_strategy_value))))
 
 ================================================================================
-Record declaration (comma-separated fields)
+Struct declaration (comma-separated fields)
 ================================================================================
 
-record Point {
+type Point {
     x: i64,
     y: i64,
 }
@@ -393,14 +393,15 @@ record Point {
 --------------------------------------------------------------------------------
 
 (source_file
-  (record_declaration
+  (struct_declaration
     name: (identifier)
-    (record_field
-      name: (identifier)
-      type: (primitive_type))
-    (record_field
-      name: (identifier)
-      type: (primitive_type))))
+    body: (struct_body
+      (struct_field
+        name: (identifier)
+        type: (primitive_type))
+      (struct_field
+        name: (identifier)
+        type: (primitive_type)))))
 
 ================================================================================
 Raw pointer type in extern block (FFI-scoped)

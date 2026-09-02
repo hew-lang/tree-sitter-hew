@@ -3,7 +3,7 @@
 [
   (block)
   (struct_declaration)
-  (record_declaration)
+  (tuple_type_declaration)
   (enum_declaration)
   (trait_declaration)
   (impl_declaration)

@@ -27,13 +27,18 @@
 "as" @keyword
 
 [
-  "enum" "trait" "impl" "actor" "supervisor" "machine" "record"
+  "enum" "trait" "impl" "actor" "supervisor" "machine"
 ] @keyword.type
 
 [
   "state" "on" "when"
   "events" "emits" "reenter" "entry" "exit" "emit" "initial"
+  "mailbox" "overflow" "strategy" "intensity" "within"
 ] @keyword
+
+[
+  "block" "drop_new" "drop_old" "fail" "coalesce" "fallback"
+] @constant.builtin
 
 [
   "permanent" "transient" "temporary"
@@ -80,9 +85,6 @@
 
 ; ---- Functions ----
 (function_declaration
-  name: (identifier) @function)
-
-(async_function_declaration
   name: (identifier) @function)
 
 (gen_function_declaration
@@ -175,11 +177,8 @@
 (type_alias
   name: (identifier) @type)
 
-(record_declaration
+(tuple_type_declaration
   name: (identifier) @type)
-
-(record_field
-  name: (identifier) @property)
 
 ; Supervisor strategy enum values (real lexer keywords; hew-lexer lex:189-195)
 (supervisor_strategy_value) @constant.builtin

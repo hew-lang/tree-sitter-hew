@@ -80,14 +80,13 @@ export default grammar({
         $.import_declaration,
         $.const_declaration,
         $.struct_declaration,
-        $.record_declaration,
+        $.tuple_type_declaration,
         $.enum_declaration,
         $.trait_declaration,
         $.impl_declaration,
         $.function_declaration,
         $.gen_function_declaration,
         $.async_gen_function_declaration,
-        $.async_function_declaration,
         $.extern_block,
         $.actor_declaration,
         $.supervisor_declaration,
@@ -195,25 +194,19 @@ export default grammar({
       optional(choice(',', ';')),
     ),
 
-    // record Name { field: T, field: T }  — comma-separated product type.
-    // Spec: grammar.ebnf:47, Hew.g4:155. End-to-end probe OK.
-    // RecordDecl (grammar.ebnf:47-51): named body `{ field: T, … }` or tuple
-    //   body `( T, … );`. The tuple form is a positional record.
-    record_declaration: $ => seq(
-      'record',
+    // `type Name(T, T, ...);` — positional/tuple record. The bare `record`
+    // keyword form (both named- and tuple-body) was removed from the
+    // compiler ("record has been removed; use `type Name { ... }` instead");
+    // the tuple-positional shape survives under the `type` keyword, dispatched
+    // by the parser's `is_tuple_type_lookahead` (hew-parser items.rs:441-457,
+    // parse_record_decl at items.rs:941-983). The named-body form is just
+    // `struct_declaration` (`type Name { field: T, ... }`).
+    tuple_type_declaration: $ => seq(
+      'type',
       field('name', $.identifier),
       optional($.type_parameters),
       optional($.where_clause),
-      choice(
-        seq('{', sep1($.record_field, ','), optional(','), '}'),
-        seq('(', sep1($._type, ','), optional(','), ')', ';'),
-      ),
-    ),
-
-    record_field: $ => seq(
-      field('name', $.identifier),
-      ':',
-      field('type', $._type),
+      '(', sep1($._type, ','), optional(','), ')', ';',
     ),
 
     enum_declaration: $ => seq(
@@ -356,19 +349,9 @@ export default grammar({
       field('body', $.block),
     ),
 
-    async_function_declaration: $ => seq(
-      'async',
-      'fn',
-      field('name', $.identifier),
-      optional($.type_parameters),
-      '(',
-      optional($.parameters),
-      ')',
-      optional($.return_type),
-      optional($.where_clause),
-      field('body', $.block),
-    ),
-
+    // NOTE: bare `async fn` (without `gen`) was removed from the compiler —
+    // `hew check` on `async fn f() -> i64 { ... }` fails with "expected 'gen
+    // fn' after 'async'". Only the generator form below is real surface.
     async_gen_function_declaration: $ => seq(
       'async',
       'gen',
@@ -1541,9 +1524,14 @@ export default grammar({
     // after an interpolation closes (spec grammar.ebnf:385-386, InterpPart).
     interpolated_string_content: $ => token.immediate(prec(1, /[^"\\{]+/)),
 
+    // `{expr:?}` requests explicit structural/debug rendering (StringPart::
+    // StructuralExpr, hew-parser parser/mod.rs:547-552 — a literal `:?`
+    // suffix stripped from the trimmed sub-expression text, not a general
+    // format-spec mini-language).
     interpolation: $ => seq(
       token.immediate('{'),
       $.expression,
+      optional(seq(':', '?')),
       '}',
     ),
 

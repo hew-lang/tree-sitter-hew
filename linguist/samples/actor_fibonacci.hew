@@ -12,7 +12,7 @@ actor FibWorker {
     receive fn compute(n: i32) {
         let result = fib(n);
         print("Worker ");
-        print(self.id);
+        print(id);
         print(": fib(");
         print(n);
         println(f") = {result}");
@@ -27,6 +27,6 @@ fn main() {
     w1.compute(5);
     w2.compute(10);
     w3.compute(15);
-    sleep_ms(200);
+    sleep(200ms);
     println("=== Done ===");
 }

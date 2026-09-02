@@ -3,11 +3,10 @@
 [
   (block)
   (function_declaration)
-  (async_function_declaration)
   (gen_function_declaration)
   (async_gen_function_declaration)
   (struct_declaration)
-  (record_declaration)
+  (tuple_type_declaration)
   (enum_declaration)
   (trait_declaration)
   (impl_declaration)

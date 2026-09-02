@@ -11,7 +11,7 @@ fn test_is_some_int_with_value() {
 
 #[test]
 fn test_is_some_int_with_none() {
-    let x: Option<int> = None;
+    let x: Option<i64> = None;
     testing.assert_false(option.is_some_int(x));
 }
 
@@ -29,6 +29,6 @@ fn test_unwrap_or_int_some() {
 
 #[test]
 fn test_unwrap_or_int_none() {
-    let x: Option<int> = None;
+    let x: Option<i64> = None;
     testing.assert_eq(option.unwrap_or_int(x, -1), -1);
 }

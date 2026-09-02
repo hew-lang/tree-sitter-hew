@@ -402,6 +402,30 @@ fn m() {
             (escape_sequence)))))))
 
 ================================================================================
+G7 F-string — structural/debug interpolation (`:?`)
+================================================================================
+
+fn m() {
+    let s = f"{point:?}";
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    name: (identifier)
+    body: (block
+      (let_statement
+        pattern: (pattern
+          (identifier))
+        value: (expression
+          (interpolated_string
+            (fstring_start)
+            (interpolation
+              (expression
+                (identifier)))))))))
+
+================================================================================
 A1 Gen-block expression — yield items
 ================================================================================
 
@@ -512,16 +536,16 @@ fn m() {
             (primitive_type)))))))
 
 ================================================================================
-A4 Record — tuple (positional) body
+A4 Tuple type — positional body
 ================================================================================
 
-record Pair(i64, i64);
+type Pair(i64, i64);
 
 --------------------------------------------------------------------------------
 
 (source_file
-  (record_declaration
-    (identifier)
+  (tuple_type_declaration
+    name: (identifier)
     (primitive_type)
     (primitive_type)))
 

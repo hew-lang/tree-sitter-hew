@@ -1,6 +1,6 @@
 // Demonstrates wire types, supervisors, and actors
 actor Counter {
-    let count: i32;
+    var count: i32;
     receive fn increment(amount: i32) {
         count = count + amount;
     }
