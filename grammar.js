@@ -110,7 +110,7 @@ export default grammar({
       $._literal,
     ),
 
-    // Import (spec grammar.ebnf:63-68):
+    // Import (hew-parser: import item):
     //   Import     = "import" ( StringLit | ModulePath ( "." ImportSelection )? ) ";"
     //   ModulePath = Ident { "." Ident }
     //   ImportSelection = "{" ImportName { "," ImportName } "}"
@@ -1365,7 +1365,7 @@ export default grammar({
     ),
 
     this_expression: $ => 'this',
-    // YieldExpr (grammar.ebnf:322): "yield" Expr? — the operand is optional, so
+    // YieldExpr (hew-parser: yield expression, operand optional): "yield" Expr? — the operand is optional, so
     //   bare `yield;` is valid (yields Unit). `prec.right` makes `yield expr`
     //   greedily consume the operand rather than reduce `yield` on its own.
     yield_expression: $ => prec.right(seq('yield', optional($.expression))),
