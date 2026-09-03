@@ -6631,10 +6631,6 @@
     "named": false
   },
   {
-    "type": "void",
-    "named": false
-  },
-  {
     "type": "when",
     "named": false
   },
