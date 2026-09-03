@@ -61,6 +61,30 @@ impl Sink for Queue {
             (integer_literal)))))))
 
 ================================================================================
+Consume-var parameter ordering
+================================================================================
+
+extern "C" {
+    fn hew_vec_consume(consume var items: Vec<i64>);
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (extern_block
+    (string_literal
+      (string_content))
+    (extern_function
+      name: (identifier)
+      (parameters
+        (parameter
+          name: (identifier)
+          type: (generic_type
+            (identifier)
+            (type_arguments
+              (primitive_type))))))))
+
+================================================================================
 Runtime capability attribute inside an extern block
 ================================================================================
 
