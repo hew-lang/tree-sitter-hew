@@ -3312,9 +3312,13 @@
         ]
       },
       "source": {
-        "multiple": false,
+        "multiple": true,
         "required": true,
         "types": [
+          {
+            "type": ".",
+            "named": false
+          },
           {
             "type": "_",
             "named": false
@@ -3332,6 +3336,10 @@
           {
             "type": "_",
             "named": false
+          },
+          {
+            "type": "contextual_variant_expression",
+            "named": true
           },
           {
             "type": "identifier",

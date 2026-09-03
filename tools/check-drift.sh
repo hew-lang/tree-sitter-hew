@@ -5,7 +5,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 GRAMMAR="$SCRIPT_DIR/../grammar.js"
-SYNTAX_DATA="${HEW_REPO:-$HOME/projects/hew}/docs/syntax-data.json"
+SYNTAX_DATA="${HEW_REPO:-$HOME/projects/hew-lang/hew}/docs/syntax-data.json"
 
 if [ ! -f "$SYNTAX_DATA" ]; then
     echo "ERROR: Cannot find $SYNTAX_DATA"
@@ -13,7 +13,8 @@ if [ ! -f "$SYNTAX_DATA" ]; then
     exit 1
 fi
 
-# Extract all_keywords from syntax-data.json
+# Extract all_keywords from syntax-data.json — the one canonical keyword list
+# (docs/syntax-data.json in the hew repo, exported from the compiler's lexer).
 CANONICAL=$(python3 -c "
 import json, sys
 data = json.load(open('$SYNTAX_DATA'))
@@ -21,8 +22,32 @@ for kw in data['all_keywords']:
     print(kw)
 ")
 
-# Extract keywords used in grammar.js (string literals in quotes that match keywords)
-GRAMMAR_KWS=$(grep -oP "(?<=['\"])(let|var|const|fn|if|else|match|loop|for|while|break|continue|return|import|pub|package|super|struct|enum|trait|impl|wire|isolated|actor|supervisor|child|restart|budget|strategy|permanent|transient|temporary|one_for_one|one_for_all|rest_for_one|scope|spawn|async|await|receive|init|type|dyn|move|try|and|or|true|false|reserved|optional|deprecated|default|unsafe|extern|foreign|in|select|race|join|from|after|gen|yield|where|cooperate|catch|defer)(?=['\"])" "$GRAMMAR" | sort -u)
+# keywords.reserved_unused are lexer-reserved words with no accepted syntax
+# yet (see tools/downstream/generate-tmgrammar.mjs's own intentionallyUnassigned
+# set in the hew repo for the same exclusion on the TextMate side) — a
+# grammar that cannot parse them is correct, not drifted, so they are
+# dropped from the "missing from grammar" comparison below.
+RESERVED_UNUSED=$(python3 -c "
+import json
+data = json.load(open('$SYNTAX_DATA'))
+for kw in data['keywords'].get('reserved_unused', []):
+    print(kw)
+")
+CANONICAL_ACTIVE=$(comm -23 <(echo "$CANONICAL" | LC_ALL=C sort -u) <(echo "$RESERVED_UNUSED" | LC_ALL=C sort -u))
+
+# Extract every lowercase quoted string literal in grammar.js. This includes
+# real keyword tokens ('let', 'machine', ...) alongside unrelated quoted
+# strings the grammar also carries (field labels like 'name'/'target', scope
+# names). Intersecting with CANONICAL below discards that noise for the
+# "grammar has an extra keyword" direction, and the raw (pre-intersection)
+# list is what "compiler keyword missing from grammar.js" is checked against
+# — a keyword absent from the raw list is absent as a literal token, full
+# stop. This replaces a hand-maintained regex alternation of keyword names
+# that silently stopped matching new keywords and never dropped removed
+# ones — the exact shadow-list bug MEMORY.md recorded against a sibling tool
+# (tools/downstream/generate-tmgrammar.mjs's cross-check in the hew repo).
+GRAMMAR_RAW=$(grep -oP "(?<=['\"])[a-z_]+(?=['\"])" "$GRAMMAR" | LC_ALL=C sort -u)
+GRAMMAR_KWS=$(comm -12 <(echo "$CANONICAL_ACTIVE" | LC_ALL=C sort -u) <(echo "$GRAMMAR_RAW"))
 
 # Extract keywords from highlights.scm
 HIGHLIGHT_KWS=$(grep -oP '"\K[a-z_]+(?=")' "$SCRIPT_DIR/../queries/highlights.scm" | sort -u)
@@ -31,14 +56,19 @@ echo "=== Canonical keywords (from compiler): $(echo "$CANONICAL" | wc -l) ==="
 echo "=== Grammar.js keywords: $(echo "$GRAMMAR_KWS" | wc -l) ==="
 echo "=== Highlights.scm keywords: $(echo "$HIGHLIGHT_KWS" | wc -l) ==="
 
-# Check for keywords in canonical but missing from grammar
+# Check for keywords in canonical but missing from grammar (excluding
+# reserved-but-unused words, which have no syntax to parse — see above).
 echo ""
 echo "--- Keywords in compiler but missing from grammar.js ---"
-comm -23 <(echo "$CANONICAL" | sort) <(echo "$GRAMMAR_KWS") || true
+comm -23 <(echo "$CANONICAL_ACTIVE" | LC_ALL=C sort -u) <(echo "$GRAMMAR_RAW") || true
 
+# GRAMMAR_KWS is CANONICAL_ACTIVE ∩ GRAMMAR_RAW by construction, so it can
+# never hold an entry outside CANONICAL_ACTIVE — this direction is now
+# structurally empty rather than a live false-positive source, kept for
+# symmetry with the section above.
 echo ""
 echo "--- Keywords in grammar.js but not in compiler ---"
-comm -13 <(echo "$CANONICAL" | sort) <(echo "$GRAMMAR_KWS") || true
+comm -13 <(echo "$CANONICAL_ACTIVE" | LC_ALL=C sort -u) <(echo "$GRAMMAR_KWS") || true
 
 echo ""
 echo "Done. Review any drift above."

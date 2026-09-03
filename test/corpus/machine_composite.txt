@@ -74,3 +74,57 @@ machine ConnectionLifecycle {
         (expression_statement
           (expression
             (identifier)))))))
+
+================================================================================
+Machine transition with contextual (dot-prefixed) target and qualified source
+================================================================================
+
+machine ConnectionLifecycle {
+    events {
+        Connect;
+        Disconnect;
+    }
+
+    state Disconnected;
+
+    state Connected {
+        initial state Authenticating;
+        on Disconnect: _ => .Disconnected;
+    }
+
+    on Connect: Disconnected => .Authenticating;
+    on Disconnect: Connected.Authenticating => .Disconnected;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (machine_declaration
+    name: (identifier)
+    events_header: (machine_events_header
+      (machine_event_decl
+        name: (identifier))
+      (machine_event_decl
+        name: (identifier)))
+    (machine_state
+      name: (identifier))
+    (machine_state
+      name: (identifier)
+      (machine_composite_member
+        (machine_state
+          name: (identifier)))
+      (machine_transition
+        event: (identifier)
+        target: (contextual_variant_expression
+          name: (identifier))))
+    (machine_transition
+      event: (identifier)
+      source: (identifier)
+      target: (contextual_variant_expression
+        name: (identifier)))
+    (machine_transition
+      event: (identifier)
+      source: (identifier)
+      source: (identifier)
+      target: (contextual_variant_expression
+        name: (identifier)))))

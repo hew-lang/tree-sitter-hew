@@ -612,18 +612,23 @@ export default grammar({
 
     // on EventIdent [ "(" Ident { "," Ident } ")" ] : Source => Target
     //   [ "reenter" ] [ "when" Expr ] TransitionBody
-    // Source/Target = StatePattern = Ident | "_" (grammar.ebnf:171)
-    // TransitionBody = ";" | "{" FieldInitList "}" | Block (grammar.ebnf:170)
+    // Source = Ident ( "." Ident )* | "_"  (hew-parser/src/parser/actor_machine_supervisor.rs
+    //   parse_state_pattern: a leading "." is rejected on the source; a
+    //   "Composite.Leaf" qualifier strips to "Leaf")
+    // Target = Ident | "." Ident | "_"  (same fn: the "." Ident contextual
+    //   form is the bare-variant target the checker's fix-it steers authors
+    //   towards; "._" is rejected, so the wildcard stays plain "_")
+    // TransitionBody = ";" | "{" FieldInitList "}" | Block
     //   The `{ FieldInitList }` form supplies the target state's payload, e.g.
-    //   `=> Holding { handle: handle }`.
+    //   `=> Holding { handle: handle }` or `=> .Holding { handle: handle }`.
     machine_transition: $ => seq(
       'on',
       field('event', $.identifier),
       optional(seq('(', field('payload_bindings', sep1($.identifier, ',')), ')')),
       ':',
-      field('source', choice($.identifier, '_')),
+      field('source', choice(seq($.identifier, repeat(seq('.', $.identifier))), '_')),
       '=>',
-      field('target', choice($.identifier, '_')),
+      field('target', choice($.identifier, $.contextual_variant_expression, '_')),
       optional('reenter'),
       optional(seq('when', field('guard', $.expression))),
       choice(
