@@ -1201,6 +1201,10 @@
           "named": true
         },
         {
+          "type": "integer_literal",
+          "named": true
+        },
+        {
           "type": "shutdown_directive",
           "named": true
         }
@@ -6203,6 +6207,10 @@
   },
   {
     "type": "continue",
+    "named": false
+  },
+  {
+    "type": "count",
     "named": false
   },
   {

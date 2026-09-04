@@ -353,6 +353,32 @@ supervisor Pool {
           (integer_literal))))))
 
 ================================================================================
+Supervisor pool with a count clause
+================================================================================
+
+supervisor Pool {
+    strategy: simple_one_for_one;
+    pool workers: Worker(value: 7) count: 3;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (supervisor_declaration
+    name: (identifier)
+    (supervisor_field
+      strategy: (supervisor_strategy_value))
+    (child_spec
+      name: (identifier)
+      actor: (identifier)
+      (call_argument
+        name: (identifier)
+        value: (expression
+          (integer_literal)))
+      (child_clause
+        (integer_literal)))))
+
+================================================================================
 Supervisor with all strategy values
 ================================================================================
 

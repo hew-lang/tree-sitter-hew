@@ -2726,6 +2726,23 @@
           "members": [
             {
               "type": "STRING",
+              "value": "count"
+            },
+            {
+              "type": "STRING",
+              "value": ":"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "integer_literal"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "STRING",
               "value": "restart"
             },
             {

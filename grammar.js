@@ -527,6 +527,7 @@ export default grammar({
     ),
 
     child_clause: $ => choice(
+      seq('count', ':', $.integer_literal),
       seq('restart', ':', choice('permanent', 'transient', 'temporary')),
       seq('shutdown', ':', $.shutdown_directive),
       seq('wired_to', ':', '{', repeat(seq($.identifier, optional(seq(':', $.identifier)), optional(','))), '}'),
