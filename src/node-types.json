@@ -1119,6 +1119,11 @@
     }
   },
   {
+    "type": "callable_capabilities",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "cast_expression",
     "named": true,
     "fields": {
@@ -2075,6 +2080,10 @@
           "named": true
         },
         {
+          "type": "callable_capabilities",
+          "named": true
+        },
+        {
           "type": "function_type",
           "named": true
         },
@@ -2860,9 +2869,13 @@
       }
     },
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": false,
       "types": [
+        {
+          "type": "private_capture_list",
+          "named": true
+        },
         {
           "type": "return_type",
           "named": true
@@ -3971,6 +3984,37 @@
     "type": "primitive_type",
     "named": true,
     "fields": {}
+  },
+  {
+    "type": "private_capture",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "private_capture_list",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "private_capture",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "qualified_expression",
@@ -6174,6 +6218,10 @@
     "named": false
   },
   {
+    "type": "capture",
+    "named": false
+  },
+  {
     "type": "char",
     "named": false
   },
@@ -6468,6 +6516,10 @@
   },
   {
     "type": "on",
+    "named": false
+  },
+  {
+    "type": "once",
     "named": false
   },
   {

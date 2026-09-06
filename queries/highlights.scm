@@ -17,6 +17,9 @@
 ; anonymous token here never touches `x.clone()`, `fn clone()`, or `clone(args)`,
 ; where `clone` stays an ordinary identifier.
 (clone_expression "clone" @keyword.operator)
+(callable_capabilities ["var" "once" "clone"] @keyword)
+(private_capture_list "capture" @keyword)
+(private_capture (identifier) @variable)
 
 "receive" @keyword
 

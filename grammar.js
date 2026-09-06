@@ -41,6 +41,7 @@ export default grammar({
     [$.expression, $._member_object],
     [$.qualified_expression, $.field_expression],
     [$.generic_apply_expression, $.bare_generic_call_expression],
+    [$.expression, $.private_capture_list],
     [$.actor_spawn],
     [$.trait_bound],
     // `expr | …` — at the `|` the parser cannot tell (within LR(1)) whether a
@@ -754,7 +755,16 @@ export default grammar({
 
     slice_type: $ => seq('[', $._type, ']'),
 
-    function_type: $ => prec(1, seq('fn', '(', optional(sep1($._type, ',')), ')', optional($.return_type))),
+    function_type: $ => prec(1, seq(
+      'fn', optional($.callable_capabilities),
+      '(', optional(sep1($._type, ',')), ')', optional($.return_type),
+    )),
+
+    callable_capabilities: $ => seq('[', choice(
+      'clone',
+      seq(choice('var', 'once'), optional(seq(',', 'clone'))),
+      seq('clone', ',', choice('var', 'once')),
+    ), ']'),
 
     // *const T / *mut T — raw pointer types. Real but FFI/unsafe-scoped; *var T is legacy and rejected.
     pointer_type: $ => seq('*', choice('const', 'mut'), $._type),
@@ -875,6 +885,7 @@ export default grammar({
 
     expression: $ => choice(
       $.identifier,
+      alias('capture', $.identifier),
       $.self,
       $._literal,
       $.interpolated_string,
@@ -1224,6 +1235,7 @@ export default grammar({
     // braced body (hew-parser/src/parser.rs:7691 parse_pipe_lambda).
     lambda: $ => prec.right(2, seq(
       optional('move'),
+      optional($.private_capture_list),
       field('parameters', choice(
         '||',
         seq('|', optional(sep1($.lambda_parameter, ',')), '|'),
@@ -1234,6 +1246,12 @@ export default grammar({
         field('body', $.expression),
       ),
     )),
+
+    private_capture_list: $ => seq(
+      'capture', '(', sep1($.private_capture, ','), ')',
+    ),
+
+    private_capture: $ => seq('var', field('name', $.identifier)),
 
     lambda_parameter: $ => seq(
       field('name', $.identifier),
