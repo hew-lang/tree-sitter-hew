@@ -310,9 +310,9 @@ G5 Supervisor — intensity within duration
 ================================================================================
 
 supervisor Sup {
-    strategy: one_for_all;
-    intensity: 5 within 10s;
-    child w: Worker;
+    strategy: one_for_all,
+    intensity: 5 within 10s,
+    child w: Worker,
 }
 
 --------------------------------------------------------------------------------
@@ -335,7 +335,7 @@ G5 Supervisor — construction-time params
 ================================================================================
 
 supervisor App(config: AppConfig) {
-    child worker: Worker;
+    child worker: Worker,
 }
 
 --------------------------------------------------------------------------------

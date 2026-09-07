@@ -509,8 +509,8 @@ export default grammar({
     //   "intensity" ":" IntLit "within" DurationLit
     // `within` is a contextual keyword used only here. DurationLit is reused.
     supervisor_field: $ => choice(
-      seq('strategy', ':', field('strategy', $.supervisor_strategy_value), optional(choice(',', ';'))),
-      seq('intensity', ':', field('restarts', $.integer_literal), 'within', field('window', $.duration_literal), optional(choice(',', ';'))),
+      seq('strategy', ':', field('strategy', $.supervisor_strategy_value), optional(',')),
+      seq('intensity', ':', field('restarts', $.integer_literal), 'within', field('window', $.duration_literal), optional(',')),
     ),
 
     child_spec: $ => seq(
@@ -521,7 +521,10 @@ export default grammar({
       field('actor', $.identifier),
       optional(seq('(', optional(sep1($.call_argument, ',')), ')')),
       repeat($.child_clause),
-      ';',
+      // Child specs are structural members: `,`-separated, the last one may
+      // omit the comma (hew-parser actor_machine_supervisor.rs
+      // `expect_structural_separator`).
+      optional(','),
     ),
 
     child_clause: $ => choice(

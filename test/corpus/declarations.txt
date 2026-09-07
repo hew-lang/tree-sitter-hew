@@ -334,8 +334,8 @@ Supervisor with child arguments
 ================================================================================
 
 supervisor Pool {
-    strategy: one_for_one;
-    child worker: Counter(100);
+    strategy: one_for_one,
+    child worker: Counter(100),
 }
 
 --------------------------------------------------------------------------------
@@ -357,8 +357,8 @@ Supervisor pool with a count clause
 ================================================================================
 
 supervisor Pool {
-    strategy: simple_one_for_one;
-    pool workers: Worker(value: 7) count: 3;
+    strategy: simple_one_for_one,
+    pool workers: Worker(value: 7) count: 3,
 }
 
 --------------------------------------------------------------------------------
@@ -382,10 +382,10 @@ supervisor Pool {
 Supervisor with all strategy values
 ================================================================================
 
-supervisor S1 { strategy: one_for_one; }
-supervisor S2 { strategy: one_for_all; }
-supervisor S3 { strategy: rest_for_one; }
-supervisor S4 { strategy: simple_one_for_one; }
+supervisor S1 { strategy: one_for_one, }
+supervisor S2 { strategy: one_for_all, }
+supervisor S3 { strategy: rest_for_one, }
+supervisor S4 { strategy: simple_one_for_one, }
 
 --------------------------------------------------------------------------------
 

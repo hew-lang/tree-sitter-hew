@@ -811,3 +811,46 @@ fn f() {
                 (expression
                   (string_literal
                     (string_content)))))))))))
+
+================================================================================
+Supervisor members use comma separators
+================================================================================
+
+supervisor Tree {
+    strategy: one_for_one,
+    intensity: 3 within 10s,
+    child w1: Worker(1) restart: permanent,
+    pool workers: Worker count: 4 shutdown: 5s,
+    child last: Worker
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (supervisor_declaration
+    (identifier)
+    (supervisor_field
+      (supervisor_strategy_value))
+    (supervisor_field
+      (integer_literal)
+      (duration_literal
+        (integer_literal)))
+    (child_spec
+      (identifier)
+      (identifier)
+      (call_argument
+        (expression
+          (integer_literal)))
+      (child_clause))
+    (child_spec
+      (identifier)
+      (identifier)
+      (child_clause
+        (integer_literal))
+      (child_clause
+        (shutdown_directive
+          (duration_literal
+            (integer_literal)))))
+    (child_spec
+      (identifier)
+      (identifier))))
