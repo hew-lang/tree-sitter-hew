@@ -784,6 +784,10 @@ export default grammar({
     block: $ => seq('{', repeat($._statement), '}'),
 
     _statement: $ => choice(
+      // A stray `;` after a statement is accepted by the compiler with an
+      // "unnecessary semicolon" warning (hew-parser statements.rs), so
+      // `defer { … };` and `};` stay ERROR-free here.
+      $.empty_statement,
       $.let_statement,
       $.var_statement,
       $.assignment_statement,
@@ -873,6 +877,8 @@ export default grammar({
     ),
 
     expression_statement: $ => seq($.expression, optional(';')),
+
+    empty_statement: $ => ';',
 
     if_statement: $ => $.if_expression,
     match_statement: $ => $.match_expression,

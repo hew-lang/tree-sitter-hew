@@ -4452,6 +4452,10 @@
       "members": [
         {
           "type": "SYMBOL",
+          "name": "empty_statement"
+        },
+        {
+          "type": "SYMBOL",
           "name": "let_statement"
         },
         {
@@ -5089,6 +5093,10 @@
           ]
         }
       ]
+    },
+    "empty_statement": {
+      "type": "STRING",
+      "value": ";"
     },
     "if_statement": {
       "type": "SYMBOL",
