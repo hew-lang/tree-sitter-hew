@@ -47,7 +47,6 @@ export default grammar({
     // `expr | …` — at the `|` the parser cannot tell (within LR(1)) whether a
     // bit-or `expr | expr` or a timeout `expr | after <dur>` follows; the `after`
     // keyword one token later disambiguates, so GLR explores both branches.
-    [$.binary_expression, $.timeout_expression],
     [$.binary_expression, $.timeout_expression, $.lambda],
     // `where P , (` — after a where-predicate's trailing comma, a `(` may begin
     // either another predicate (a parenthesized/tuple type) or a record's tuple
@@ -372,8 +371,10 @@ export default grammar({
     // `fn hew_handle_free(consume h: Handle);`, and `consume var items: T`
     // is accepted — `var consume` is not.
     // In trait/impl method position a leading bare receiver is also accepted:
-    // `self`, `var self`, or `consuming self` — all without a type annotation, as
-    // `Self`-typed receiver sugar (hew-parser/src/parser.rs:5552 and 5634).
+    // `self`, `var self`, or `consume self` — all without a type annotation, as
+    // `Self`-typed receiver sugar (hew-parser/src/parser/types.rs
+    // `eat_consume_self_receiver`). `consuming self` is refused by the compiler
+    // with a fix-it and `this` is an ordinary identifier.
     parameter: $ => choice(
       $.self_parameter,
       seq(
@@ -386,7 +387,7 @@ export default grammar({
     ),
 
     self_parameter: $ => seq(
-      optional(choice('var', 'consuming')),
+      optional(choice('var', 'consume')),
       $.self,
     ),
 
@@ -436,7 +437,7 @@ export default grammar({
       'mailbox',
       $.integer_literal,
       optional($.overflow_policy),
-      ',',
+      optional(','),
     ),
 
     overflow_policy: $ => seq(
@@ -573,10 +574,12 @@ export default grammar({
     ),
 
     // Output events use comma-separated names.
+    // Output events carry the same optional payload shape as inputs
+    // (hew-parser actor_machine_supervisor.rs `parse_machine_event_fields`).
     machine_emits_header: $ => seq(
       'emits',
       '{',
-      optional(seq(sep1($.identifier, ','), optional(','))),
+      repeat($.machine_event_decl),
       '}',
     ),
 
@@ -752,11 +755,11 @@ export default grammar({
       '(', optional(sep1($._type, ',')), ')', optional($.return_type),
     )),
 
-    callable_capabilities: $ => seq('[', choice(
-      'clone',
-      seq(choice('var', 'once'), optional(seq(',', 'clone'))),
-      seq('clone', ',', choice('var', 'once')),
-    ), ']'),
+    // Bracketed callable qualifiers (hew-parser/src/parser/types.rs
+    // `parse_callable_qualifiers`): `var` or `once` (call mode, at most one),
+    // `clone` and `suspends`, comma-separated in any order, e.g.
+    // `fn[once, suspends](i64) -> i64`. Only `var` is reserved elsewhere.
+    callable_capabilities: $ => seq('[', sep1(choice('var', 'once', 'clone', 'suspends'), ','), ']'),
 
     // *const T / *mut T — raw pointer types. Real but FFI/unsafe-scoped; *var T is legacy and rejected.
     pointer_type: $ => seq('*', choice('const', 'mut'), $._type),
@@ -799,9 +802,8 @@ export default grammar({
     let_statement: $ => seq(
       'let',
       field('pattern', $.pattern),
-      // `let r? = expr;` is sugar for `let r = expr?;` (hew-parser statements.rs:260).
-      // The `?` is only valid after a simple identifier pattern.
-      optional('?'),
+      // `let r? = expr;` was removed from the compiler (statements.rs refuses it
+      // with a hint); only `let r = expr?;` remains.
       optional(seq(':', field('type', $._type))),
       optional(seq('=', field('value', choice($.expression, $.block)))),
       // let-else: `let Pat = expr else { <diverging block> };`
@@ -852,7 +854,9 @@ export default grammar({
     return_expression: $ => prec.right(seq('return', optional($.expression))),
 
     // Deferred cleanup may be an expression statement or a scoped block.
-    defer_statement: $ => seq('defer', choice($.expression, $.block), ';'),
+    // `defer <expr>;` or `defer { … }` — a block body needs no `;`
+    // (hew-parser statements.rs `Token::Defer`).
+    defer_statement: $ => seq('defer', choice(seq($.expression, ';'), $.block)),
 
     // emit EventName { field: value, … } ;  — Mealy output inside a transition body
     emit_statement: $ => seq(
@@ -915,7 +919,6 @@ export default grammar({
       $.fork_expression,
       $.handle_expression,
       $.scope_expression,
-      $.this_expression,
       $.yield_expression,
       $.return_expression,
       $.gen_block_expression,
@@ -941,22 +944,26 @@ export default grammar({
       field('operand', $.expression),
     )),
 
+    // The right operand may be a block (`text + { text = other; ":tail" }`):
+    // the real parser treats a block as an ordinary primary expression.
     binary_expression: $ => choice(
-      prec.left(PREC.OR, seq($.expression, '||', $.expression)),
-      prec.left(PREC.BIT_OR, seq($.expression, '|', $.expression)),
-      prec.left(PREC.BIT_XOR, seq($.expression, '^', $.expression)),
-      prec.left(PREC.AND, seq($.expression, '&&', $.expression)),
-      prec.left(PREC.BIT_AND, seq($.expression, '&', $.expression)),
-      prec.left(PREC.EQ, seq($.expression, choice('==', '!=', 'is'), $.expression)),
-      prec.left(PREC.REL, seq($.expression, choice('<', '<=', '>', '>='), $.expression)),
-      prec.right(PREC.RANGE, seq($.expression, choice('..', '..='), $.expression)),
-      prec.left(PREC.SHIFT, seq($.expression, choice('<<', '>>'), $.expression)),
+      prec.left(PREC.OR, seq($.expression, '||', $._binary_operand)),
+      prec.left(PREC.BIT_OR, seq($.expression, '|', $._binary_operand)),
+      prec.left(PREC.BIT_XOR, seq($.expression, '^', $._binary_operand)),
+      prec.left(PREC.AND, seq($.expression, '&&', $._binary_operand)),
+      prec.left(PREC.BIT_AND, seq($.expression, '&', $._binary_operand)),
+      prec.left(PREC.EQ, seq($.expression, choice('==', '!=', 'is'), $._binary_operand)),
+      prec.left(PREC.REL, seq($.expression, choice('<', '<=', '>', '>='), $._binary_operand)),
+      prec.right(PREC.RANGE, seq($.expression, choice('..', '..='), $._binary_operand)),
+      prec.left(PREC.SHIFT, seq($.expression, choice('<<', '>>'), $._binary_operand)),
       // '+' also concatenates strings; '&+'/'&-' are two's-complement wrapping
       // forms (grammar.ebnf:233, Hew.g4:658).
-      prec.left(PREC.ADD, seq($.expression, choice('+', '-', '&+', '&-'), $.expression)),
+      prec.left(PREC.ADD, seq($.expression, choice('+', '-', '&+', '&-'), $._binary_operand)),
       // '&*' is two's-complement wrapping multiply (grammar.ebnf:234, Hew.g4:663).
-      prec.left(PREC.MUL, seq($.expression, choice('*', '/', '%', '&*'), $.expression)),
+      prec.left(PREC.MUL, seq($.expression, choice('*', '/', '%', '&*'), $._binary_operand)),
     ),
+
+    _binary_operand: $ => choice($.expression, $.block),
 
     // Left associativity keeps postfix calls composable after a completed
     // field/call chain (`value.slice(...).to_lower()`).
@@ -1038,9 +1045,14 @@ export default grammar({
       ')',
     )),
 
+    // A block is an ordinary argument expression to the real parser
+    // (`f({ side_effect(); value })`); it is admitted here rather than in the
+    // general expression set so a statement-level `{` still opens a block
+    // statement.
     call_argument: $ => choice(
       seq(field('name', $.identifier), ':', field('value', $.expression)),
       $.expression,
+      $.block,
     ),
 
     field_expression: $ => prec(PREC.FIELD, seq(
@@ -1363,7 +1375,6 @@ export default grammar({
       field('body', $.block),
     ),
 
-    this_expression: $ => 'this',
     // YieldExpr (hew-parser: yield expression, operand optional): "yield" Expr? — the operand is optional, so
     //   bare `yield;` is valid (yields Unit). `prec.right` makes `yield expr`
     //   greedily consume the operand rather than reduce `yield` on its own.

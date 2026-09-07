@@ -866,6 +866,10 @@
       "required": true,
       "types": [
         {
+          "type": "block",
+          "named": true
+        },
+        {
           "type": "expression",
           "named": true
         }
@@ -1085,6 +1089,10 @@
       "multiple": false,
       "required": false,
       "types": [
+        {
+          "type": "block",
+          "named": true
+        },
         {
           "type": "expression",
           "named": true
@@ -1770,10 +1778,6 @@
         },
         {
           "type": "struct_init",
-          "named": true
-        },
-        {
-          "type": "this_expression",
           "named": true
         },
         {
@@ -3248,7 +3252,7 @@
       "required": false,
       "types": [
         {
-          "type": "identifier",
+          "type": "machine_event_decl",
           "named": true
         }
       ]
@@ -6265,10 +6269,6 @@
     "named": false
   },
   {
-    "type": "consuming",
-    "named": false
-  },
-  {
     "type": "continue",
     "named": false
   },
@@ -6666,12 +6666,12 @@
     "named": false
   },
   {
-    "type": "temporary",
+    "type": "suspends",
     "named": false
   },
   {
-    "type": "this_expression",
-    "named": true
+    "type": "temporary",
+    "named": false
   },
   {
     "type": "trait",

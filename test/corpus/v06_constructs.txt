@@ -1,10 +1,10 @@
 ================================================================================
-let-else and let-propagate (let r? = expr;)
+let-else and postfix propagate (let z = g()?;)
 ================================================================================
 
 fn f(x: Option<i64>) -> i64 {
   let Some(y) = x else { return 0; };
-  let z? = g();
+  let z = g()?;
   y
 }
 
@@ -41,9 +41,11 @@ fn f(x: Option<i64>) -> i64 {
         pattern: (pattern
           (identifier))
         value: (expression
-          (call_expression
-            function: (expression
-              (identifier)))))
+          (try_expression
+            (expression
+              (call_expression
+                function: (expression
+                  (identifier)))))))
       (expression_statement
         (expression
           (identifier))))))
@@ -249,17 +251,17 @@ fn f(a: i64, b: i64, c: i64) -> i64 {
         (expression
           (binary_expression
             (expression
-              (binary_expression
-                (expression
-                  (identifier))
-                (expression
-                  (identifier))))
+              (identifier))
             (expression
               (binary_expression
                 (expression
                   (identifier))
                 (expression
-                  (identifier))))))))))
+                  (binary_expression
+                    (expression
+                      (identifier))
+                    (expression
+                      (identifier))))))))))))
 
 ================================================================================
 Removed regex-match operators (=~ / !~) no longer parse

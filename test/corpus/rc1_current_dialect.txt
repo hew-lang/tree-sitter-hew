@@ -122,7 +122,7 @@ fn main() -> i64 {
     let data: bytes = bytes[1, 2, 3];
     let part: bytes = data[..];
     let value = {
-        defer { println("done"); };
+        defer { println("done"); }
         duplex_pair<i64, i64>(4)
     };
     let map: HashMap<string, i64> = {};

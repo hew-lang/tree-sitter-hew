@@ -1,0 +1,813 @@
+================================================================================
+Receiver forms: self, var self, consume self
+================================================================================
+
+impl Buffer {
+    fn len(self) -> i64 { self.n }
+    fn push(var self, x: i64) { self.n = self.n + 1; }
+    fn finish(consume self) -> Vec<i64> { self.items }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (impl_declaration
+    (identifier)
+    (function_declaration
+      (identifier)
+      (parameters
+        (parameter
+          (self_parameter
+            (self))))
+      (return_type
+        (primitive_type))
+      (block
+        (expression_statement
+          (expression
+            (field_expression
+              (expression
+                (self))
+              (identifier))))))
+    (function_declaration
+      (identifier)
+      (parameters
+        (parameter
+          (self_parameter
+            (self)))
+        (parameter
+          (identifier)
+          (primitive_type)))
+      (block
+        (assignment_statement
+          (expression
+            (field_expression
+              (expression
+                (self))
+              (identifier)))
+          (expression
+            (binary_expression
+              (expression
+                (field_expression
+                  (expression
+                    (self))
+                  (identifier)))
+              (expression
+                (integer_literal)))))))
+    (function_declaration
+      (identifier)
+      (parameters
+        (parameter
+          (self_parameter
+            (self))))
+      (return_type
+        (generic_type
+          (identifier)
+          (type_arguments
+            (primitive_type))))
+      (block
+        (expression_statement
+          (expression
+            (field_expression
+              (expression
+                (self))
+              (identifier))))))))
+
+================================================================================
+Receivers in type body methods
+================================================================================
+
+type Handle {
+    fd: i64,
+    fn close(consume self) { hew_close(self.fd); }
+    fn id(self) -> i64 { self.fd }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (struct_declaration
+    (identifier)
+    (struct_body
+      (struct_field
+        (identifier)
+        (primitive_type))
+      (function_declaration
+        (identifier)
+        (parameters
+          (parameter
+            (self_parameter
+              (self))))
+        (block
+          (expression_statement
+            (expression
+              (call_expression
+                (expression
+                  (identifier))
+                (call_argument
+                  (expression
+                    (field_expression
+                      (expression
+                        (self))
+                      (identifier)))))))))
+      (function_declaration
+        (identifier)
+        (parameters
+          (parameter
+            (self_parameter
+              (self))))
+        (return_type
+          (primitive_type))
+        (block
+          (expression_statement
+            (expression
+              (field_expression
+                (expression
+                  (self))
+                (identifier)))))))))
+
+================================================================================
+this is an ordinary identifier
+================================================================================
+
+fn f(this: i64) -> i64 {
+    let that = this + 1;
+    that
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (primitive_type)))
+    (return_type
+      (primitive_type))
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (binary_expression
+            (expression
+              (identifier))
+            (expression
+              (integer_literal)))))
+      (expression_statement
+        (expression
+          (identifier))))))
+
+================================================================================
+Callable type qualifiers
+================================================================================
+
+fn apply(f: fn[var](i64) -> i64, g: fn[once, suspends](i64) -> i64, h: fn[clone]() -> i64, k: fn[suspends]() -> i64) -> i64 {
+    f(1)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (function_type
+          (callable_capabilities)
+          (primitive_type)
+          (return_type
+            (primitive_type))))
+      (parameter
+        (identifier)
+        (function_type
+          (callable_capabilities)
+          (primitive_type)
+          (return_type
+            (primitive_type))))
+      (parameter
+        (identifier)
+        (function_type
+          (callable_capabilities)
+          (return_type
+            (primitive_type))))
+      (parameter
+        (identifier)
+        (function_type
+          (callable_capabilities)
+          (return_type
+            (primitive_type)))))
+    (return_type
+      (primitive_type))
+    (block
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (identifier))
+            (call_argument
+              (expression
+                (integer_literal)))))))))
+
+================================================================================
+Qualifier words stay identifiers elsewhere
+================================================================================
+
+fn main() {
+    let once = 1;
+    let suspends = once + 1;
+    x.capture();
+    y.race();
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (integer_literal)))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (binary_expression
+            (expression
+              (identifier))
+            (expression
+              (integer_literal)))))
+      (expression_statement
+        (expression
+          (method_call_expression
+            (identifier)
+            (identifier))))
+      (expression_statement
+        (expression
+          (method_call_expression
+            (identifier)
+            (identifier)))))))
+
+================================================================================
+Fork expression forms
+================================================================================
+
+fn main() {
+    let t = fork work(1);
+    let pair = fork [a(), b()];
+    let tuple = fork (a(), b());
+    let blk = fork { work(2) };
+    let r = await t;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (fork_expression
+            (expression
+              (call_expression
+                (expression
+                  (identifier))
+                (call_argument
+                  (expression
+                    (integer_literal))))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (fork_expression
+            (expression
+              (array_expression
+                (expression
+                  (call_expression
+                    (expression
+                      (identifier))))
+                (expression
+                  (call_expression
+                    (expression
+                      (identifier)))))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (fork_expression
+            (expression
+              (tuple_expression
+                (expression
+                  (call_expression
+                    (expression
+                      (identifier))))
+                (expression
+                  (call_expression
+                    (expression
+                      (identifier)))))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (fork_expression
+            (block
+              (expression_statement
+                (expression
+                  (call_expression
+                    (expression
+                      (identifier))
+                    (call_argument
+                      (expression
+                        (integer_literal))))))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (await_expression
+            (expression
+              (identifier))))))))
+
+================================================================================
+Join expression stays
+================================================================================
+
+fn main() {
+    let both = join { a(), b() };
+    let paren = join (c(), d());
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (join_expression
+            (expression
+              (call_expression
+                (expression
+                  (identifier))))
+            (expression
+              (call_expression
+                (expression
+                  (identifier)))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (join_expression
+            (expression
+              (call_expression
+                (expression
+                  (identifier))))
+            (expression
+              (call_expression
+                (expression
+                  (identifier))))))))))
+
+================================================================================
+Timeout combinator stays
+================================================================================
+
+fn main() {
+    let r = await ask(x) | after 5s;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (timeout_expression
+            (expression
+              (await_expression
+                (expression
+                  (call_expression
+                    (expression
+                      (identifier))
+                    (call_argument
+                      (expression
+                        (identifier)))))))
+            (expression
+              (duration_literal
+                (integer_literal)))))))))
+
+================================================================================
+Closure private captures
+================================================================================
+
+fn main() {
+    let counter = move capture(var n) || { n = n + 1; n };
+    let adder = capture(var total, var count) |x: i64| { total = total + x; count = count + 1; };
+    let plain = move |x| x + 1;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (lambda
+            (private_capture_list
+              (private_capture
+                (identifier)))
+            (block
+              (assignment_statement
+                (expression
+                  (identifier))
+                (expression
+                  (binary_expression
+                    (expression
+                      (identifier))
+                    (expression
+                      (integer_literal)))))
+              (expression_statement
+                (expression
+                  (identifier)))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (lambda
+            (private_capture_list
+              (private_capture
+                (identifier))
+              (private_capture
+                (identifier)))
+            (lambda_parameter
+              (identifier)
+              (primitive_type))
+            (block
+              (assignment_statement
+                (expression
+                  (identifier))
+                (expression
+                  (binary_expression
+                    (expression
+                      (identifier))
+                    (expression
+                      (identifier)))))
+              (assignment_statement
+                (expression
+                  (identifier))
+                (expression
+                  (binary_expression
+                    (expression
+                      (identifier))
+                    (expression
+                      (integer_literal)))))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (lambda
+            (lambda_parameter
+              (identifier))
+            (expression
+              (binary_expression
+                (expression
+                  (identifier))
+                (expression
+                  (integer_literal))))))))))
+
+================================================================================
+Structural members use comma separators
+================================================================================
+
+pub enum Delivery {
+    Accepted,
+    Discarded(i64),
+    Started { handle: i64, label: string },
+}
+
+type Point { x: i64, y: i64 }
+
+actor Gate {
+    var permits: i64,
+    let label: string = "gate",
+    mailbox 1,
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (visibility)
+  (enum_declaration
+    (identifier)
+    (enum_body
+      (variant
+        (identifier))
+      (variant
+        (identifier)
+        (primitive_type))
+      (variant
+        (identifier)
+        (struct_field
+          (identifier)
+          (primitive_type))
+        (struct_field
+          (identifier)
+          (primitive_type)))))
+  (struct_declaration
+    (identifier)
+    (struct_body
+      (struct_field
+        (identifier)
+        (primitive_type))
+      (struct_field
+        (identifier)
+        (primitive_type))))
+  (actor_declaration
+    (identifier)
+    (actor_field
+      (identifier)
+      (primitive_type))
+    (actor_field
+      (identifier)
+      (primitive_type)
+      (expression
+        (string_literal
+          (string_content))))
+    (mailbox_declaration
+      (integer_literal))))
+
+================================================================================
+Machine members use comma separators and typed emits
+================================================================================
+
+machine Cycle {
+    events { Tick, Begin { nonce: i64, label: string }, }
+    emits { Trace { text: string } }
+    state Ready { label: string, }
+    state Done,
+    on Tick: Ready => Done { Done }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (machine_declaration
+    (identifier)
+    (machine_events_header
+      (machine_event_decl
+        (identifier))
+      (machine_event_decl
+        (identifier)
+        (struct_field
+          (identifier)
+          (primitive_type))
+        (struct_field
+          (identifier)
+          (primitive_type))))
+    (machine_emits_header
+      (machine_event_decl
+        (identifier)
+        (struct_field
+          (identifier)
+          (primitive_type))))
+    (machine_state
+      (identifier)
+      (struct_field
+        (identifier)
+        (primitive_type)))
+    (machine_state
+      (identifier))
+    (machine_transition
+      (identifier)
+      (identifier)
+      (identifier)
+      (block
+        (expression_statement
+          (expression
+            (identifier)))))))
+
+================================================================================
+Semicolon-separated enum variants no longer parse
+================================================================================
+
+enum Colour {
+    Red;
+    Green;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (enum_declaration
+    name: (identifier)
+    body: (enum_body
+      (ERROR
+        (identifier))
+      (variant
+        name: (identifier))
+      (ERROR))))
+
+================================================================================
+Defer block needs no semicolon
+================================================================================
+
+fn f(value: i64) {
+    defer { println(value); }
+    defer cleanup();
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (primitive_type)))
+    (block
+      (defer_statement
+        (block
+          (expression_statement
+            (expression
+              (call_expression
+                (expression
+                  (identifier))
+                (call_argument
+                  (expression
+                    (identifier))))))))
+      (defer_statement
+        (expression
+          (call_expression
+            (expression
+              (identifier))))))))
+
+================================================================================
+Fallible return clause and handle recovery
+================================================================================
+
+fn decode(data: bytes) -> string fails Utf8Error {
+    let text = inner(data) handle error {
+        if error.valid_up_to != 0 { return "bad"; }
+        "repaired"
+    };
+    text
+}
+
+fn handle(handle: i64) -> i64 { handle }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (primitive_type)))
+    (return_type
+      (primitive_type)
+      (failure_return
+        (identifier)))
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (handle_expression
+            (expression
+              (call_expression
+                (expression
+                  (identifier))
+                (call_argument
+                  (expression
+                    (identifier)))))
+            (identifier)
+            (block
+              (expression_statement
+                (expression
+                  (if_expression
+                    (expression
+                      (binary_expression
+                        (expression
+                          (field_expression
+                            (expression
+                              (identifier))
+                            (identifier)))
+                        (expression
+                          (integer_literal))))
+                    (block
+                      (expression_statement
+                        (expression
+                          (return_expression
+                            (expression
+                              (string_literal
+                                (string_content))))))))))
+              (expression_statement
+                (expression
+                  (string_literal
+                    (string_content))))))))
+      (expression_statement
+        (expression
+          (identifier)))))
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (primitive_type)))
+    (return_type
+      (primitive_type))
+    (block
+      (expression_statement
+        (expression
+          (identifier))))))
+
+================================================================================
+Block as call argument and binary operand
+================================================================================
+
+fn f() {
+    values.push({ values.push(1); 2 });
+    println(left == { left.clear(); right });
+    let combined = text + { text = "new"; ":tail" };
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (expression_statement
+        (expression
+          (method_call_expression
+            (identifier)
+            (identifier)
+            (call_argument
+              (block
+                (expression_statement
+                  (expression
+                    (method_call_expression
+                      (identifier)
+                      (identifier)
+                      (call_argument
+                        (expression
+                          (integer_literal))))))
+                (expression_statement
+                  (expression
+                    (integer_literal))))))))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (identifier))
+            (call_argument
+              (expression
+                (binary_expression
+                  (expression
+                    (identifier))
+                  (block
+                    (expression_statement
+                      (expression
+                        (method_call_expression
+                          (identifier)
+                          (identifier))))
+                    (expression_statement
+                      (expression
+                        (identifier))))))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (binary_expression
+            (expression
+              (identifier))
+            (block
+              (assignment_statement
+                (expression
+                  (identifier))
+                (expression
+                  (string_literal
+                    (string_content))))
+              (expression_statement
+                (expression
+                  (string_literal
+                    (string_content)))))))))))

@@ -17,14 +17,18 @@
 ; anonymous token here never touches `x.clone()`, `fn clone()`, or `clone(args)`,
 ; where `clone` stays an ordinary identifier.
 (clone_expression "clone" @keyword.operator)
-(callable_capabilities ["var" "once" "clone"] @keyword)
+(callable_capabilities ["var" "once" "clone" "suspends"] @keyword)
 (private_capture_list "capture" @keyword)
 (private_capture (identifier) @variable)
 (failure_return "fails" @keyword)
 
 "receive" @keyword
 
-(this_expression) @keyword
+; Contextual words are coloured only where the grammar builds the node, so
+; `consume` as a parameter or receiver modifier never touches the same
+; spelling used as an ordinary identifier.
+(self_parameter "consume" @keyword)
+(parameter "consume" @keyword)
 
 "indirect" @keyword
 
