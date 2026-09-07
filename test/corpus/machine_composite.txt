@@ -17,13 +17,13 @@ machine ConnectionLifecycle {
         initial state Authenticating,
         state Active,
         state Draining,
-        on Disconnect: _ => Disconnected;
+        on Disconnect: _ => Disconnected,
     }
 
-    on Connect: Disconnected => Authenticating;
-    on AuthOk: Authenticating => Active;
-    on DrainStart: Active => Draining;
-    on DrainDone: Draining => Disconnected;
+    on Connect: Disconnected => Authenticating,
+    on AuthOk: Authenticating => Active,
+    on DrainStart: Active => Draining,
+    on DrainDone: Draining => Disconnected,
     on Connect: _ => _ {
         state
     }
@@ -89,11 +89,11 @@ machine ConnectionLifecycle {
 
     state Connected {
         initial state Authenticating,
-        on Disconnect: _ => .Disconnected;
+        on Disconnect: _ => .Disconnected,
     }
 
-    on Connect: Disconnected => .Authenticating;
-    on Disconnect: Connected.Authenticating => .Disconnected;
+    on Connect: Disconnected => .Authenticating,
+    on Disconnect: Connected.Authenticating => .Disconnected,
 }
 
 --------------------------------------------------------------------------------

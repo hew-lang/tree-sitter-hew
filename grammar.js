@@ -618,7 +618,7 @@ export default grammar({
     // Target = Ident | "." Ident | "_"  (same fn: the "." Ident contextual
     //   form is the bare-variant target the checker's fix-it steers authors
     //   towards; "._" is rejected, so the wildcard stays plain "_")
-    // TransitionBody = ";" | "{" FieldInitList "}" | Block
+    // TransitionBody = ","? | "{" FieldInitList "}" | Block
     //   The `{ FieldInitList }` form supplies the target state's payload, e.g.
     //   `=> Holding { handle: handle }` or `=> .Holding { handle: handle }`.
     machine_transition: $ => seq(
@@ -631,8 +631,11 @@ export default grammar({
       field('target', choice($.identifier, $.contextual_variant_expression, '_')),
       optional('reenter'),
       optional(seq('when', field('guard', $.expression))),
+      // A body-less transition is a structural member ending in `,` or the
+      // closing brace (hew-parser actor_machine_supervisor.rs
+      // `parse_machine_transition` → `expect_structural_separator`).
       choice(
-        ';',
+        optional(','),
         field('payload', seq(
           '{',
           sep1($.field_initializer, ','),

@@ -854,3 +854,37 @@ supervisor Tree {
     (child_spec
       (identifier)
       (identifier))))
+
+================================================================================
+Body-less machine transitions end with a comma
+================================================================================
+
+machine Run {
+    events { Go, Stop }
+    state Idle,
+    state Running,
+    on Go: Idle => Running,
+    on Stop: _ => Idle
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (machine_declaration
+    (identifier)
+    (machine_events_header
+      (machine_event_decl
+        (identifier))
+      (machine_event_decl
+        (identifier)))
+    (machine_state
+      (identifier))
+    (machine_state
+      (identifier))
+    (machine_transition
+      (identifier)
+      (identifier)
+      (identifier))
+    (machine_transition
+      (identifier)
+      (identifier))))
