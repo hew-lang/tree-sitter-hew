@@ -25,9 +25,9 @@ Enum declaration
 ================================================================================
 
 enum Color {
-    Red;
-    Green;
-    Blue;
+    Red,
+    Green,
+    Blue,
 }
 
 --------------------------------------------------------------------------------
@@ -48,9 +48,9 @@ Indirect enum declaration
 ================================================================================
 
 indirect enum Expr {
-    Lit(i32);
-    Add(Expr, Expr);
-    Neg(Expr);
+    Lit(i32),
+    Add(Expr, Expr),
+    Neg(Expr),
 }
 
 --------------------------------------------------------------------------------
@@ -129,7 +129,7 @@ Actor declaration
 ================================================================================
 
 actor Counter {
-    let count: i32;
+    let count: i32,
 
     receive fn increment() {
         self.count = self.count + 1;
@@ -169,13 +169,13 @@ Machine declaration (v0.5)
 
 machine TrafficLight {
     events {
-        Timer;
-        Emergency { reason: string; }
+        Timer,
+        Emergency { reason: string, }
     }
 
-    state Red;
-    state Green;
-    state Yellow;
+    state Red,
+    state Green,
+    state Yellow,
 
     on Timer: Red => Green { Green }
     on Timer: Green => Yellow { Yellow }
@@ -285,7 +285,7 @@ Actor with on(start) and on(stop) hooks
 ================================================================================
 
 actor Counter {
-    let count: i64;
+    let count: i64,
 
     #[on(start)]
     fn boot() {

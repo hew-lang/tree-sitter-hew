@@ -228,9 +228,9 @@ fn main() -> i64 {
 RC1 grammar parity: rest patterns, spaced bytes, block conditions, and handlers
 ================================================================================
 
-type Inner { a: i64; b: i64; }
-type Outer { inner: Inner; tag: i64; }
-enum Event { Data { inner: Inner; tag: i64; }; }
+type Inner { a: i64, b: i64, }
+type Outer { inner: Inner, tag: i64, }
+enum Event { Data { inner: Inner, tag: i64, }, }
 
 actor Pulse {
     #[every(1s)]

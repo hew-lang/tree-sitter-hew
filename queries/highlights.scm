@@ -3,11 +3,11 @@
 ; ---- Keywords ----
 [
   "fn" "let" "var" "const" "mut" "pub" "return" "if" "else" "match" "for" "while"
-  "loop" "break" "continue" "in" "spawn" "await" "await_restart" "select" "join"
+  "loop" "break" "continue" "in" "spawn" "await" "await_restart" "select" "join" "race"
   "import" "extern" "async" "gen" "yield" "scope" "move" "fork"
   "type" "where" "dyn" "unsafe" "defer"
   "init" "child" "pool" "restart" "shutdown" "wired_to"
-  "package" "after" "from"
+  "package" "after"
   "reserved" "optional" "deprecated" "default"
 ] @keyword
 
@@ -20,6 +20,7 @@
 (callable_capabilities ["var" "once" "clone"] @keyword)
 (private_capture_list "capture" @keyword)
 (private_capture (identifier) @variable)
+(failure_return "fails" @keyword)
 
 "receive" @keyword
 
@@ -238,15 +239,6 @@
   "|" @punctuation.bracket
   "|" @punctuation.bracket)
 
-; ---- Fork / scope-deadline ----
-(fork_statement
-  "fork" @keyword)
-
-(scope_deadline
-  "after" @keyword
-  "(" @punctuation.bracket
-  ")" @punctuation.bracket)
-
-; Fork child binding name
-(fork_statement
-  binding: (identifier) @variable.definition)
+; ---- Structured concurrency and recovery ----
+(fork_expression "fork" @keyword)
+(handle_expression "handle" @keyword error: (identifier) @variable.definition)

@@ -1657,6 +1657,10 @@
           "named": true
         },
         {
+          "type": "fork_expression",
+          "named": true
+        },
+        {
           "type": "gen_block_expression",
           "named": true
         },
@@ -1670,6 +1674,10 @@
         },
         {
           "type": "generic_struct_init",
+          "named": true
+        },
+        {
+          "type": "handle_expression",
           "named": true
         },
         {
@@ -1722,6 +1730,10 @@
         },
         {
           "type": "qualified_expression",
+          "named": true
+        },
+        {
+          "type": "race_expression",
           "named": true
         },
         {
@@ -1864,6 +1876,66 @@
     }
   },
   {
+    "type": "failure_return",
+    "named": true,
+    "fields": {
+      "error": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "array_type",
+            "named": true
+          },
+          {
+            "type": "borrow_type",
+            "named": true
+          },
+          {
+            "type": "function_type",
+            "named": true
+          },
+          {
+            "type": "generic_type",
+            "named": true
+          },
+          {
+            "type": "identifier",
+            "named": true
+          },
+          {
+            "type": "pointer_type",
+            "named": true
+          },
+          {
+            "type": "primitive_type",
+            "named": true
+          },
+          {
+            "type": "scoped_type",
+            "named": true
+          },
+          {
+            "type": "slice_type",
+            "named": true
+          },
+          {
+            "type": "trait_object_type",
+            "named": true
+          },
+          {
+            "type": "tuple_type",
+            "named": true
+          },
+          {
+            "type": "unit_type",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "field_expression",
     "named": true,
     "fields": {
@@ -1980,39 +2052,22 @@
     }
   },
   {
-    "type": "fork_statement",
+    "type": "fork_expression",
     "named": true,
-    "fields": {
-      "binding": {
-        "multiple": false,
-        "required": false,
-        "types": [
-          {
-            "type": "identifier",
-            "named": true
-          }
-        ]
-      },
-      "body": {
-        "multiple": false,
-        "required": false,
-        "types": [
-          {
-            "type": "block",
-            "named": true
-          }
-        ]
-      },
-      "expr": {
-        "multiple": false,
-        "required": false,
-        "types": [
-          {
-            "type": "expression",
-            "named": true
-          }
-        ]
-      }
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "expression",
+          "named": true
+        }
+      ]
     }
   },
   {
@@ -2443,6 +2498,42 @@
           "named": true
         }
       ]
+    }
+  },
+  {
+    "type": "handle_expression",
+    "named": true,
+    "fields": {
+      "body": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "block",
+            "named": true
+          }
+        ]
+      },
+      "error": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "operand": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {
@@ -4043,6 +4134,21 @@
     }
   },
   {
+    "type": "race_expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "receive_function",
     "named": true,
     "fields": {
@@ -4238,7 +4344,7 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": true,
       "types": [
         {
@@ -4247,6 +4353,10 @@
         },
         {
           "type": "borrow_type",
+          "named": true
+        },
+        {
+          "type": "failure_return",
           "named": true
         },
         {
@@ -4293,86 +4403,7 @@
     }
   },
   {
-    "type": "scope_block",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "assignment_statement",
-          "named": true
-        },
-        {
-          "type": "block_statement",
-          "named": true
-        },
-        {
-          "type": "break_statement",
-          "named": true
-        },
-        {
-          "type": "continue_statement",
-          "named": true
-        },
-        {
-          "type": "defer_statement",
-          "named": true
-        },
-        {
-          "type": "emit_statement",
-          "named": true
-        },
-        {
-          "type": "expression_statement",
-          "named": true
-        },
-        {
-          "type": "for_statement",
-          "named": true
-        },
-        {
-          "type": "fork_statement",
-          "named": true
-        },
-        {
-          "type": "if_statement",
-          "named": true
-        },
-        {
-          "type": "let_statement",
-          "named": true
-        },
-        {
-          "type": "loop_statement",
-          "named": true
-        },
-        {
-          "type": "match_statement",
-          "named": true
-        },
-        {
-          "type": "scope_deadline",
-          "named": true
-        },
-        {
-          "type": "var_statement",
-          "named": true
-        },
-        {
-          "type": "while_let_statement",
-          "named": true
-        },
-        {
-          "type": "while_statement",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "scope_deadline",
+    "type": "scope_expression",
     "named": true,
     "fields": {
       "body": {
@@ -4387,26 +4418,10 @@
       },
       "duration": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "expression",
-            "named": true
-          }
-        ]
-      }
-    }
-  },
-  {
-    "type": "scope_expression",
-    "named": true,
-    "fields": {
-      "body": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "scope_block",
             "named": true
           }
         ]
@@ -4460,7 +4475,7 @@
           }
         ]
       },
-      "channel": {
+      "duration": {
         "multiple": false,
         "required": false,
         "types": [
@@ -4470,7 +4485,7 @@
           }
         ]
       },
-      "duration": {
+      "source": {
         "multiple": false,
         "required": false,
         "types": [
@@ -6338,6 +6353,10 @@
     "named": false
   },
   {
+    "type": "fails",
+    "named": false
+  },
+  {
     "type": "fallback",
     "named": false
   },
@@ -6362,10 +6381,6 @@
     "named": false
   },
   {
-    "type": "from",
-    "named": false
-  },
-  {
     "type": "fstring_start",
     "named": true
   },
@@ -6375,6 +6390,10 @@
   },
   {
     "type": "h",
+    "named": false
+  },
+  {
+    "type": "handle",
     "named": false
   },
   {
@@ -6552,6 +6571,10 @@
   },
   {
     "type": "pub",
+    "named": false
+  },
+  {
+    "type": "race",
     "named": false
   },
   {

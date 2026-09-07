@@ -15,6 +15,7 @@
 (match_arm) @local.scope
 (if_expression) @local.scope
 (scope_expression) @local.scope
+(handle_expression) @local.scope
 
 ; Definitions
 (let_statement
@@ -32,9 +33,9 @@
 (for_statement
   pattern: (pattern (identifier) @local.definition))
 
-; Fork child binding introduces a Task<T> name in the enclosing scope
-(fork_statement
-  binding: (identifier) @local.definition)
+; Task names use ordinary let bindings; recovery introduces its own binding.
+(handle_expression
+  error: (identifier) @local.definition)
 
 ; Select arm bindings
 (select_arm

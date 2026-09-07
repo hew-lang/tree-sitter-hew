@@ -101,7 +101,7 @@ Scope expression with fork child (named binding)
 
 fn main() {
     scope {
-        fork result = compute();
+        let result = fork compute();
     }
 }
 
@@ -114,13 +114,16 @@ fn main() {
       (expression_statement
         (expression
           (scope_expression
-            body: (scope_block
-              (fork_statement
-                binding: (identifier)
-                expr: (expression
-                  (call_expression
-                    function: (expression
-                      (identifier))))))))))))
+            body: (block
+              (let_statement
+                pattern: (pattern
+                  (identifier))
+                value: (expression
+                  (fork_expression
+                    (expression
+                      (call_expression
+                        function: (expression
+                          (identifier))))))))))))))
 
 ================================================================================
 Scope expression with bare fork child
@@ -141,12 +144,14 @@ fn main() {
       (expression_statement
         (expression
           (scope_expression
-            body: (scope_block
-              (fork_statement
-                expr: (expression
-                  (call_expression
-                    function: (expression
-                      (identifier))))))))))))
+            body: (block
+              (expression_statement
+                (expression
+                  (fork_expression
+                    (expression
+                      (call_expression
+                        function: (expression
+                          (identifier))))))))))))))
 
 ================================================================================
 Scope expression with fork block
@@ -169,25 +174,26 @@ fn main() {
       (expression_statement
         (expression
           (scope_expression
-            body: (scope_block
-              (fork_statement
-                body: (block
-                  (expression_statement
-                    (expression
-                      (call_expression
-                        function: (expression
-                          (identifier))))))))))))))
+            body: (block
+              (expression_statement
+                (expression
+                  (fork_expression
+                    (block
+                      (expression_statement
+                        (expression
+                          (call_expression
+                            function: (expression
+                              (identifier))))))))))))))))
 
 ================================================================================
-Scope expression with after deadline
+Scope expression with a deadline and recovery
 ================================================================================
 
 fn main() {
-    scope {
+    scope within 5s {
         fork run_task();
-        after(5s) {
-            cancel();
-        }
+    } handle failure {
+        println(failure);
     }
 }
 
@@ -199,23 +205,30 @@ fn main() {
     body: (block
       (expression_statement
         (expression
-          (scope_expression
-            body: (scope_block
-              (fork_statement
-                expr: (expression
-                  (call_expression
-                    function: (expression
-                      (identifier)))))
-              (scope_deadline
+          (handle_expression
+            operand: (expression
+              (scope_expression
                 duration: (expression
                   (duration_literal
                     (integer_literal)))
                 body: (block
                   (expression_statement
                     (expression
-                      (call_expression
-                        function: (expression
-                          (identifier))))))))))))))
+                      (fork_expression
+                        (expression
+                          (call_expression
+                            function: (expression
+                              (identifier))))))))))
+            error: (identifier)
+            body: (block
+              (expression_statement
+                (expression
+                  (call_expression
+                    function: (expression
+                      (identifier))
+                    (call_argument
+                      (expression
+                        (identifier)))))))))))))
 
 ================================================================================
 Spawn actor by name (v0.5 unchanged)
@@ -261,7 +274,7 @@ fn main() {
       (expression_statement
         (expression
           (scope_expression
-            body: (scope_block
+            body: (block
               (expression_statement
                 (expression
                   (call_expression
@@ -273,9 +286,9 @@ Machine with events header and transitions (v0.5)
 ================================================================================
 
 machine Counter {
-    events { Inc; Reset; }
-    state Zero;
-    state NonZero { value: i64; }
+    events { Inc, Reset, }
+    state Zero,
+    state NonZero { value: i64, }
     on Inc: Zero => NonZero { NonZero { value: 1 } }
     on Inc: NonZero => NonZero reenter { NonZero { value: self.value + 1 } }
     on Reset: NonZero => Zero { Zero }
@@ -347,9 +360,9 @@ Machine with wildcard transitions (v0.5)
 ================================================================================
 
 machine Toggle {
-    events { Flip; Reset; }
-    state Off;
-    state On;
+    events { Flip, Reset, }
+    state Off,
+    state On,
     on Flip: Off => On { On }
     on Flip: On => Off { Off }
     on Reset: _ => Off { Off }
@@ -398,10 +411,10 @@ Machine with emits block and emit statement (v0.5)
 ================================================================================
 
 machine Signal {
-    events { Fire; }
-    emits { Fired; }
-    state Ready;
-    state Done;
+    events { Fire, }
+    emits { Fired, }
+    state Ready,
+    state Done,
     on Fire: Ready => Done {
         emit Fired;
         Done
@@ -440,9 +453,9 @@ Machine with payload binding and when guard (v0.5)
 ================================================================================
 
 machine Bucket {
-    events { Add { amount: i64; } Drain; }
-    state Empty;
-    state Full { level: i64; }
+    events { Add { amount: i64, } Drain, }
+    state Empty,
+    state Full { level: i64, }
     on Add(amount): Empty => Full when amount > 0 { Full { level: amount } }
     default { state }
 }
@@ -494,12 +507,12 @@ Machine with state entry and exit hooks (v0.5)
 ================================================================================
 
 machine Lamp {
-    events { On; Off; }
+    events { On, Off, }
     state Dark {
         entry { log("on"); }
         exit { log("off"); }
     }
-    state Bright;
+    state Bright,
     on On: Dark => Bright { Bright }
     on Off: Bright => Dark { Dark }
 }
