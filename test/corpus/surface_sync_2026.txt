@@ -902,4 +902,46 @@ fn f(value: i64) {
 
 --------------------------------------------------------------------------------
 
-(source_file)
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (primitive_type)))
+    (block
+      (defer_statement
+        (block
+          (expression_statement
+            (expression
+              (call_expression
+                (expression
+                  (identifier))
+                (call_argument
+                  (expression
+                    (identifier))))))))
+      (empty_statement)
+      (expression_statement
+        (expression
+          (if_expression
+            (expression
+              (binary_expression
+                (expression
+                  (identifier))
+                (expression
+                  (integer_literal))))
+            (block
+              (expression_statement
+                (expression
+                  (call_expression
+                    (expression
+                      (identifier)))))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (integer_literal)))
+      (empty_statement)
+      (expression_statement
+        (expression
+          (identifier))))))

@@ -876,7 +876,9 @@ export default grammar({
       ';',
     ),
 
-    expression_statement: $ => seq($.expression, optional(';')),
+    // prec.right keeps the `;` attached to the expression it ends instead of
+    // parsing it as an empty statement.
+    expression_statement: $ => prec.right(seq($.expression, optional(';'))),
 
     empty_statement: $ => ';',
 
@@ -885,7 +887,7 @@ export default grammar({
 
     // A block used in statement position may carry a trailing `;`
     // (examples/test_block.hew, examples/lambda_actors.hew).
-    block_statement: $ => seq($.block, optional(';')),
+    block_statement: $ => $.block,
 
     label: $ => /@[a-zA-Z_][a-zA-Z0-9_]*/,
 
