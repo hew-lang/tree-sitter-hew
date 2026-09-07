@@ -431,7 +431,8 @@ machine Signal {
       (machine_event_decl
         name: (identifier)))
     emits_header: (machine_emits_header
-      (identifier))
+      (machine_event_decl
+        name: (identifier)))
     (machine_state
       name: (identifier))
     (machine_state
