@@ -47,7 +47,7 @@ KEYWORDS=(
   loop while in scope cooperate yield unsafe
 
   # Expression keywords
-  as await await_restart spawn select join after from move this self
+  as await await_restart spawn select join after from move this self capture once
 
   # Actor keywords
   init mailbox overflow receive

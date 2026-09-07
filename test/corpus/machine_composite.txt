@@ -4,19 +4,19 @@ Machine with depth-1 composite state (v0.5)
 
 machine ConnectionLifecycle {
     events {
-        Connect;
-        AuthOk;
-        DrainStart;
-        DrainDone;
-        Disconnect;
+        Connect,
+        AuthOk,
+        DrainStart,
+        DrainDone,
+        Disconnect,
     }
 
-    state Disconnected;
+    state Disconnected,
 
     state Connected {
-        initial state Authenticating;
-        state Active;
-        state Draining;
+        initial state Authenticating,
+        state Active,
+        state Draining,
         on Disconnect: _ => Disconnected;
     }
 
@@ -81,14 +81,14 @@ Machine transition with contextual (dot-prefixed) target and qualified source
 
 machine ConnectionLifecycle {
     events {
-        Connect;
-        Disconnect;
+        Connect,
+        Disconnect,
     }
 
-    state Disconnected;
+    state Disconnected,
 
     state Connected {
-        initial state Authenticating;
+        initial state Authenticating,
         on Disconnect: _ => .Disconnected;
     }
 

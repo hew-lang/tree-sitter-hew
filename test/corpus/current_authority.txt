@@ -3,12 +3,12 @@ Current authority: contextual variants in expressions and record fields
 ================================================================================
 
 enum Mode {
-    SplitWords;
-    Lit(i64);
-    Compute { value: i64; };
+    SplitWords,
+    Lit(i64),
+    Compute { value: i64, },
 }
 
-type Job { mode: Mode; }
+type Job { mode: Mode, }
 
 fn modes() -> Mode {
     let job = Job { mode: .Compute { value: 7 } };

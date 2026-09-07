@@ -41,6 +41,7 @@ export default grammar({
     [$.expression, $._member_object],
     [$.qualified_expression, $.field_expression],
     [$.generic_apply_expression, $.bare_generic_call_expression],
+    [$.expression, $.private_capture_list],
     [$.actor_spawn],
     [$.trait_bound],
     // `expr | …` — at the `|` the parser cannot tell (within LR(1)) whether a
@@ -181,7 +182,7 @@ export default grammar({
     )), '}'),
 
     // StructFieldDecl / WireStructFieldDecl (grammar.ebnf:68, 76):
-    // `Attribute* Ident ":" Type ("@" IntLit)? WireAttr* (";" | ",")`.
+    // `Attribute* Ident ":" Type ("@" IntLit)? WireAttr* ","?`.
     // The real parser attaches `@N` tags and trailing wire modifiers to a normal
     // `type` declaration when a `#[wire]` attribute is present.
     struct_field: $ => seq(
@@ -191,7 +192,7 @@ export default grammar({
       field('type', $._type),
       optional(seq('@', $.integer_literal)),
       repeat($.wire_attribute),
-      optional(choice(',', ';')),
+      optional(','),
     ),
 
     // `type Name(T, T, ...);` — positional/tuple record. The bare `record`
@@ -218,7 +219,7 @@ export default grammar({
       field('body', $.enum_body),
     ),
 
-    enum_body: $ => seq('{', repeat($.variant), '}'),
+    enum_body: $ => seq('{', optional(seq(sep1($.variant, ','), optional(','))), '}'),
 
     variant: $ => seq(
       field('name', $.identifier),
@@ -226,10 +227,6 @@ export default grammar({
         seq('(', sep1($._type, ','), ')'),
         seq('{', repeat($.struct_field), '}'),
       )),
-      // Enum variants are `;`-separated (a `,` separator is rejected by the real
-      // parser: "use `;` instead of `,` to separate variants"). The last variant
-      // may omit the trailing `;`.
-      optional(';'),
     ),
 
     // NOTE: the legacy bare `wire` keyword item form (`wire struct/enum/type
@@ -393,7 +390,9 @@ export default grammar({
       $.self,
     ),
 
-    return_type: $ => seq('->', $._type),
+    return_type: $ => prec.right(seq('->', $._type, optional($.failure_return))),
+
+    failure_return: $ => seq('fails', field('error', $._type)),
 
     // Visibility = "pub" | "package" (spec grammar.ebnf:53; both standalone
     // keywords per hew-parser/src/parser.rs:1863 parse_visibility).
@@ -437,7 +436,7 @@ export default grammar({
       'mailbox',
       $.integer_literal,
       optional($.overflow_policy),
-      ';',
+      ',',
     ),
 
     overflow_policy: $ => seq(
@@ -451,16 +450,14 @@ export default grammar({
       seq('coalesce', '(', $.identifier, ')', optional(seq('fallback', $.overflow_kind))),
     ),
 
-    // ActorFieldDecl (grammar.ebnf:95-96): ("let"|"var")? Ident ":" Type
-    //   ("=" Expr)? ";". The bare form (no let/var) is immutable (let-like) by
-    //   default; the corpus uses it widely (e.g. examples/mqtt_broker.hew).
+    // Actor state uses the same comma separator as record fields.
     actor_field: $ => seq(
       optional(choice('let', 'var')),
       field('name', $.identifier),
       ':',
       field('type', $._type),
       optional(seq('=', $.expression)),
-      ';',
+      ',',
     ),
 
     receive_function: $ => seq(
@@ -527,6 +524,7 @@ export default grammar({
     ),
 
     child_clause: $ => choice(
+      seq('count', ':', $.integer_literal),
       seq('restart', ':', choice('permanent', 'transient', 'temporary')),
       seq('shutdown', ':', $.shutdown_directive),
       seq('wired_to', ':', '{', repeat(seq($.identifier, optional(seq(':', $.identifier)), optional(','))), '}'),
@@ -560,7 +558,7 @@ export default grammar({
       '}',
     ),
 
-    // events { EventDecl* }
+    // Event and state declarations share the structural comma separator.
     machine_events_header: $ => seq(
       'events',
       '{',
@@ -568,25 +566,21 @@ export default grammar({
       '}',
     ),
 
-    // EventDecl = Ident ( ";" | "{" { StructField } "}" ";"? )
     machine_event_decl: $ => seq(
       field('name', $.identifier),
-      choice(
-        ';',
-        seq('{', repeat($.struct_field), '}', optional(';')),
-      ),
+      optional(seq('{', repeat($.struct_field), '}')),
+      optional(','),
     ),
 
-    // emits { Ident ";" * }
+    // Output events use comma-separated names.
     machine_emits_header: $ => seq(
       'emits',
       '{',
-      repeat(seq($.identifier, ';')),
+      optional(seq(sep1($.identifier, ','), optional(','))),
       '}',
     ),
 
-    // state Ident ;
-    // state Ident { StructFields [entry Block] [exit Block] [CompositeMember*] [TransitionDecl*] } ;?
+    // States may contain fields, hooks, substates and transition rules.
     machine_state: $ => seq(
       'state',
       field('name', $.identifier),
@@ -601,7 +595,7 @@ export default grammar({
           '}',
         ),
       ),
-      optional(';'),
+      optional(','),
     ),
 
     // [ "initial" ] StateDecl  — depth-1 composite substate
@@ -753,7 +747,16 @@ export default grammar({
 
     slice_type: $ => seq('[', $._type, ']'),
 
-    function_type: $ => prec(1, seq('fn', '(', optional(sep1($._type, ',')), ')', optional($.return_type))),
+    function_type: $ => prec(1, seq(
+      'fn', optional($.callable_capabilities),
+      '(', optional(sep1($._type, ',')), ')', optional($.return_type),
+    )),
+
+    callable_capabilities: $ => seq('[', choice(
+      'clone',
+      seq(choice('var', 'once'), optional(seq(',', 'clone'))),
+      seq('clone', ',', choice('var', 'once')),
+    ), ']'),
 
     // *const T / *mut T — raw pointer types. Real but FFI/unsafe-scoped; *var T is legacy and rejected.
     pointer_type: $ => seq('*', choice('const', 'mut'), $._type),
@@ -874,6 +877,7 @@ export default grammar({
 
     expression: $ => choice(
       $.identifier,
+      alias('capture', $.identifier),
       $.self,
       $._literal,
       $.interpolated_string,
@@ -907,6 +911,9 @@ export default grammar({
       $.spawn_expression,
       $.select_expression,
       $.join_expression,
+      $.race_expression,
+      $.fork_expression,
+      $.handle_expression,
       $.scope_expression,
       $.this_expression,
       $.yield_expression,
@@ -1223,6 +1230,7 @@ export default grammar({
     // braced body (hew-parser/src/parser.rs:7691 parse_pipe_lambda).
     lambda: $ => prec.right(2, seq(
       optional('move'),
+      optional($.private_capture_list),
       field('parameters', choice(
         '||',
         seq('|', optional(sep1($.lambda_parameter, ',')), '|'),
@@ -1233,6 +1241,12 @@ export default grammar({
         field('body', $.expression),
       ),
     )),
+
+    private_capture_list: $ => seq(
+      'capture', '(', sep1($.private_capture, ','), ')',
+    ),
+
+    private_capture: $ => seq('var', field('name', $.identifier)),
 
     lambda_parameter: $ => seq(
       field('name', $.identifier),
@@ -1273,11 +1287,9 @@ export default grammar({
       '}',
     ),
 
-    // SelectArm (grammar.ebnf:306-307): `Pattern "from" Expr "=>" Expr ","?` and
-    // the timeout arm `"after" Expr "=>" Expr ","?`. The arm body may be a block
-    // (examples/channel/select_recv.hew) and the trailing comma is optional.
+    // Selection binds the result of an await expression or a timer arm.
     select_arm: $ => choice(
-      seq(field('binding', $.pattern), 'from', field('channel', $.expression), '=>', field('body', choice($.block, $.expression)), optional(',')),
+      seq(field('binding', $.pattern), '=', field('source', $.expression), '=>', field('body', choice($.block, $.expression)), optional(',')),
       seq('after', field('duration', $.expression), '=>', field('body', choice($.block, $.expression)), optional(',')),
     ),
 
@@ -1324,15 +1336,22 @@ export default grammar({
       field('body', $.block),
     )),
 
-    // ScopeExpr (grammar.ebnf:317): `scope Block`. The structured-concurrency
-    // body additionally admits `fork`/`after(d)` child & deadline statements,
-    // which are ONLY legal inside a scope (grammar.ebnf:313-319). Keeping them
-    // out of the general expression set is what lets `after`/`fork` stay usable
-    // as ordinary identifiers everywhere else.
     scope_expression: $ => seq(
       'scope',
-      field('body', $.scope_block),
+      optional(seq('within', field('duration', $.expression))),
+      field('body', $.block),
     ),
+
+    race_expression: $ => seq(
+      'race', '{', optional(seq(sep1($.expression, ','), optional(','))), '}',
+    ),
+
+    fork_expression: $ => prec.right(seq('fork', choice($.expression, $.block))),
+
+    handle_expression: $ => prec.left(1, seq(
+      field('operand', $.expression), 'handle', field('error', $.identifier),
+      field('body', $.block),
+    )),
 
     // Gen-block expression `gen { … }` (hew-parser/src/parser.rs:7433
     //   `Token::Gen` immediately followed by `{` → `Expr::GenBlock`). Distinct
@@ -1342,33 +1361,6 @@ export default grammar({
     gen_block_expression: $ => seq(
       'gen',
       field('body', $.block),
-    ),
-
-    scope_block: $ => seq('{', repeat($._scope_statement), '}'),
-
-    _scope_statement: $ => choice(
-      $.fork_statement,
-      $.scope_deadline,
-      $._statement,
-    ),
-
-    // ForkChild (grammar.ebnf:320): `fork (Ident "=")? Expr`, plus the block form
-    // `fork { ... }`. Statement-positioned inside a scope body.
-    fork_statement: $ => choice(
-      seq('fork', field('body', $.block), optional(';')),
-      prec.dynamic(10, seq('fork', field('binding', $.identifier), '=', field('expr', $.expression), ';')),
-      seq('fork', field('expr', $.expression), ';'),
-    ),
-
-    // ScopeDeadline (grammar.ebnf:318): `after "(" Expr ")" Block`, statement-only
-    // inside a scope body.
-    scope_deadline: $ => seq(
-      'after',
-      '(',
-      field('duration', $.expression),
-      ')',
-      field('body', $.block),
-      optional(';'),
     ),
 
     this_expression: $ => 'this',

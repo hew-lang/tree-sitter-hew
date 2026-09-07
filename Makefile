@@ -73,7 +73,7 @@ $(LANGUAGE_NAME).pc: bindings/c/$(LANGUAGE_NAME).pc.in
 		-e 's|@CMAKE_INSTALL_PREFIX@|$(PREFIX)|' $< > $@
 
 $(SRC_DIR)/grammar.json: grammar.js
-	$(TS) generate --no-parser $^
+	$(TS) generate $^
 
 $(PARSER): $(SRC_DIR)/grammar.json
 	$(TS) generate $^
@@ -110,7 +110,7 @@ clean:
 	$(RM) $(OBJS) $(LANGUAGE_NAME).pc lib$(LANGUAGE_NAME).a lib$(LANGUAGE_NAME).$(SOEXT) lib$(LANGUAGE_NAME).dll.a
 
 test:
-	$(TS) test
+	$(TS) test $(TEST_FLAGS)
 
 test-active-corpus:
 	bash scripts/check-active-corpus.sh

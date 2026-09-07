@@ -1,0 +1,237 @@
+================================================================================
+Race composes with a scope deadline and fallible return
+================================================================================
+
+fn work(value: i64) -> i64 fails Error {
+    value
+}
+
+fn main() {
+    scope within 2s {
+        let winner = race { work(1), work(2), };
+        let task = fork work(winner);
+        await task
+    } handle failure {
+        println(failure);
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (primitive_type)))
+    (return_type
+      (primitive_type)
+      (failure_return
+        (identifier)))
+    (block
+      (expression_statement
+        (expression
+          (identifier)))))
+  (function_declaration
+    (identifier)
+    (block
+      (expression_statement
+        (expression
+          (handle_expression
+            (expression
+              (scope_expression
+                (expression
+                  (duration_literal
+                    (integer_literal)))
+                (block
+                  (let_statement
+                    (pattern
+                      (identifier))
+                    (expression
+                      (race_expression
+                        (expression
+                          (call_expression
+                            (expression
+                              (identifier))
+                            (call_argument
+                              (expression
+                                (integer_literal)))))
+                        (expression
+                          (call_expression
+                            (expression
+                              (identifier))
+                            (call_argument
+                              (expression
+                                (integer_literal))))))))
+                  (let_statement
+                    (pattern
+                      (identifier))
+                    (expression
+                      (fork_expression
+                        (expression
+                          (call_expression
+                            (expression
+                              (identifier))
+                            (call_argument
+                              (expression
+                                (identifier))))))))
+                  (expression_statement
+                    (expression
+                      (await_expression
+                        (expression
+                          (identifier))))))))
+            (identifier)
+            (block
+              (expression_statement
+                (expression
+                  (call_expression
+                    (expression
+                      (identifier))
+                    (call_argument
+                      (expression
+                        (identifier)))))))))))))
+
+================================================================================
+Contextual recovery words remain ordinary identifiers
+================================================================================
+
+fn handle(fails: i64, within: i64) -> i64 { fails + within }
+fn main() { println(handle(1, 2)); }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (primitive_type))
+      (parameter
+        (identifier)
+        (primitive_type)))
+    (return_type
+      (primitive_type))
+    (block
+      (expression_statement
+        (expression
+          (binary_expression
+            (expression
+              (identifier))
+            (expression
+              (identifier)))))))
+  (function_declaration
+    (identifier)
+    (block
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (identifier))
+            (call_argument
+              (expression
+                (call_expression
+                  (expression
+                    (identifier))
+                  (call_argument
+                    (expression
+                      (integer_literal)))
+                  (call_argument
+                    (expression
+                      (integer_literal))))))))))))
+
+================================================================================
+Prepared task selection and timer arms
+================================================================================
+
+fn main() {
+    let first = fork work(1);
+    let second = fork work(2);
+    let selected = select {
+        value = await first => value + await second,
+        value = await second => value + await first,
+        after 1s => 0,
+    };
+    println(selected);
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (fork_expression
+            (expression
+              (call_expression
+                (expression
+                  (identifier))
+                (call_argument
+                  (expression
+                    (integer_literal))))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (fork_expression
+            (expression
+              (call_expression
+                (expression
+                  (identifier))
+                (call_argument
+                  (expression
+                    (integer_literal))))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (select_expression
+            (select_arm
+              (pattern
+                (identifier))
+              (expression
+                (await_expression
+                  (expression
+                    (identifier))))
+              (expression
+                (binary_expression
+                  (expression
+                    (identifier))
+                  (expression
+                    (await_expression
+                      (expression
+                        (identifier)))))))
+            (select_arm
+              (pattern
+                (identifier))
+              (expression
+                (await_expression
+                  (expression
+                    (identifier))))
+              (expression
+                (binary_expression
+                  (expression
+                    (identifier))
+                  (expression
+                    (await_expression
+                      (expression
+                        (identifier)))))))
+            (select_arm
+              (expression
+                (duration_literal
+                  (integer_literal)))
+              (expression
+                (integer_literal))))))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (identifier))
+            (call_argument
+              (expression
+                (identifier)))))))))
