@@ -336,7 +336,7 @@ fn main() {
               (identifier))))))))
 
 ================================================================================
-Join expression stays
+Join expression is removed
 ================================================================================
 
 fn main() {
@@ -354,31 +354,31 @@ fn main() {
         (pattern
           (identifier))
         (expression
-          (join_expression
-            (expression
-              (call_expression
-                (expression
-                  (identifier))))
-            (expression
-              (call_expression
-                (expression
-                  (identifier)))))))
+          (struct_init
+            (identifier)
+            (ERROR
+              (identifier)
+              (identifier)))))
       (let_statement
         (pattern
           (identifier))
         (expression
-          (join_expression
+          (call_expression
             (expression
-              (call_expression
-                (expression
-                  (identifier))))
-            (expression
-              (call_expression
-                (expression
-                  (identifier))))))))))
+              (identifier))
+            (call_argument
+              (expression
+                (call_expression
+                  (expression
+                    (identifier)))))
+            (call_argument
+              (expression
+                (call_expression
+                  (expression
+                    (identifier)))))))))))
 
 ================================================================================
-Timeout combinator stays
+Infix timeout combinator is removed
 ================================================================================
 
 fn main() {
@@ -395,7 +395,7 @@ fn main() {
         (pattern
           (identifier))
         (expression
-          (timeout_expression
+          (binary_expression
             (expression
               (await_expression
                 (expression
@@ -405,6 +405,8 @@ fn main() {
                     (call_argument
                       (expression
                         (identifier)))))))
+            (ERROR
+              (identifier))
             (expression
               (duration_literal
                 (integer_literal)))))))))

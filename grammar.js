@@ -44,10 +44,6 @@ export default grammar({
     [$.expression, $.private_capture_list],
     [$.actor_spawn],
     [$.trait_bound],
-    // `expr | …` — at the `|` the parser cannot tell (within LR(1)) whether a
-    // bit-or `expr | expr` or a timeout `expr | after <dur>` follows; the `after`
-    // keyword one token later disambiguates, so GLR explores both branches.
-    [$.binary_expression, $.timeout_expression, $.lambda],
     // `where P , (` — after a where-predicate's trailing comma, a `(` may begin
     // either another predicate (a parenthesized/tuple type) or a record's tuple
     // body `( T, … )`; GLR explores both and only the valid continuation lives.
@@ -86,7 +82,6 @@ export default grammar({
         $.impl_declaration,
         $.function_declaration,
         $.gen_function_declaration,
-        $.async_gen_function_declaration,
         $.extern_block,
         $.actor_declaration,
         $.supervisor_declaration,
@@ -345,24 +340,6 @@ export default grammar({
       field('body', $.block),
     ),
 
-    // NOTE: bare `async fn` (without `gen`) was removed from the compiler —
-    // `hew check` on `async fn f() -> i64 { ... }` fails with "expected 'gen
-    // fn' after 'async'". Only the generator form below is real surface.
-    async_gen_function_declaration: $ => seq(
-      'async',
-      'gen',
-      'fn',
-      field('name', $.identifier),
-      optional($.type_parameters),
-      '(',
-      optional($.parameters),
-      ')',
-      '->',
-      field('yield_type', $._type),
-      optional($.where_clause),
-      field('body', $.block),
-    ),
-
     parameters: $ => sep1($.parameter, ','),
 
     // Param (hew-parser `parse_params_with_implicit_self_and_context`) admits
@@ -494,6 +471,7 @@ export default grammar({
     supervisor_declaration: $ => seq(
       'supervisor',
       field('name', $.identifier),
+      optional($.type_parameters),
       optional(seq(
         '(',
         optional($.parameters),
@@ -901,7 +879,6 @@ export default grammar({
       $.interpolated_string,
       $.unary_expression,
       $.binary_expression,
-      $.timeout_expression,
       $.call_expression,
       $.method_call_expression,
       $.field_expression,
@@ -928,7 +905,6 @@ export default grammar({
       $.actor_expression,
       $.spawn_expression,
       $.select_expression,
-      $.join_expression,
       $.race_expression,
       $.fork_expression,
       $.handle_expression,
@@ -1234,17 +1210,6 @@ export default grammar({
       '}',
     ),
 
-    // TimeoutExpr (grammar.ebnf:228-230): `RangeExpr ( "|" "after" Expr )?` — any
-    // expression may carry a trailing `| after <duration>` timeout race (e.g.
-    // `match await f.answer() | after 5s { … }`). The `after` keyword right after
-    // `|` is what distinguishes this from a bit-or; it binds looser than `||`.
-    timeout_expression: $ => prec.left(1, seq(
-      field('expr', $.expression),
-      '|',
-      'after',
-      field('duration', $.expression),
-    )),
-
     // Closures are PIPE-style (spec grammar.ebnf:288-295):
     //   Lambda = "move"? "|" LambdaParams? "|" Expr
     //          | "move"? "||" Expr
@@ -1315,18 +1280,8 @@ export default grammar({
 
     // Selection binds the result of an await expression or a timer arm.
     select_arm: $ => choice(
-      seq(field('binding', $.pattern), '=', field('source', $.expression), '=>', field('body', choice($.block, $.expression)), optional(',')),
+      seq(field('binding', $.pattern), 'from', field('source', $.expression), '=>', field('body', choice($.block, $.expression)), optional(',')),
       seq('after', field('duration', $.expression), '=>', field('body', choice($.block, $.expression)), optional(',')),
-    ),
-
-    // JoinExpr (grammar.ebnf:309): "join" ("{" | "(") Expr {"," Expr} ","?
-    //   ("}" | ")"). Both the brace and paren delimiters are accepted.
-    join_expression: $ => seq(
-      'join',
-      choice(
-        seq('{', sep1($.expression, ','), optional(','), '}'),
-        seq('(', sep1($.expression, ','), optional(','), ')'),
-      ),
     ),
 
     loop_statement: $ => prec(10, seq(
@@ -1338,7 +1293,6 @@ export default grammar({
     for_statement: $ => prec(10, seq(
       optional(seq($.label, ':')),
       'for',
-      optional('await'),
       field('pattern', $.pattern),
       'in',
       field('iterable', choice($.expression, $.block)),

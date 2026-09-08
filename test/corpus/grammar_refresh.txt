@@ -567,15 +567,19 @@ fn m() {
         (pattern
           (identifier))
         (expression
-          (join_expression
+          (call_expression
             (expression
-              (call_expression
-                (expression
-                  (identifier))))
-            (expression
-              (call_expression
-                (expression
-                  (identifier))))))))))
+              (identifier))
+            (call_argument
+              (expression
+                (call_expression
+                  (expression
+                    (identifier)))))
+            (call_argument
+              (expression
+                (call_expression
+                  (expression
+                    (identifier)))))))))))
 
 ================================================================================
 A6 Byte array literal
@@ -654,15 +658,15 @@ Wire struct — #[wire] attribute, @N field numbers, modifiers, reserved
     name: (identifier)
     body: (struct_body
       (struct_field
-      name: (identifier)
-      type: (primitive_type)
-      (integer_literal)
-      (wire_attribute))
+        name: (identifier)
+        type: (primitive_type)
+        (integer_literal)
+        (wire_attribute))
       (struct_field
-      name: (identifier)
-      type: (primitive_type)
-      (integer_literal)
-      (wire_attribute))
+        name: (identifier)
+        type: (primitive_type)
+        (integer_literal)
+        (wire_attribute))
       (reserved_declaration
         (integer_literal)
         (integer_literal)))))
