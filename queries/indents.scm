@@ -13,7 +13,6 @@
   (extern_block)
   (match_expression)
   (select_expression)
-  (join_expression)
   (if_expression)
   (for_statement)
   (while_statement)

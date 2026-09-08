@@ -1,0 +1,186 @@
+================================================================================
+Async is an ordinary identifier
+================================================================================
+fn ordinary(async: i64) -> i64 {
+    async
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (primitive_type)))
+    (return_type
+      (primitive_type))
+    (block
+      (expression_statement
+        (expression
+          (identifier))))))
+
+================================================================================
+Async generator modifier is rejected
+================================================================================
+async gen fn stream() -> i64 {
+    yield 1;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (ERROR
+    (identifier))
+  (gen_function_declaration
+    (identifier)
+    (primitive_type)
+    (block
+      (expression_statement
+        (expression
+          (yield_expression
+            (expression
+              (integer_literal))))))))
+
+================================================================================
+For-await syntax is rejected
+================================================================================
+fn stream_values(stream: Stream<i64>) {
+    for await item in stream {
+        println(item);
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (generic_type
+          (identifier)
+          (type_arguments
+            (primitive_type)))))
+    (block
+      (for_statement
+        (pattern
+          (identifier))
+        (ERROR
+          (identifier))
+        (expression
+          (identifier))
+        (block
+          (expression_statement
+            (expression
+              (call_expression
+                (expression
+                  (identifier))
+                (call_argument
+                  (expression
+                    (identifier)))))))))))
+
+================================================================================
+Selection, await-restart, and consume-self remain structural
+================================================================================
+trait Owned {
+    fn finish(consume self) -> i64;
+}
+
+fn choose(task: Task<i64>, sup: Supervisor) -> i64 {
+    let selected = select {
+        value from await task => value,
+        after 1s => 0,
+    };
+    let restarted = await_restart sup.child;
+    selected + restarted
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (trait_declaration
+    (identifier)
+    (trait_function_signature
+      (identifier)
+      (parameters
+        (parameter
+          (self_parameter
+            (self))))
+      (return_type
+        (primitive_type))))
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (generic_type
+          (identifier)
+          (type_arguments
+            (primitive_type))))
+      (parameter
+        (identifier)
+        (identifier)))
+    (return_type
+      (primitive_type))
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (select_expression
+            (select_arm
+              (pattern
+                (identifier))
+              (expression
+                (await_expression
+                  (expression
+                    (identifier))))
+              (expression
+                (identifier)))
+            (select_arm
+              (expression
+                (duration_literal
+                  (integer_literal)))
+              (expression
+                (integer_literal))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (await_restart_expression
+            (expression
+              (field_expression
+                (expression
+                  (identifier))
+                (identifier))))))
+      (expression_statement
+      (expression
+        (binary_expression
+          (expression
+            (identifier))
+          (expression
+            (identifier))))))))
+
+================================================================================
+Generic supervisor type parameters remain structural
+================================================================================
+supervisor Pool<Job: Send> {
+    strategy: one_for_one,
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (supervisor_declaration
+    (identifier)
+    (type_parameters
+      (type_parameter
+        (identifier)
+        (trait_bounds
+          (trait_bound
+            (identifier)))))
+    (supervisor_field
+      (supervisor_strategy_value))))

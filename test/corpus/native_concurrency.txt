@@ -149,8 +149,8 @@ fn main() {
     let first = fork work(1);
     let second = fork work(2);
     let selected = select {
-        value = await first => value + await second,
-        value = await second => value + await first,
+        value from await first => value + await second,
+        value from await second => value + await first,
         after 1s => 0,
     };
     println(selected);

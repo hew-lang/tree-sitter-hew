@@ -3,7 +3,6 @@
 ; Scope boundaries
 (function_declaration) @local.scope
 (gen_function_declaration) @local.scope
-(async_gen_function_declaration) @local.scope
 (block) @local.scope
 (for_statement) @local.scope
 (while_statement) @local.scope
