@@ -294,3 +294,26 @@ fn f(a: string, b: string) -> bool {
             operand: (expression
               (identifier))))
         (MISSING ";")))))
+
+================================================================================
+Retired async gen fn no longer forms one declaration
+================================================================================
+
+async gen fn f() -> i64 {
+    yield 1
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (ERROR
+    (identifier))
+  (gen_function_declaration
+    name: (identifier)
+    yield_type: (primitive_type)
+    body: (block
+      (expression_statement
+        (expression
+          (yield_expression
+            (expression
+              (integer_literal))))))))

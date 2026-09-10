@@ -86,7 +86,6 @@ export default grammar({
         $.impl_declaration,
         $.function_declaration,
         $.gen_function_declaration,
-        $.async_gen_function_declaration,
         $.extern_block,
         $.actor_declaration,
         $.supervisor_declaration,
@@ -345,24 +344,6 @@ export default grammar({
       field('body', $.block),
     ),
 
-    // NOTE: bare `async fn` (without `gen`) was removed from the compiler —
-    // `hew check` on `async fn f() -> i64 { ... }` fails with "expected 'gen
-    // fn' after 'async'". Only the generator form below is real surface.
-    async_gen_function_declaration: $ => seq(
-      'async',
-      'gen',
-      'fn',
-      field('name', $.identifier),
-      optional($.type_parameters),
-      '(',
-      optional($.parameters),
-      ')',
-      '->',
-      field('yield_type', $._type),
-      optional($.where_clause),
-      field('body', $.block),
-    ),
-
     parameters: $ => sep1($.parameter, ','),
 
     // Param (hew-parser `parse_params_with_implicit_self_and_context`) admits
@@ -519,7 +500,7 @@ export default grammar({
       field('name', $.identifier),
       ':',
       field('actor', $.identifier),
-      optional(seq('(', optional(sep1($.call_argument, ',')), ')')),
+      optional(seq('(', optional(sep1($.call_argument, ',')), optional(','), ')')),
       repeat($.child_clause),
       // Child specs are structural members: `,`-separated, the last one may
       // omit the comma (hew-parser actor_machine_supervisor.rs
@@ -1302,6 +1283,7 @@ export default grammar({
       optional(seq(
         '(',
         optional(sep1($.call_argument, ',')),
+        optional(','),
         ')',
       )),
     ),
@@ -1314,8 +1296,11 @@ export default grammar({
     ),
 
     // Selection binds the result of an await expression or a timer arm.
+    // The source clause is spelled `from`, a contextual identifier rather
+    // than a keyword (hew-parser patterns.rs `parse_select_arm`), so `from`
+    // stays usable as an ordinary name everywhere else.
     select_arm: $ => choice(
-      seq(field('binding', $.pattern), '=', field('source', $.expression), '=>', field('body', choice($.block, $.expression)), optional(',')),
+      seq(field('binding', $.pattern), 'from', field('source', $.expression), '=>', field('body', choice($.block, $.expression)), optional(',')),
       seq('after', field('duration', $.expression), '=>', field('body', choice($.block, $.expression)), optional(',')),
     ),
 

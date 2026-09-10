@@ -4,7 +4,6 @@
   (block)
   (function_declaration)
   (gen_function_declaration)
-  (async_gen_function_declaration)
   (struct_declaration)
   (tuple_type_declaration)
   (enum_declaration)
