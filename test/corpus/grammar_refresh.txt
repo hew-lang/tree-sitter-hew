@@ -550,7 +550,7 @@ type Pair(i64, i64);
     (primitive_type)))
 
 ================================================================================
-A5 Join — parenthesized form
+A5 `join` is a retired keyword — an ordinary call, not a join expression
 ================================================================================
 
 fn m() {
@@ -567,15 +567,19 @@ fn m() {
         (pattern
           (identifier))
         (expression
-          (join_expression
+          (call_expression
             (expression
-              (call_expression
-                (expression
-                  (identifier))))
-            (expression
-              (call_expression
-                (expression
-                  (identifier))))))))))
+              (identifier))
+            (call_argument
+              (expression
+                (call_expression
+                  (expression
+                    (identifier)))))
+            (call_argument
+              (expression
+                (call_expression
+                  (expression
+                    (identifier)))))))))))
 
 ================================================================================
 A6 Byte array literal

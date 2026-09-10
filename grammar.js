@@ -909,7 +909,6 @@ export default grammar({
       $.actor_expression,
       $.spawn_expression,
       $.select_expression,
-      $.join_expression,
       $.race_expression,
       $.fork_expression,
       $.handle_expression,
@@ -1302,16 +1301,6 @@ export default grammar({
     select_arm: $ => choice(
       seq(field('binding', $.pattern), 'from', field('source', $.expression), '=>', field('body', choice($.block, $.expression)), optional(',')),
       seq('after', field('duration', $.expression), '=>', field('body', choice($.block, $.expression)), optional(',')),
-    ),
-
-    // JoinExpr (grammar.ebnf:309): "join" ("{" | "(") Expr {"," Expr} ","?
-    //   ("}" | ")"). Both the brace and paren delimiters are accepted.
-    join_expression: $ => seq(
-      'join',
-      choice(
-        seq('{', sep1($.expression, ','), optional(','), '}'),
-        seq('(', sep1($.expression, ','), optional(','), ')'),
-      ),
     ),
 
     loop_statement: $ => prec(10, seq(

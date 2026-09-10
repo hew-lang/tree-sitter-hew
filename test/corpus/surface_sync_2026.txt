@@ -336,7 +336,7 @@ fn main() {
               (identifier))))))))
 
 ================================================================================
-Join expression stays
+Retired join keyword — brace form errors, paren form is an ordinary call
 ================================================================================
 
 fn main() {
@@ -348,34 +348,34 @@ fn main() {
 
 (source_file
   (function_declaration
-    (identifier)
-    (block
+    name: (identifier)
+    body: (block
       (let_statement
-        (pattern
+        pattern: (pattern
           (identifier))
-        (expression
-          (join_expression
-            (expression
-              (call_expression
-                (expression
-                  (identifier))))
-            (expression
-              (call_expression
-                (expression
-                  (identifier)))))))
+        value: (expression
+          (struct_init
+            name: (identifier)
+            (ERROR
+              (identifier)
+              (identifier)))))
       (let_statement
-        (pattern
+        pattern: (pattern
           (identifier))
-        (expression
-          (join_expression
-            (expression
-              (call_expression
-                (expression
-                  (identifier))))
-            (expression
-              (call_expression
-                (expression
-                  (identifier))))))))))
+        value: (expression
+          (call_expression
+            function: (expression
+              (identifier))
+            (call_argument
+              (expression
+                (call_expression
+                  function: (expression
+                    (identifier)))))
+            (call_argument
+              (expression
+                (call_expression
+                  function: (expression
+                    (identifier)))))))))))
 
 ================================================================================
 Timeout combinator stays

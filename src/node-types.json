@@ -1620,10 +1620,6 @@
           "named": true
         },
         {
-          "type": "join_expression",
-          "named": true
-        },
-        {
           "type": "lambda",
           "named": true
         },
@@ -2809,21 +2805,6 @@
     "fields": {},
     "children": {
       "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "expression",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "join_expression",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
       "required": true,
       "types": [
         {
@@ -6373,10 +6354,6 @@
   },
   {
     "type": "isize",
-    "named": false
-  },
-  {
-    "type": "join",
     "named": false
   },
   {

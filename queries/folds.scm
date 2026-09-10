@@ -18,5 +18,4 @@
   (if_expression)
   (match_expression)
   (select_expression)
-  (join_expression)
 ] @fold
