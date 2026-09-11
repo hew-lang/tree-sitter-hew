@@ -706,6 +706,7 @@ export default grammar({
       $.array_type,
       $.slice_type,
       $.function_type,
+      $.actor_type,
       $.pointer_type,
       $.borrow_type,
       $.trait_object_type,
@@ -740,6 +741,13 @@ export default grammar({
     function_type: $ => prec(1, seq(
       'fn', optional($.callable_capabilities),
       '(', optional(sep1($._type, ',')), ')', optional($.return_type),
+    )),
+
+    // actor(M) [-> R] — the type of an anonymous actor handle
+    // (hew-parser/src/parser/types.rs, `Token::Actor` in the type parser); a named actor's
+    // handle is spelled by the actor's own name.
+    actor_type: $ => prec(1, seq(
+      'actor', '(', optional(sep1($._type, ',')), ')', optional($.return_type),
     )),
 
     // Bracketed callable qualifiers (hew-parser/src/parser/types.rs

@@ -159,3 +159,72 @@ fn legacy() {
               (call_expression
                 (expression
                   (identifier))))))))))
+
+================================================================================
+Anonymous actor type
+================================================================================
+
+fn make(factor: i64) -> actor(i64) {
+    actor |x: i64| { println(f"{x * factor}"); }
+}
+
+fn reply() -> actor(i64) -> i64 {
+    actor |x: i64| -> i64 { x }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (primitive_type)))
+    (return_type
+      (actor_type
+        (primitive_type)))
+    (block
+      (expression_statement
+        (expression
+          (actor_expression
+            (lambda_parameter
+              (identifier)
+              (primitive_type))
+            (block
+              (expression_statement
+                (expression
+                  (call_expression
+                    (expression
+                      (identifier))
+                    (call_argument
+                      (expression
+                        (interpolated_string
+                          (fstring_start)
+                          (interpolation
+                            (expression
+                              (binary_expression
+                                (expression
+                                  (identifier))
+                                (expression
+                                  (identifier)))))))))))))))))
+  (function_declaration
+    (identifier)
+    (return_type
+      (actor_type
+        (primitive_type)
+        (return_type
+          (primitive_type))))
+    (block
+      (expression_statement
+        (expression
+          (actor_expression
+            (lambda_parameter
+              (identifier)
+              (primitive_type))
+            (return_type
+              (primitive_type))
+            (block
+              (expression_statement
+                (expression
+                  (identifier))))))))))
