@@ -90,6 +90,10 @@
 
 (type_parameters "<" @punctuation.bracket)
 (type_parameters ">" @punctuation.bracket)
+(machine_type_parameters "<" @punctuation.bracket)
+(machine_type_parameters ">" @punctuation.bracket)
+(const_parameter name: (identifier) @constant)
+(associated_type_projection (identifier) @type)
 
 ; ---- Functions ----
 (function_declaration

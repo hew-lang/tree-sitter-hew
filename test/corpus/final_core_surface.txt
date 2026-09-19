@@ -1,0 +1,469 @@
+================================================================================
+Async is an ordinary identifier
+================================================================================
+fn ordinary(async: i64) -> i64 {
+    async
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (primitive_type)))
+    (return_type
+      (primitive_type))
+    (block
+      (expression_statement
+        (expression
+          (identifier))))))
+
+================================================================================
+Async generator modifier is rejected
+================================================================================
+async gen fn stream() -> i64 {
+    yield 1;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (ERROR
+    (identifier))
+  (gen_function_declaration
+    (identifier)
+    (primitive_type)
+    (block
+      (expression_statement
+        (expression
+          (yield_expression
+            (expression
+              (integer_literal))))))))
+
+================================================================================
+Explicit for await is rejected
+:error
+================================================================================
+fn stream_values(stream: Stream<i64>) {
+    for await item in stream {
+        println(item);
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (generic_type
+          (identifier)
+          (type_arguments
+            (primitive_type)))))
+    (block
+      (for_statement
+        (pattern
+          (identifier))
+        (expression
+          (identifier))
+        (block
+          (expression_statement
+            (expression
+              (call_expression
+                (expression
+                  (identifier))
+                (call_argument
+                  (expression
+                    (identifier)))))))))))
+
+================================================================================
+Selection, await-restart, and consume-self remain structural
+================================================================================
+trait Owned {
+    fn finish(consume self) -> i64;
+}
+
+fn choose(task: Task<i64>, sup: Supervisor) -> i64 {
+    let selected = select {
+        value from await task => value,
+        after 1s => 0,
+    };
+    let restarted = await_restart sup.child;
+    selected + restarted
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (trait_declaration
+    (identifier)
+    (trait_function_signature
+      (identifier)
+      (parameters
+        (parameter
+          (self_parameter
+            (self))))
+      (return_type
+        (primitive_type))))
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (generic_type
+          (identifier)
+          (type_arguments
+            (primitive_type))))
+      (parameter
+        (identifier)
+        (identifier)))
+    (return_type
+      (primitive_type))
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (select_expression
+            (select_arm
+              (pattern
+                (identifier))
+              (expression
+                (await_expression
+                  (expression
+                    (identifier))))
+              (expression
+                (identifier)))
+            (select_arm
+              (expression
+                (duration_literal
+                  (integer_literal)))
+              (expression
+                (integer_literal))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (await_restart_expression
+            (expression
+              (field_expression
+                (expression
+                  (identifier))
+                (identifier))))))
+      (expression_statement
+        (expression
+          (binary_expression
+            (expression
+              (identifier))
+            (expression
+              (identifier))))))))
+
+================================================================================
+Generic supervisor type parameters remain structural
+================================================================================
+supervisor Pool<Job: Send> {
+    strategy: one_for_one,
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (supervisor_declaration
+    (identifier)
+    (type_parameters
+      (type_parameter
+        (identifier)
+        (trait_bounds
+          (trait_bound
+            (identifier)))))
+    (supervisor_field
+      (supervisor_strategy_value))))
+
+================================================================================
+Condition chains retain pattern bindings between boolean operands
+================================================================================
+fn inspect(value: Option<i64>, ready: bool) {
+    if let .Some(first) = value && ready && let .Some(second) = value {
+        println(first + second);
+    }
+    if ready && let .Some(item) = value { println(item); }
+    while let .Some(item) = value && item > 0 { break }
+}
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (generic_type
+          (identifier)
+          (type_arguments
+            (primitive_type))))
+      (parameter
+        (identifier)
+        (primitive_type)))
+    (block
+      (expression_statement
+        (expression
+          (if_expression
+            (condition_chain
+              (let_condition
+                (pattern
+                  (variant_pattern
+                    (identifier)
+                    (pattern
+                      (identifier))))
+                (expression
+                  (identifier)))
+              (expression
+                (identifier))
+              (let_condition
+                (pattern
+                  (variant_pattern
+                    (identifier)
+                    (pattern
+                      (identifier))))
+                (expression
+                  (identifier))))
+            (block
+              (expression_statement
+                (expression
+                  (call_expression
+                    (expression
+                      (identifier))
+                    (call_argument
+                      (expression
+                        (binary_expression
+                          (expression
+                            (identifier))
+                          (expression
+                            (identifier))))))))))))
+      (expression_statement
+        (expression
+          (if_expression
+            (condition_chain
+              (expression
+                (identifier))
+              (let_condition
+                (pattern
+                  (variant_pattern
+                    (identifier)
+                    (pattern
+                      (identifier))))
+                (expression
+                  (identifier))))
+            (block
+              (expression_statement
+                (expression
+                  (call_expression
+                    (expression
+                      (identifier))
+                    (call_argument
+                      (expression
+                        (identifier))))))))))
+      (while_statement
+        (condition_chain
+          (let_condition
+            (pattern
+              (variant_pattern
+                (identifier)
+                (pattern
+                  (identifier))))
+            (expression
+              (identifier)))
+          (expression
+            (binary_expression
+              (expression
+                (identifier))
+              (expression
+                (integer_literal)))))
+        (block
+          (break_statement))))))
+
+================================================================================
+Block operands and vector spreads compose
+================================================================================
+fn apply(op: fn(i64) -> i64, values: Vec<i64>) -> i64 { op(values[0]) }
+fn main() {
+    let xs = [1, 2];
+    let value = match { xs } { items => items };
+    apply(op: { |n| n + 1 }, values: [..value, 3]);
+    loop { continue }
+}
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (function_type
+          (primitive_type)
+          (return_type
+            (primitive_type))))
+      (parameter
+        (identifier)
+        (generic_type
+          (identifier)
+          (type_arguments
+            (primitive_type)))))
+    (return_type
+      (primitive_type))
+    (block
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (identifier))
+            (call_argument
+              (expression
+                (index_expression
+                  (expression
+                    (identifier))
+                  (expression
+                    (integer_literal))))))))))
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (array_expression
+            (expression
+              (integer_literal))
+            (expression
+              (integer_literal)))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (match_expression
+            (block
+              (expression_statement
+                (expression
+                  (identifier))))
+            (match_arm
+              (pattern
+                (identifier))
+              (expression
+                (identifier))))))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (identifier))
+            (call_argument
+              (identifier)
+              (block
+                (expression_statement
+                  (expression
+                    (lambda
+                      (lambda_parameter
+                        (identifier))
+                      (expression
+                        (binary_expression
+                          (expression
+                            (identifier))
+                          (expression
+                            (integer_literal)))))))))
+            (call_argument
+              (identifier)
+              (expression
+                (array_expression
+                  (expression
+                    (identifier))
+                  (expression
+                    (integer_literal))))))))
+      (loop_statement
+        (block
+          (continue_statement))))))
+
+================================================================================
+Typed supervisor children, associated projections and machine constants
+================================================================================
+trait Source { type Item; }
+type Text {}
+impl Source for Text { type Item = string; }
+type Message { body: <Text as Source>.Item }
+actor Worker<T> { var value: Option<T> = .None, }
+supervisor Group<T> { child worker: Worker<T>, }
+machine Fuse<const MAX: usize = 3> {
+    events { Hit, }
+    state Open,
+    on Hit: Open => Open,
+}
+--------------------------------------------------------------------------------
+
+(source_file
+  (trait_declaration
+    (identifier)
+    (associated_type
+      (identifier)))
+  (struct_declaration
+    (identifier)
+    (struct_body))
+  (impl_declaration
+    (identifier)
+    (identifier)
+    (associated_type_impl
+      (identifier)
+      (primitive_type)))
+  (struct_declaration
+    (identifier)
+    (struct_body
+      (struct_field
+        (identifier)
+        (associated_type_projection
+          (identifier)
+          (trait_bound
+            (identifier))
+          (identifier)))))
+  (actor_declaration
+    (identifier)
+    (type_parameters
+      (type_parameter
+        (identifier)))
+    (actor_field
+      (identifier)
+      (generic_type
+        (identifier)
+        (type_arguments
+          (identifier)))
+      (expression
+        (contextual_variant_expression
+          (identifier)))))
+  (supervisor_declaration
+    (identifier)
+    (type_parameters
+      (type_parameter
+        (identifier)))
+    (child_spec
+      (identifier)
+      (generic_type
+        (identifier)
+        (type_arguments
+          (identifier)))))
+  (machine_declaration
+    (identifier)
+    (machine_type_parameters
+      (const_parameter
+        (identifier)
+        (integer_literal)))
+    (machine_events_header
+      (machine_event_decl
+        (identifier)))
+    (machine_state
+      (identifier))
+    (machine_transition
+      (identifier)
+      (identifier)
+      (identifier))))

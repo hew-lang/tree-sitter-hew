@@ -28,8 +28,7 @@
       }
     ],
     "links": {
-      "repository": "https://github.com/hew-lang/tree-sitter-hew",
-      "funding": ""
+      "repository": "https://github.com/hew-lang/tree-sitter-hew"
     }
   },
   "bindings": {
