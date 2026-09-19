@@ -5084,18 +5084,6 @@
             "type": "CHOICE",
             "members": [
               {
-                "type": "SYMBOL",
-                "name": "expression"
-              },
-              {
-                "type": "BLANK"
-              }
-            ]
-          },
-          {
-            "type": "CHOICE",
-            "members": [
-              {
                 "type": "STRING",
                 "value": ";"
               },
@@ -9505,10 +9493,6 @@
     [
       "block",
       "map_literal"
-    ],
-    [
-      "_binary_operand",
-      "condition_chain"
     ],
     [
       "expression",

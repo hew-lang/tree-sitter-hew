@@ -1194,13 +1194,9 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": true,
+      "multiple": false,
       "required": false,
       "types": [
-        {
-          "type": "expression",
-          "named": true
-        },
         {
           "type": "label",
           "named": true

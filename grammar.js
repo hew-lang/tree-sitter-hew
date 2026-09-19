@@ -37,7 +37,6 @@ export default grammar({
     [$.match_statement, $.expression],
     [$.expression, $.struct_init],
     [$.block, $.map_literal],
-    [$._binary_operand, $.condition_chain],
     [$.expression, $._member_object, $.path_expression],
     [$.expression, $._member_object],
     [$.qualified_expression, $.field_expression],
@@ -848,7 +847,7 @@ export default grammar({
 
 
 
-    break_statement: $ => prec.right(seq('break', optional($.label), optional($.expression), optional(';'))),
+    break_statement: $ => prec.right(seq('break', optional($.label), optional(';'))),
 
     continue_statement: $ => prec.right(seq('continue', optional($.label), optional(';'))),
 
