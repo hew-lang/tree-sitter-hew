@@ -37,6 +37,8 @@ export default grammar({
     [$._block_arm_value, $.fork_expression],
     [$.if_statement, $.expression],
     [$.match_statement, $.expression],
+    [$.block_like_statement, $.expression],
+    [$.block_like_statement, $.fork_expression],
     [$.expression, $.struct_init],
     [$.block, $.map_literal],
     [$.expression, $._member_object, $.path_expression],
@@ -787,6 +789,7 @@ export default grammar({
       $.if_statement,
       $.match_statement,
       $.block_statement,
+      $.block_like_statement,
     ),
 
     // LetStmt (grammar.ebnf): the initializer is optional — `let x: i64;` is a
@@ -880,8 +883,20 @@ export default grammar({
 
     empty_statement: $ => ';',
 
-    if_statement: $ => $.if_expression,
-    match_statement: $ => $.match_expression,
+    // A block-like form at the start of a statement ends the statement at its
+    // `}` (HEW-SPEC-2026 §12.2): a `.Ok(x)` on the next line is a new
+    // expression, never a method call on the block. The dynamic precedence
+    // makes the statement reading win over the operand reading.
+    if_statement: $ => prec.dynamic(1, $.if_expression),
+    match_statement: $ => prec.dynamic(1, $.match_expression),
+    block_like_statement: $ => prec.dynamic(1, choice(
+      $.unsafe_expression,
+      $.scope_expression,
+      $.select_expression,
+      $.race_expression,
+      alias(seq('fork', $.block), $.fork_expression),
+      $.gen_block_expression,
+    )),
 
     // A block used in statement position may carry a trailing `;`
     // (examples/test_block.hew, examples/lambda_actors.hew).
@@ -1287,6 +1302,7 @@ export default grammar({
       'select',
       '{',
       repeat($.select_arm),
+      optional(alias($._select_final_arm, $.select_arm)),
       '}',
     ),
 
@@ -1294,10 +1310,18 @@ export default grammar({
     // The source clause is spelled `from`, a contextual identifier rather
     // than a keyword (hew-parser patterns.rs `parse_select_arm`), so `from`
     // stays usable as an ordinary name everywhere else.
-    select_arm: $ => choice(
-      seq(field('binding', $.pattern), 'from', field('source', $.expression), '=>', field('body', choice($._block_arm_value, seq($.expression, ',')))),
-      seq('after', field('duration', $.expression), '=>', field('body', choice($._block_arm_value, seq($.expression, ',')))),
+    select_arm: $ => prec(3, seq(
+      $._select_arm_head,
+      field('body', choice($._block_arm_value, seq($.expression, ','))),
+    )),
+
+    _select_arm_head: $ => choice(
+      seq(field('binding', $.pattern), 'from', field('source', $.expression), '=>'),
+      seq('after', field('duration', $.expression), '=>'),
     ),
+
+    // The last expression arm may omit its comma, as in `match`.
+    _select_final_arm: $ => prec(3, seq($._select_arm_head, field('body', $.expression))),
 
     loop_statement: $ => prec(10, seq(
       optional(seq($.label, ':')),

@@ -1,0 +1,564 @@
+================================================================================
+Statement block ends before a dotted tail
+================================================================================
+
+fn f() -> Result<i64, string> {
+    { work(); }
+    .Ok(1)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (return_type
+      (generic_type
+        (identifier)
+        (type_arguments
+          (primitive_type)
+          (primitive_type))))
+    (block
+      (block_statement
+        (block
+          (expression_statement
+            (expression
+              (call_expression
+                (expression
+                  (identifier)))))))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (contextual_variant_expression
+                (identifier)))
+            (call_argument
+              (expression
+                (integer_literal)))))))))
+
+================================================================================
+Statement unsafe block ends before a dotted tail
+================================================================================
+
+fn f() -> Result<i64, string> {
+    unsafe { work(); }
+    .Ok(1)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (return_type
+      (generic_type
+        (identifier)
+        (type_arguments
+          (primitive_type)
+          (primitive_type))))
+    (block
+      (block_like_statement
+        (unsafe_expression
+          (block
+            (expression_statement
+              (expression
+                (call_expression
+                  (expression
+                    (identifier))))))))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (contextual_variant_expression
+                (identifier)))
+            (call_argument
+              (expression
+                (integer_literal)))))))))
+
+================================================================================
+Statement scope ends before a dotted tail
+================================================================================
+
+fn f() -> Result<i64, string> {
+    scope { work(); }
+    .Ok(1)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (return_type
+      (generic_type
+        (identifier)
+        (type_arguments
+          (primitive_type)
+          (primitive_type))))
+    (block
+      (block_like_statement
+        (scope_expression
+          (block
+            (expression_statement
+              (expression
+                (call_expression
+                  (expression
+                    (identifier))))))))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (contextual_variant_expression
+                (identifier)))
+            (call_argument
+              (expression
+                (integer_literal)))))))))
+
+================================================================================
+Statement select ends before a dotted tail
+================================================================================
+
+fn f() -> Result<i64, string> {
+    select { after 1ms => 0 }
+    .Ok(1)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (return_type
+      (generic_type
+        (identifier)
+        (type_arguments
+          (primitive_type)
+          (primitive_type))))
+    (block
+      (block_like_statement
+        (select_expression
+          (select_arm
+            (expression
+              (duration_literal
+                (integer_literal)))
+            (expression
+              (integer_literal)))))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (contextual_variant_expression
+                (identifier)))
+            (call_argument
+              (expression
+                (integer_literal)))))))))
+
+================================================================================
+Statement race ends before a dotted tail
+================================================================================
+
+fn f() -> Result<i64, string> {
+    race { work(), }
+    .Ok(1)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (return_type
+      (generic_type
+        (identifier)
+        (type_arguments
+          (primitive_type)
+          (primitive_type))))
+    (block
+      (block_like_statement
+        (race_expression
+          (expression
+            (call_expression
+              (expression
+                (identifier))))))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (contextual_variant_expression
+                (identifier)))
+            (call_argument
+              (expression
+                (integer_literal)))))))))
+
+================================================================================
+Statement fork block ends before a dotted tail
+================================================================================
+
+fn f() -> Result<i64, string> {
+    fork { work() }
+    .Ok(1)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (return_type
+      (generic_type
+        (identifier)
+        (type_arguments
+          (primitive_type)
+          (primitive_type))))
+    (block
+      (block_like_statement
+        (fork_expression)
+        (fork_expression
+          (expression_statement
+            (expression
+              (call_expression
+                (expression
+                  (identifier)))))))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (contextual_variant_expression
+                (identifier)))
+            (call_argument
+              (expression
+                (integer_literal)))))))))
+
+================================================================================
+Statement gen block ends before a dotted tail
+================================================================================
+
+fn f() -> Result<i64, string> {
+    gen { yield 1; }
+    .Ok(1)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (return_type
+      (generic_type
+        (identifier)
+        (type_arguments
+          (primitive_type)
+          (primitive_type))))
+    (block
+      (block_like_statement
+        (gen_block_expression
+          (block
+            (expression_statement
+              (expression
+                (yield_expression
+                  (expression
+                    (integer_literal))))))))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (contextual_variant_expression
+                (identifier)))
+            (call_argument
+              (expression
+                (integer_literal)))))))))
+
+================================================================================
+Statement if ends before a dotted tail
+================================================================================
+
+fn f() -> Result<i64, string> {
+    if c { work(); }
+    .Ok(1)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (return_type
+      (generic_type
+        (identifier)
+        (type_arguments
+          (primitive_type)
+          (primitive_type))))
+    (block
+      (if_statement
+        (if_expression
+          (expression
+            (identifier))
+          (block
+            (expression_statement
+              (expression
+                (call_expression
+                  (expression
+                    (identifier))))))))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (contextual_variant_expression
+                (identifier)))
+            (call_argument
+              (expression
+                (integer_literal)))))))))
+
+================================================================================
+Statement if let ends before a dotted tail
+================================================================================
+
+fn f() -> Result<i64, string> {
+    if let .Some(v) = o { work(); }
+    .Ok(1)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (return_type
+      (generic_type
+        (identifier)
+        (type_arguments
+          (primitive_type)
+          (primitive_type))))
+    (block
+      (if_statement
+        (if_expression
+          (let_condition
+            (pattern
+              (variant_pattern
+                (identifier)
+                (pattern
+                  (identifier))))
+            (expression
+              (identifier)))
+          (block
+            (expression_statement
+              (expression
+                (call_expression
+                  (expression
+                    (identifier))))))))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (contextual_variant_expression
+                (identifier)))
+            (call_argument
+              (expression
+                (integer_literal)))))))))
+
+================================================================================
+Statement match ends before a dotted tail
+================================================================================
+
+fn f() -> Result<i64, string> {
+    match o { .Some(v) => v, .None => 0 }
+    .Ok(1)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (return_type
+      (generic_type
+        (identifier)
+        (type_arguments
+          (primitive_type)
+          (primitive_type))))
+    (block
+      (match_statement
+        (match_expression
+          (expression
+            (identifier))
+          (match_arm
+            (pattern
+              (variant_pattern
+                (identifier)
+                (pattern
+                  (identifier))))
+            (expression
+              (identifier)))
+          (match_arm
+            (pattern
+              (variant_pattern
+                (identifier)))
+            (expression
+              (integer_literal)))))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (contextual_variant_expression
+                (identifier)))
+            (call_argument
+              (expression
+                (integer_literal)))))))))
+
+================================================================================
+Statement for ends before a dotted tail
+================================================================================
+
+fn f() -> Result<i64, string> {
+    for i in 0..2 { work(); }
+    .Ok(1)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (return_type
+      (generic_type
+        (identifier)
+        (type_arguments
+          (primitive_type)
+          (primitive_type))))
+    (block
+      (for_statement
+        (pattern
+          (identifier))
+        (expression
+          (binary_expression
+            (expression
+              (integer_literal))
+            (expression
+              (integer_literal))))
+        (block
+          (expression_statement
+            (expression
+              (call_expression
+                (expression
+                  (identifier)))))))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (contextual_variant_expression
+                (identifier)))
+            (call_argument
+              (expression
+                (integer_literal)))))))))
+
+================================================================================
+Statement while ends before a dotted tail
+================================================================================
+
+fn f() -> Result<i64, string> {
+    while c { work(); }
+    .Ok(1)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (return_type
+      (generic_type
+        (identifier)
+        (type_arguments
+          (primitive_type)
+          (primitive_type))))
+    (block
+      (while_statement
+        (expression
+          (identifier))
+        (block
+          (expression_statement
+            (expression
+              (call_expression
+                (expression
+                  (identifier)))))))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (contextual_variant_expression
+                (identifier)))
+            (call_argument
+              (expression
+                (integer_literal)))))))))
+
+================================================================================
+Statement loop ends before a dotted tail
+================================================================================
+
+fn f() -> Result<i64, string> {
+    loop { break; }
+    .Ok(1)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (return_type
+      (generic_type
+        (identifier)
+        (type_arguments
+          (primitive_type)
+          (primitive_type))))
+    (block
+      (loop_statement
+        (block
+          (break_statement)))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (contextual_variant_expression
+                (identifier)))
+            (call_argument
+              (expression
+                (integer_literal)))))))))
+
+================================================================================
+Statement defer ends before a dotted tail
+================================================================================
+
+fn f() -> Result<i64, string> {
+    defer { work(); }
+    .Ok(1)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (return_type
+      (generic_type
+        (identifier)
+        (type_arguments
+          (primitive_type)
+          (primitive_type))))
+    (block
+      (defer_statement
+        (block
+          (expression_statement
+            (expression
+              (call_expression
+                (expression
+                  (identifier)))))))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (contextual_variant_expression
+                (identifier)))
+            (call_argument
+              (expression
+                (integer_literal)))))))))

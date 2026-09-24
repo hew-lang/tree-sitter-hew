@@ -61,33 +61,32 @@ fn modes() -> Mode {
                     (identifier)
                     (expression
                       (integer_literal)))))))))
-      (expression_statement
-        (expression
-          (if_expression
-            (expression
-              (boolean_literal))
+      (if_statement
+        (if_expression
+          (expression
+            (boolean_literal))
+          (block
+            (expression_statement
+              (expression
+                (call_expression
+                  (expression
+                    (contextual_variant_expression
+                      (identifier)))
+                  (call_argument
+                    (expression
+                      (field_expression
+                        (expression
+                          (field_expression
+                            (expression
+                              (identifier))
+                            (identifier)))
+                        (identifier))))))))
+          (else_clause
             (block
               (expression_statement
                 (expression
-                  (call_expression
-                    (expression
-                      (contextual_variant_expression
-                        (identifier)))
-                    (call_argument
-                      (expression
-                        (field_expression
-                          (expression
-                            (field_expression
-                              (expression
-                                (identifier))
-                              (identifier)))
-                          (identifier))))))))
-            (else_clause
-              (block
-                (expression_statement
-                  (expression
-                    (contextual_variant_expression
-                      (identifier))))))))))))
+                  (contextual_variant_expression
+                    (identifier)))))))))))
 
 ================================================================================
 Current authority: whole-module aliases
@@ -235,36 +234,35 @@ fn guard(value: Result<i64, string>) -> i64 {
     (return_type
       (primitive_type))
     (block
-      (expression_statement
-        (expression
-          (match_expression
+      (match_statement
+        (match_expression
+          (expression
+            (identifier))
+          (match_arm
+            (pattern
+              (constructor_pattern
+                (identifier)
+                (pattern
+                  (identifier))))
+            (block
+              (expression_statement
+                (expression
+                  (return_expression
+                    (expression
+                      (identifier))))))
             (expression
-              (identifier))
-            (match_arm
-              (pattern
-                (constructor_pattern
-                  (identifier)
-                  (pattern
-                    (identifier))))
-              (block
-                (expression_statement
-                  (expression
-                    (return_expression
-                      (expression
-                        (identifier))))))
-              (expression
-                (integer_literal)))
-            (match_arm
-              (pattern
-                (constructor_pattern
-                  (identifier)
-                  (pattern)))
-              (expression
-                (integer_literal)))
-            (match_arm
-              (pattern
-                (constructor_pattern
-                  (identifier)
-                  (pattern)))
-              (expression
-                (integer_literal)))))))))
+              (integer_literal)))
+          (match_arm
+            (pattern
+              (constructor_pattern
+                (identifier)
+                (pattern)))
+            (expression
+              (integer_literal)))
+          (match_arm
+            (pattern
+              (constructor_pattern
+                (identifier)
+                (pattern)))
+            (expression
+              (integer_literal))))))))

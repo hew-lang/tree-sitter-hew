@@ -111,19 +111,18 @@ fn main() {
   (function_declaration
     name: (identifier)
     body: (block
-      (expression_statement
-        (expression
-          (scope_expression
-            body: (block
-              (let_statement
-                pattern: (pattern
-                  (identifier))
-                value: (expression
-                  (fork_expression
-                    (expression
-                      (call_expression
-                        function: (expression
-                          (identifier))))))))))))))
+      (block_like_statement
+        (scope_expression
+          body: (block
+            (let_statement
+              pattern: (pattern
+                (identifier))
+              value: (expression
+                (fork_expression
+                  (expression
+                    (call_expression
+                      function: (expression
+                        (identifier)))))))))))))
 
 ================================================================================
 Scope expression with bare fork child
@@ -141,17 +140,16 @@ fn main() {
   (function_declaration
     name: (identifier)
     body: (block
-      (expression_statement
-        (expression
-          (scope_expression
-            body: (block
-              (expression_statement
-                (expression
-                  (fork_expression
-                    (expression
-                      (call_expression
-                        function: (expression
-                          (identifier))))))))))))))
+      (block_like_statement
+        (scope_expression
+          body: (block
+            (expression_statement
+              (expression
+                (fork_expression
+                  (expression
+                    (call_expression
+                      function: (expression
+                        (identifier)))))))))))))
 
 ================================================================================
 Scope expression with fork block
@@ -171,19 +169,17 @@ fn main() {
   (function_declaration
     name: (identifier)
     body: (block
-      (expression_statement
-        (expression
-          (scope_expression
-            body: (block
-              (expression_statement
-                (expression
-                  (fork_expression
-                    (block
-                      (expression_statement
-                        (expression
-                          (call_expression
-                            function: (expression
-                              (identifier))))))))))))))))
+      (block_like_statement
+        (scope_expression
+          body: (block
+            (block_like_statement
+              (fork_expression)
+              (fork_expression
+                (expression_statement
+                  (expression
+                    (call_expression
+                      function: (expression
+                        (identifier)))))))))))))
 
 ================================================================================
 Scope expression with a deadline and recovery
@@ -271,15 +267,14 @@ fn main() {
   (function_declaration
     name: (identifier)
     body: (block
-      (expression_statement
-        (expression
-          (scope_expression
-            body: (block
-              (expression_statement
-                (expression
-                  (call_expression
-                    function: (expression
-                      (identifier))))))))))))
+      (block_like_statement
+        (scope_expression
+          body: (block
+            (expression_statement
+              (expression
+                (call_expression
+                  function: (expression
+                    (identifier)))))))))))
 
 ================================================================================
 Machine with events header and transitions (v0.5)
