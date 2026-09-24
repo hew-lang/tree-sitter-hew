@@ -35,6 +35,8 @@ export default grammar({
   conflicts: $ => [
     [$.if_statement, $.expression],
     [$.match_statement, $.expression],
+    [$.block_like_statement, $.expression],
+    [$.block_like_statement, $.fork_expression],
     [$.expression, $.struct_init],
     [$.block, $.map_literal],
     [$.expression, $._member_object, $.path_expression],
@@ -799,6 +801,7 @@ export default grammar({
       $.if_statement,
       $.match_statement,
       $.block_statement,
+      $.block_like_statement,
     ),
 
     // LetStmt (grammar.ebnf): the initializer is optional — `let x: i64;` is a
@@ -877,8 +880,20 @@ export default grammar({
 
     empty_statement: $ => ';',
 
-    if_statement: $ => $.if_expression,
-    match_statement: $ => $.match_expression,
+    // A block-like form at the start of a statement ends the statement at its
+    // `}` (HEW-SPEC-2026 §12.2): a `.Ok(x)` on the next line is a new
+    // expression, never a method call on the block. The dynamic precedence
+    // makes the statement reading win over the operand reading.
+    if_statement: $ => prec.dynamic(1, $.if_expression),
+    match_statement: $ => prec.dynamic(1, $.match_expression),
+    block_like_statement: $ => prec.dynamic(1, choice(
+      $.unsafe_expression,
+      $.scope_expression,
+      $.select_expression,
+      $.race_expression,
+      alias(seq('fork', $.block), $.fork_expression),
+      $.gen_block_expression,
+    )),
 
     // A block used in statement position may carry a trailing `;`
     // (examples/test_block.hew, examples/lambda_actors.hew).

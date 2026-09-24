@@ -199,30 +199,29 @@ fn main() -> i64 {
             (primitive_type)
             (primitive_type)))
         (block))
-      (expression_statement
-        (expression
-          (match_expression
-            (expression
-              (call_expression
+      (match_statement
+        (match_expression
+          (expression
+            (call_expression
+              (expression
+                (identifier))
+              (call_argument
                 (expression
-                  (identifier))
-                (call_argument
-                  (expression
-                    (unit_expression)))))
-            (match_arm
-              (pattern
-                (constructor_pattern
-                  (identifier)
-                  (pattern)))
-              (expression
-                (integer_literal)))
-            (match_arm
-              (pattern
-                (constructor_pattern
-                  (identifier)
-                  (pattern)))
-              (expression
-                (integer_literal)))))))))
+                  (unit_expression)))))
+          (match_arm
+            (pattern
+              (constructor_pattern
+                (identifier)
+                (pattern)))
+            (expression
+              (integer_literal)))
+          (match_arm
+            (pattern
+              (constructor_pattern
+                (identifier)
+                (pattern)))
+            (expression
+              (integer_literal))))))))
 
 ================================================================================
 RC1 grammar parity: rest patterns, spaced bytes, block conditions, and handlers
@@ -313,14 +312,13 @@ fn main() {
               (integer_literal))
             (expression
               (integer_literal)))))
-      (expression_statement
-        (expression
-          (if_expression
-            (block
-              (expression_statement
-                (expression
-                  (boolean_literal))))
-            (block))))
+      (if_statement
+        (if_expression
+          (block
+            (expression_statement
+              (expression
+                (boolean_literal))))
+          (block)))
       (let_statement
         (pattern
           (identifier))
@@ -344,25 +342,24 @@ fn main() {
               (identifier)
               (expression
                 (integer_literal))))))
-      (expression_statement
-        (expression
-          (match_expression
-            (expression
-              (identifier))
-            (match_arm
-              (pattern
-                (struct_pattern
+      (match_statement
+        (match_expression
+          (expression
+            (identifier))
+          (match_arm
+            (pattern
+              (struct_pattern
+                (identifier)
+                (pattern_field
                   (identifier)
-                  (pattern_field
-                    (identifier)
-                    (pattern
-                      (struct_pattern
-                        (identifier)
-                        (pattern_field
-                          (identifier)))))))
-              (expression
-                (interpolated_string
-                  (fstring_start)
-                  (interpolation
-                    (expression
-                      (integer_literal))))))))))))
+                  (pattern
+                    (struct_pattern
+                      (identifier)
+                      (pattern_field
+                        (identifier)))))))
+            (expression
+              (interpolated_string
+                (fstring_start)
+                (interpolation
+                  (expression
+                    (integer_literal)))))))))))

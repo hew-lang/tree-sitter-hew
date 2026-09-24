@@ -4708,6 +4708,10 @@
         {
           "type": "SYMBOL",
           "name": "block_statement"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "block_like_statement"
         }
       ]
     },
@@ -5310,12 +5314,67 @@
       "value": ";"
     },
     "if_statement": {
-      "type": "SYMBOL",
-      "name": "if_expression"
+      "type": "PREC_DYNAMIC",
+      "value": 1,
+      "content": {
+        "type": "SYMBOL",
+        "name": "if_expression"
+      }
     },
     "match_statement": {
-      "type": "SYMBOL",
-      "name": "match_expression"
+      "type": "PREC_DYNAMIC",
+      "value": 1,
+      "content": {
+        "type": "SYMBOL",
+        "name": "match_expression"
+      }
+    },
+    "block_like_statement": {
+      "type": "PREC_DYNAMIC",
+      "value": 1,
+      "content": {
+        "type": "CHOICE",
+        "members": [
+          {
+            "type": "SYMBOL",
+            "name": "unsafe_expression"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "scope_expression"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "select_expression"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "race_expression"
+          },
+          {
+            "type": "ALIAS",
+            "content": {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": "fork"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "block"
+                }
+              ]
+            },
+            "named": true,
+            "value": "fork_expression"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "gen_block_expression"
+          }
+        ]
+      }
     },
     "block_statement": {
       "type": "SYMBOL",
@@ -9485,6 +9544,14 @@
     [
       "match_statement",
       "expression"
+    ],
+    [
+      "block_like_statement",
+      "expression"
+    ],
+    [
+      "block_like_statement",
+      "fork_expression"
     ],
     [
       "expression",

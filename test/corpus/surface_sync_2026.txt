@@ -702,25 +702,24 @@ fn handle(handle: i64) -> i64 { handle }
                     (identifier)))))
             (identifier)
             (block
-              (expression_statement
-                (expression
-                  (if_expression
-                    (expression
-                      (binary_expression
-                        (expression
-                          (field_expression
-                            (expression
-                              (identifier))
-                            (identifier)))
-                        (expression
-                          (integer_literal))))
-                    (block
-                      (expression_statement
-                        (expression
-                          (return_expression
-                            (expression
-                              (string_literal
-                                (string_content))))))))))
+              (if_statement
+                (if_expression
+                  (expression
+                    (binary_expression
+                      (expression
+                        (field_expression
+                          (expression
+                            (identifier))
+                          (identifier)))
+                      (expression
+                        (integer_literal))))
+                  (block
+                    (expression_statement
+                      (expression
+                        (return_expression
+                          (expression
+                            (string_literal
+                              (string_content)))))))))
               (expression_statement
                 (expression
                   (string_literal
@@ -922,21 +921,21 @@ fn f(value: i64) {
                   (expression
                     (identifier))))))))
       (empty_statement)
-      (expression_statement
-        (expression
-          (if_expression
-            (expression
-              (binary_expression
-                (expression
-                  (identifier))
-                (expression
-                  (integer_literal))))
-            (block
-              (expression_statement
-                (expression
-                  (call_expression
-                    (expression
-                      (identifier)))))))))
+      (if_statement
+        (if_expression
+          (expression
+            (binary_expression
+              (expression
+                (identifier))
+              (expression
+                (integer_literal))))
+          (block
+            (expression_statement
+              (expression
+                (call_expression
+                  (expression
+                    (identifier))))))))
+      (empty_statement)
       (let_statement
         (pattern
           (identifier))
