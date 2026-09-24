@@ -52,35 +52,34 @@ fn current(value: Outcome) -> net.Result<string> {
                       (identifier)))
                   (identifier))
                 (primitive_type))))))
-      (expression_statement
-        (expression
-          (match_expression
+      (match_statement
+        (match_expression
+          (expression
+            (identifier))
+          (match_arm
+            (pattern
+              (variant_pattern
+                (identifier)))
             (expression
-              (identifier))
-            (match_arm
-              (pattern
-                (variant_pattern
-                  (identifier)))
-              (expression
-                (field_expression
-                  (expression
-                    (field_expression
-                      (expression
-                        (identifier))
-                      (identifier)))
-                  (identifier))))
-            (match_arm
-              (pattern
-                (variant_pattern
-                  (identifier)))
-              (expression
-                (field_expression
-                  (expression
-                    (field_expression
-                      (expression
-                        (identifier))
-                      (identifier)))
-                  (identifier))))))))))
+              (field_expression
+                (expression
+                  (field_expression
+                    (expression
+                      (identifier))
+                    (identifier)))
+                (identifier))))
+          (match_arm
+            (pattern
+              (variant_pattern
+                (identifier)))
+            (expression
+              (field_expression
+                (expression
+                  (field_expression
+                    (expression
+                      (identifier))
+                    (identifier)))
+                (identifier)))))))))
 
 ================================================================================
 Legacy path separators are rejected
