@@ -286,9 +286,9 @@ Machine with events header and transitions (v0.5)
 ================================================================================
 
 machine Counter {
-    events { Inc, Reset, }
-    state Zero,
-    state NonZero { value: i64, }
+    events { Inc; Reset; }
+    state Zero;
+    state NonZero { value: i64; }
     on Inc: Zero => NonZero { NonZero { value: 1 } }
     on Inc: NonZero => NonZero reenter { NonZero { value: self.value + 1 } }
     on Reset: NonZero => Zero { Zero }
@@ -360,9 +360,9 @@ Machine with wildcard transitions (v0.5)
 ================================================================================
 
 machine Toggle {
-    events { Flip, Reset, }
-    state Off,
-    state On,
+    events { Flip; Reset; }
+    state Off;
+    state On;
     on Flip: Off => On { On }
     on Flip: On => Off { Off }
     on Reset: _ => Off { Off }
@@ -411,10 +411,10 @@ Machine with emits block and emit statement (v0.5)
 ================================================================================
 
 machine Signal {
-    events { Fire, }
-    emits { Fired, }
-    state Ready,
-    state Done,
+    events { Fire; }
+    emits { Fired; }
+    state Ready;
+    state Done;
     on Fire: Ready => Done {
         emit Fired;
         Done
@@ -454,9 +454,9 @@ Machine with payload binding and when guard (v0.5)
 ================================================================================
 
 machine Bucket {
-    events { Add { amount: i64, } Drain, }
-    state Empty,
-    state Full { level: i64, }
+    events { Add { amount: i64; } Drain; }
+    state Empty;
+    state Full { level: i64; }
     on Add(amount): Empty => Full when amount > 0 { Full { level: amount } }
     default { state }
 }
@@ -508,12 +508,12 @@ Machine with state entry and exit hooks (v0.5)
 ================================================================================
 
 machine Lamp {
-    events { On, Off, }
+    events { On; Off; }
     state Dark {
         entry { log("on"); }
         exit { log("off"); }
     }
-    state Bright,
+    state Bright;
     on On: Dark => Bright { Bright }
     on Off: Bright => Dark { Dark }
 }

@@ -224,14 +224,14 @@ G3 Visibility — pub type and pub enum
 ================================================================================
 
 pub type Point {
-    x: i64,
-    y: i64,
+    x: i64;
+    y: i64;
 }
 
 pub enum Color {
-    Red,
-    Green,
-    Blue,
+    Red;
+    Green;
+    Blue;
 }
 
 --------------------------------------------------------------------------------
@@ -310,9 +310,9 @@ G5 Supervisor — intensity within duration
 ================================================================================
 
 supervisor Sup {
-    strategy: one_for_all,
-    intensity: 5 within 10s,
-    child w: Worker,
+    strategy: one_for_all;
+    intensity: 5 within 10s;
+    child w: Worker;
 }
 
 --------------------------------------------------------------------------------
@@ -335,7 +335,7 @@ G5 Supervisor — construction-time params
 ================================================================================
 
 supervisor App(config: AppConfig) {
-    child worker: Worker,
+    child worker: Worker;
 }
 
 --------------------------------------------------------------------------------
@@ -460,13 +460,13 @@ fn m() {
                       (identifier))))))))))))
 
 ================================================================================
-A2 Actor field — bare, let, and var forms
+A2 Actor fields require let or var
 ================================================================================
 
 actor Counter {
-    count: i64,
-    let label: string,
-    var total: i64 = 0,
+    var count: i64;
+    let label: string;
+    var total: i64 = 0;
 }
 
 --------------------------------------------------------------------------------
@@ -642,8 +642,8 @@ Wire struct — #[wire] attribute, @N field numbers, modifiers, reserved
 ================================================================================
 
 #[wire(version = 2)] type Telemetry {
-    samples: f64 @1 repeated,
-    label: string @2 optional,
+    samples: f64 @1 repeated;
+    label: string @2 optional;
     reserved @3, @4;
 }
 

@@ -77,7 +77,7 @@ Receivers in type body methods
 ================================================================================
 
 type Handle {
-    fd: i64,
+    fd: i64;
     fn close(consume self) { hew_close(self.fd); }
     fn id(self) -> i64 { self.fd }
 }
@@ -494,21 +494,21 @@ fn main() {
                   (integer_literal))))))))))
 
 ================================================================================
-Structural members use comma separators
+Structural members use declaration terminators
 ================================================================================
 
 pub enum Delivery {
-    Accepted,
-    Discarded(i64),
-    Started { handle: i64, label: string },
+    Accepted;
+    Discarded(i64);
+    Started { handle: i64; label: string; }
 }
 
-type Point { x: i64, y: i64 }
+type Point { x: i64; y: i64; }
 
 actor Gate {
-    var permits: i64,
-    let label: string = "gate",
-    mailbox 1,
+    var permits: i64;
+    let label: string = "gate";
+    mailbox 1;
 }
 
 --------------------------------------------------------------------------------
@@ -555,14 +555,14 @@ actor Gate {
       (integer_literal))))
 
 ================================================================================
-Machine members use comma separators and typed emits
+Machine members use declaration terminators and typed emits
 ================================================================================
 
 machine Cycle {
-    events { Tick, Begin { nonce: i64, label: string }, }
-    emits { Trace { text: string } }
-    state Ready { label: string, }
-    state Done,
+    events { Tick; Begin { nonce: i64; label: string; } }
+    emits { Trace { text: string; } }
+    state Ready { label: string; }
+    state Done;
     on Tick: Ready => Done { Done }
 }
 
@@ -605,7 +605,7 @@ machine Cycle {
             (identifier)))))))
 
 ================================================================================
-Semicolon-separated enum variants no longer parse
+Semicolon-separated enum variants parse
 ================================================================================
 
 enum Colour {
@@ -619,11 +619,10 @@ enum Colour {
   (enum_declaration
     name: (identifier)
     body: (enum_body
-      (ERROR
-        (identifier))
       (variant
         name: (identifier))
-      (ERROR))))
+      (variant
+        name: (identifier)))))
 
 ================================================================================
 Defer block needs no semicolon
@@ -814,15 +813,15 @@ fn f() {
                     (string_content)))))))))))
 
 ================================================================================
-Supervisor members use comma separators
+Supervisor members use declaration terminators
 ================================================================================
 
 supervisor Tree {
-    strategy: one_for_one,
-    intensity: 3 within 10s,
-    child w1: Worker(1) restart: permanent,
-    pool workers: Worker count: 4 shutdown: 5s,
-    child last: Worker
+    strategy: one_for_one;
+    intensity: 3 within 10s;
+    child w1: Worker(1) restart: permanent;
+    pool workers: Worker count: 4 stop: 5s;
+    child last: Worker;
 }
 
 --------------------------------------------------------------------------------
@@ -849,7 +848,7 @@ supervisor Tree {
       (child_clause
         (integer_literal))
       (child_clause
-        (shutdown_directive
+        (expression
           (duration_literal
             (integer_literal)))))
     (child_spec
@@ -857,15 +856,15 @@ supervisor Tree {
       (identifier))))
 
 ================================================================================
-Body-less machine transitions end with a comma
+Bodyless machine transitions end with a semicolon
 ================================================================================
 
 machine Run {
-    events { Go, Stop }
-    state Idle,
-    state Running,
-    on Go: Idle => Running,
-    on Stop: _ => Idle
+    events { Go; Stop; }
+    state Idle;
+    state Running;
+    on Go: Idle => Running;
+    on Stop: _ => Idle;
 }
 
 --------------------------------------------------------------------------------

@@ -3,10 +3,10 @@
 ; ---- Keywords ----
 [
   "fn" "let" "var" "const" "mut" "pub" "return" "if" "else" "match" "for" "while"
-  "loop" "break" "continue" "in" "spawn" "await" "await_restart" "select" "race"
+  "loop" "break" "continue" "in" "spawn" "await" "select" "race"
   "import" "extern" "gen" "yield" "scope" "move" "fork"
   "type" "where" "dyn" "unsafe" "defer"
-  "init" "child" "pool" "restart" "shutdown" "wired_to"
+  "init" "child" "pool" "restart" "wired_to"
   "package" "after"
   "reserved" "optional" "deprecated" "default"
 ] @keyword
@@ -21,6 +21,7 @@
 (private_capture_list "capture" @keyword)
 (private_capture (identifier) @variable)
 (failure_return "fails" @keyword)
+(child_clause "stop" @keyword)
 
 "receive" @keyword
 
@@ -50,7 +51,6 @@
 
 [
   "permanent" "transient" "temporary"
-  "brutal_kill" "infinity"
 ] @constant.builtin
 
 ; ---- Attributes ----

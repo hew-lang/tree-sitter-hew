@@ -33,6 +33,8 @@ export default grammar({
   word: $ => $.identifier,
 
   conflicts: $ => [
+    [$._block_arm_value, $.expression],
+    [$._block_arm_value, $.fork_expression],
     [$.if_statement, $.expression],
     [$.match_statement, $.expression],
     [$.expression, $.struct_init],
@@ -176,7 +178,7 @@ export default grammar({
     )), '}'),
 
     // StructFieldDecl / WireStructFieldDecl (grammar.ebnf:68, 76):
-    // `Attribute* Ident ":" Type ("@" IntLit)? WireAttr* ","?`.
+    // `Attribute* Ident ":" Type ("@" IntLit)? WireAttr* ";"`.
     // The real parser attaches `@N` tags and trailing wire modifiers to a normal
     // `type` declaration when a `#[wire]` attribute is present.
     struct_field: $ => seq(
@@ -186,7 +188,7 @@ export default grammar({
       field('type', $._type),
       optional(seq('@', $.integer_literal)),
       repeat($.wire_attribute),
-      optional(','),
+      ';',
     ),
 
     // `type Name(T, T, ...);` — positional/tuple record. The bare `record`
@@ -213,14 +215,15 @@ export default grammar({
       field('body', $.enum_body),
     ),
 
-    enum_body: $ => seq('{', optional(seq(sep1($.variant, ','), optional(','))), '}'),
+    enum_body: $ => seq('{', repeat($.variant), '}'),
 
     variant: $ => seq(
       field('name', $.identifier),
-      optional(choice(
-        seq('(', sep1($._type, ','), ')'),
+      choice(
+        ';',
+        seq('(', sep1($._type, ','), optional(','), ')', ';'),
         seq('{', repeat($.struct_field), '}'),
-      )),
+      ),
     ),
 
     // NOTE: the legacy bare `wire` keyword item form (`wire struct/enum/type
@@ -414,7 +417,7 @@ export default grammar({
       'mailbox',
       $.integer_literal,
       optional($.overflow_policy),
-      optional(','),
+      ';',
     ),
 
     overflow_policy: $ => seq(
@@ -428,14 +431,14 @@ export default grammar({
       seq('coalesce', '(', $.identifier, ')', optional(seq('fallback', $.overflow_kind))),
     ),
 
-    // Actor state uses the same comma separator as record fields.
+    // Actor state uses the same declaration terminator as record fields.
     actor_field: $ => seq(
-      optional(choice('let', 'var')),
+      choice('let', 'var'),
       field('name', $.identifier),
       ':',
       field('type', $._type),
       optional(seq('=', $.expression)),
-      ',',
+      ';',
     ),
 
     receive_function: $ => seq(
@@ -487,8 +490,8 @@ export default grammar({
     //   "intensity" ":" IntLit "within" DurationLit
     // `within` is a contextual keyword used only here. DurationLit is reused.
     supervisor_field: $ => choice(
-      seq('strategy', ':', field('strategy', $.supervisor_strategy_value), optional(',')),
-      seq('intensity', ':', field('restarts', $.integer_literal), 'within', field('window', $.duration_literal), optional(',')),
+      seq('strategy', ':', field('strategy', $.supervisor_strategy_value), ';'),
+      seq('intensity', ':', field('restarts', $.integer_literal), 'within', field('window', $.duration_literal), ';'),
     ),
 
     child_spec: $ => seq(
@@ -499,24 +502,14 @@ export default grammar({
       field('actor', $._type),
       optional(seq('(', optional(sep1($.call_argument, ',')), optional(','), ')')),
       repeat($.child_clause),
-      // Child specs are structural members: `,`-separated, the last one may
-      // omit the comma (hew-parser actor_machine_supervisor.rs
-      // `expect_structural_separator`).
-      optional(','),
+      ';',
     ),
 
     child_clause: $ => choice(
       seq('count', ':', $.integer_literal),
       seq('restart', ':', choice('permanent', 'transient', 'temporary')),
-      seq('shutdown', ':', $.shutdown_directive),
+      seq('stop', ':', $.expression),
       seq('wired_to', ':', '{', repeat(seq($.identifier, optional(seq(':', $.identifier)), optional(','))), '}'),
-    ),
-
-    // @sync:shutdown_directives
-    shutdown_directive: $ => choice(
-      $.duration_literal,
-      'brutal_kill',
-      'infinity',
     ),
 
     // @sync:duration_suffixes
@@ -540,7 +533,7 @@ export default grammar({
       '}',
     ),
 
-    // Event and state declarations share the structural comma separator.
+    // Bodyless event and state declarations end with semicolons.
     machine_events_header: $ => seq(
       'events',
       '{',
@@ -550,11 +543,10 @@ export default grammar({
 
     machine_event_decl: $ => seq(
       field('name', $.identifier),
-      optional(seq('{', repeat($.struct_field), '}')),
-      optional(','),
+      choice(';', seq('{', repeat($.struct_field), '}')),
     ),
 
-    // Output events use comma-separated names.
+    // Output events use the same declaration terminators as inputs.
     // Output events carry the same optional payload shape as inputs
     // (hew-parser actor_machine_supervisor.rs `parse_machine_event_fields`).
     machine_emits_header: $ => seq(
@@ -568,7 +560,8 @@ export default grammar({
     machine_state: $ => seq(
       'state',
       field('name', $.identifier),
-      optional(
+      choice(
+        ';',
         seq(
           '{',
           repeat($.struct_field),
@@ -579,7 +572,6 @@ export default grammar({
           '}',
         ),
       ),
-      optional(','),
     ),
 
     // [ "initial" ] StateDecl  — depth-1 composite substate
@@ -596,7 +588,7 @@ export default grammar({
     // Target = Ident | "." Ident | "_"  (same fn: the "." Ident contextual
     //   form is the bare-variant target the checker's fix-it steers authors
     //   towards; "._" is rejected, so the wildcard stays plain "_")
-    // TransitionBody = ","? | "{" FieldInitList "}" | Block
+    // TransitionBody = ";" | "{" FieldInitList "}" | Block
     //   The `{ FieldInitList }` form supplies the target state's payload, e.g.
     //   `=> Holding { handle: handle }` or `=> .Holding { handle: handle }`.
     machine_transition: $ => seq(
@@ -609,11 +601,9 @@ export default grammar({
       field('target', choice($.identifier, $.contextual_variant_expression, '_')),
       optional('reenter'),
       optional(seq('when', field('guard', $.expression))),
-      // A body-less transition is a structural member ending in `,` or the
-      // closing brace (hew-parser actor_machine_supervisor.rs
-      // `parse_machine_transition` → `expect_structural_separator`).
+      // A bodyless transition needs a semicolon; a body ends at `}`.
       choice(
-        optional(','),
+        ';',
         field('payload', seq(
           '{',
           sep1($.field_initializer, ','),
@@ -667,10 +657,7 @@ export default grammar({
 
     type_parameters: $ => seq('<', sep1($.type_parameter, ','), '>'),
 
-    type_parameter: $ => seq(
-      $.identifier,
-      optional(seq(':', $.trait_bounds)),
-    ),
+    type_parameter: $ => seq($.identifier, optional(seq(':', $.trait_bounds))),
 
     type_arguments: $ => seq('<', sep1($._type_argument, ','), '>'),
 
@@ -680,6 +667,7 @@ export default grammar({
     // bounds; allowing it in any type-arg list is harmlessly permissive.
     _type_argument: $ => choice(
       $._type,
+      $.integer_literal,
       $.associated_type_binding,
     ),
 
@@ -834,16 +822,31 @@ export default grammar({
       ';',
     ),
 
-    match_arm: $ => prec(3, seq(
+    _match_arm_head: $ => seq(
       field('pattern', $.pattern),
       // The compiler accepts a block-valued, including diverging, match guard.
       optional(seq('if', field('guard', choice($.expression, $.block)))),
       '=>',
-      field('value', choice(
-        seq($.block, optional(',')),
-        seq($.expression, optional(',')),
-      )),
+    ),
+
+    match_arm: $ => prec(3, seq(
+      $._match_arm_head,
+      field('value', choice($._block_arm_value, seq($.expression, ','))),
     )),
+
+    _match_final_arm: $ => prec(3, seq($._match_arm_head, field('value', $.expression))),
+
+    // Match and select share the compiler's source-token classification:
+    // brace-bodied expressions end at `}`, while other expressions need `,`.
+    _block_arm_value: $ => choice(
+      $.block,
+      $.if_expression,
+      $.match_expression,
+      $.scope_expression,
+      $.unsafe_expression,
+      $.select_expression,
+      seq('fork', $.block),
+    ),
 
 
 
@@ -903,7 +906,6 @@ export default grammar({
       $.try_expression,
       $.cast_expression,
       $.await_expression,
-      $.await_restart_expression,
       $.clone_expression,
       $.struct_init,
       $.generic_struct_init,
@@ -1096,14 +1098,6 @@ export default grammar({
       choice($.expression, $.block),
     )),
 
-    // `await_restart <supervised-child accessor>` suspends until a supervised
-    // child restarts (hew commit 82015e997; expressions.rs:134-138). Prefix
-    // operator, same shape/precedence as `await`.
-    await_restart_expression: $ => prec(PREC.UNARY, seq(
-      'await_restart',
-      $.expression,
-    )),
-
     // `clone <operand>` prefix duplication (grammar.ebnf:242-248). Contextual:
     // `clone` is only a prefix when an operand follows; `x.clone()`, `fn clone()`,
     // and `clone(args)` keep `clone` as an ordinary identifier (tree-sitter keyword
@@ -1223,6 +1217,7 @@ export default grammar({
       field('value', choice($.expression, $.block)),
       '{',
       repeat($.match_arm),
+      optional(alias($._match_final_arm, $.match_arm)),
       '}',
     ),
 
@@ -1300,8 +1295,8 @@ export default grammar({
     // than a keyword (hew-parser patterns.rs `parse_select_arm`), so `from`
     // stays usable as an ordinary name everywhere else.
     select_arm: $ => choice(
-      seq(field('binding', $.pattern), 'from', field('source', $.expression), '=>', field('body', choice($.block, $.expression)), optional(',')),
-      seq('after', field('duration', $.expression), '=>', field('body', choice($.block, $.expression)), optional(',')),
+      seq(field('binding', $.pattern), 'from', field('source', $.expression), '=>', field('body', choice($._block_arm_value, seq($.expression, ',')))),
+      seq('after', field('duration', $.expression), '=>', field('body', choice($._block_arm_value, seq($.expression, ',')))),
     ),
 
     loop_statement: $ => prec(10, seq(

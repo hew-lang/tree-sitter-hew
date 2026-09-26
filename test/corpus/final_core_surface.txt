@@ -82,7 +82,7 @@ fn stream_values(stream: Stream<i64>) {
                     (identifier)))))))))))
 
 ================================================================================
-Selection, await-restart, and consume-self remain structural
+Selection, restart observation, and consume-self remain structural
 ================================================================================
 trait Owned {
     fn finish(consume self) -> i64;
@@ -93,8 +93,8 @@ fn choose(task: Task<i64>, sup: Supervisor) -> i64 {
         value from await task => value,
         after 1s => 0,
     };
-    let restarted = await_restart sup.child;
-    selected + restarted
+    restarted(sup.child);
+    selected
 }
 
 --------------------------------------------------------------------------------
@@ -145,29 +145,26 @@ fn choose(task: Task<i64>, sup: Supervisor) -> i64 {
                   (integer_literal)))
               (expression
                 (integer_literal))))))
-      (let_statement
-        (pattern
-          (identifier))
-        (expression
-          (await_restart_expression
-            (expression
-              (field_expression
-                (expression
-                  (identifier))
-                (identifier))))))
       (expression_statement
         (expression
-          (binary_expression
+          (call_expression
             (expression
               (identifier))
-            (expression
-              (identifier))))))))
+            (call_argument
+              (expression
+                (field_expression
+                  (expression
+                    (identifier))
+                  (identifier)))))))
+      (expression_statement
+        (expression
+          (identifier))))))
 
 ================================================================================
 Generic supervisor type parameters remain structural
 ================================================================================
 supervisor Pool<Job: Send> {
-    strategy: one_for_one,
+    strategy: one_for_one;
 }
 
 --------------------------------------------------------------------------------
@@ -393,13 +390,13 @@ Typed supervisor children, associated projections and machine constants
 trait Source { type Item; }
 type Text {}
 impl Source for Text { type Item = string; }
-type Message { body: <Text as Source>.Item }
-actor Worker<T> { var value: Option<T> = .None, }
-supervisor Group<T> { child worker: Worker<T>, }
+type Message { body: <Text as Source>.Item; }
+actor Worker<T> { var value: Option<T> = .None; }
+supervisor Group<T> { child worker: Worker<T>; }
 machine Fuse<const MAX: usize = 3> {
-    events { Hit, }
-    state Open,
-    on Hit: Open => Open,
+    events { Hit; }
+    state Open;
+    on Hit: Open => Open;
 }
 --------------------------------------------------------------------------------
 
