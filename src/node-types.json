@@ -146,6 +146,10 @@
             "named": true
           },
           {
+            "type": "projection_type",
+            "named": true
+          },
+          {
             "type": "scoped_type",
             "named": true
           },
@@ -269,6 +273,10 @@
           "named": true
         },
         {
+          "type": "projection_type",
+          "named": true
+        },
+        {
           "type": "return_type",
           "named": true
         },
@@ -367,6 +375,10 @@
         },
         {
           "type": "primitive_type",
+          "named": true
+        },
+        {
+          "type": "projection_type",
           "named": true
         },
         {
@@ -520,6 +532,10 @@
           "named": true
         },
         {
+          "type": "projection_type",
+          "named": true
+        },
+        {
           "type": "scoped_type",
           "named": true
         },
@@ -597,6 +613,10 @@
             "named": true
           },
           {
+            "type": "projection_type",
+            "named": true
+          },
+          {
             "type": "scoped_type",
             "named": true
           },
@@ -658,6 +678,10 @@
         },
         {
           "type": "primitive_type",
+          "named": true
+        },
+        {
+          "type": "projection_type",
           "named": true
         },
         {
@@ -758,21 +782,6 @@
     }
   },
   {
-    "type": "await_restart_expression",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "expression",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "bare_generic_call_expression",
     "named": true,
     "fields": {
@@ -825,6 +834,10 @@
         },
         {
           "type": "primitive_type",
+          "named": true
+        },
+        {
+          "type": "projection_type",
           "named": true
         },
         {
@@ -1005,6 +1018,10 @@
           "named": true
         },
         {
+          "type": "projection_type",
+          "named": true
+        },
+        {
           "type": "scoped_type",
           "named": true
         },
@@ -1079,6 +1096,10 @@
         "multiple": false,
         "required": false,
         "types": [
+          {
+            "type": "block",
+            "named": true
+          },
           {
             "type": "expression",
             "named": true
@@ -1173,6 +1194,10 @@
             "named": true
           },
           {
+            "type": "projection_type",
+            "named": true
+          },
+          {
             "type": "scoped_type",
             "named": true
           },
@@ -1215,15 +1240,15 @@
       "required": false,
       "types": [
         {
+          "type": "expression",
+          "named": true
+        },
+        {
           "type": "identifier",
           "named": true
         },
         {
           "type": "integer_literal",
-          "named": true
-        },
-        {
-          "type": "shutdown_directive",
           "named": true
         }
       ]
@@ -1238,7 +1263,59 @@
         "required": true,
         "types": [
           {
+            "type": "actor_type",
+            "named": true
+          },
+          {
+            "type": "array_type",
+            "named": true
+          },
+          {
+            "type": "borrow_type",
+            "named": true
+          },
+          {
+            "type": "function_type",
+            "named": true
+          },
+          {
+            "type": "generic_type",
+            "named": true
+          },
+          {
             "type": "identifier",
+            "named": true
+          },
+          {
+            "type": "pointer_type",
+            "named": true
+          },
+          {
+            "type": "primitive_type",
+            "named": true
+          },
+          {
+            "type": "projection_type",
+            "named": true
+          },
+          {
+            "type": "scoped_type",
+            "named": true
+          },
+          {
+            "type": "slice_type",
+            "named": true
+          },
+          {
+            "type": "trait_object_type",
+            "named": true
+          },
+          {
+            "type": "tuple_type",
+            "named": true
+          },
+          {
+            "type": "unit_type",
             "named": true
           }
         ]
@@ -1332,6 +1409,10 @@
           },
           {
             "type": "primitive_type",
+            "named": true
+          },
+          {
+            "type": "projection_type",
             "named": true
           },
           {
@@ -1616,10 +1697,6 @@
         },
         {
           "type": "await_expression",
-          "named": true
-        },
-        {
-          "type": "await_restart_expression",
           "named": true
         },
         {
@@ -1930,6 +2007,10 @@
             "named": true
           },
           {
+            "type": "projection_type",
+            "named": true
+          },
+          {
             "type": "scoped_type",
             "named": true
           },
@@ -2181,6 +2262,10 @@
           "named": true
         },
         {
+          "type": "projection_type",
+          "named": true
+        },
+        {
           "type": "return_type",
           "named": true
         },
@@ -2284,6 +2369,10 @@
             "named": true
           },
           {
+            "type": "projection_type",
+            "named": true
+          },
+          {
             "type": "scoped_type",
             "named": true
           },
@@ -2378,6 +2467,10 @@
         },
         {
           "type": "primitive_type",
+          "named": true
+        },
+        {
+          "type": "projection_type",
           "named": true
         },
         {
@@ -2490,6 +2583,10 @@
         },
         {
           "type": "primitive_type",
+          "named": true
+        },
+        {
+          "type": "projection_type",
           "named": true
         },
         {
@@ -2609,7 +2706,7 @@
         ]
       },
       "pattern": {
-        "multiple": false,
+        "multiple": true,
         "required": false,
         "types": [
           {
@@ -2619,7 +2716,7 @@
         ]
       },
       "value": {
-        "multiple": false,
+        "multiple": true,
         "required": false,
         "types": [
           {
@@ -2628,6 +2725,16 @@
           }
         ]
       }
+    },
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "expression",
+          "named": true
+        }
+      ]
     }
   },
   {
@@ -2686,6 +2793,10 @@
             "named": true
           },
           {
+            "type": "projection_type",
+            "named": true
+          },
+          {
             "type": "scoped_type",
             "named": true
           },
@@ -2741,6 +2852,10 @@
           },
           {
             "type": "primitive_type",
+            "named": true
+          },
+          {
+            "type": "projection_type",
             "named": true
           },
           {
@@ -3052,6 +3167,10 @@
             "named": true
           },
           {
+            "type": "projection_type",
+            "named": true
+          },
+          {
             "type": "scoped_type",
             "named": true
           },
@@ -3133,6 +3252,10 @@
           },
           {
             "type": "primitive_type",
+            "named": true
+          },
+          {
+            "type": "projection_type",
             "named": true
           },
           {
@@ -3595,6 +3718,30 @@
           {
             "type": "expression",
             "named": true
+          },
+          {
+            "type": "fork",
+            "named": false
+          },
+          {
+            "type": "if_expression",
+            "named": true
+          },
+          {
+            "type": "match_expression",
+            "named": true
+          },
+          {
+            "type": "scope_expression",
+            "named": true
+          },
+          {
+            "type": "select_expression",
+            "named": true
+          },
+          {
+            "type": "unsafe_expression",
+            "named": true
           }
         ]
       }
@@ -3608,6 +3755,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "block",
+            "named": true
+          },
           {
             "type": "expression",
             "named": true
@@ -3864,6 +4015,10 @@
             "named": true
           },
           {
+            "type": "projection_type",
+            "named": true
+          },
+          {
             "type": "scoped_type",
             "named": true
           },
@@ -4092,6 +4247,10 @@
           "named": true
         },
         {
+          "type": "projection_type",
+          "named": true
+        },
+        {
           "type": "scoped_type",
           "named": true
         },
@@ -4145,6 +4304,73 @@
       "types": [
         {
           "type": "private_capture",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "projection_type",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "actor_type",
+          "named": true
+        },
+        {
+          "type": "array_type",
+          "named": true
+        },
+        {
+          "type": "borrow_type",
+          "named": true
+        },
+        {
+          "type": "function_type",
+          "named": true
+        },
+        {
+          "type": "generic_type",
+          "named": true
+        },
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "pointer_type",
+          "named": true
+        },
+        {
+          "type": "primitive_type",
+          "named": true
+        },
+        {
+          "type": "projection_type",
+          "named": true
+        },
+        {
+          "type": "scoped_type",
+          "named": true
+        },
+        {
+          "type": "slice_type",
+          "named": true
+        },
+        {
+          "type": "trait_object_type",
+          "named": true
+        },
+        {
+          "type": "tuple_type",
+          "named": true
+        },
+        {
+          "type": "unit_type",
           "named": true
         }
       ]
@@ -4300,6 +4526,10 @@
             "named": true
           },
           {
+            "type": "projection_type",
+            "named": true
+          },
+          {
             "type": "scoped_type",
             "named": true
           },
@@ -4431,6 +4661,10 @@
           "named": true
         },
         {
+          "type": "projection_type",
+          "named": true
+        },
+        {
           "type": "scoped_type",
           "named": true
         },
@@ -4513,15 +4747,43 @@
         ]
       },
       "body": {
-        "multiple": false,
+        "multiple": true,
         "required": true,
         "types": [
+          {
+            "type": ",",
+            "named": false
+          },
           {
             "type": "block",
             "named": true
           },
           {
             "type": "expression",
+            "named": true
+          },
+          {
+            "type": "fork",
+            "named": false
+          },
+          {
+            "type": "if_expression",
+            "named": true
+          },
+          {
+            "type": "match_expression",
+            "named": true
+          },
+          {
+            "type": "scope_expression",
+            "named": true
+          },
+          {
+            "type": "select_expression",
+            "named": true
+          },
+          {
+            "type": "unsafe_expression",
             "named": true
           }
         ]
@@ -4579,21 +4841,6 @@
     }
   },
   {
-    "type": "shutdown_directive",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": false,
-      "types": [
-        {
-          "type": "duration_literal",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "slice_type",
     "named": true,
     "fields": {},
@@ -4631,6 +4878,10 @@
         },
         {
           "type": "primitive_type",
+          "named": true
+        },
+        {
+          "type": "projection_type",
           "named": true
         },
         {
@@ -4884,6 +5135,10 @@
             "named": true
           },
           {
+            "type": "projection_type",
+            "named": true
+          },
+          {
             "type": "scoped_type",
             "named": true
           },
@@ -5014,6 +5269,10 @@
         },
         {
           "type": "supervisor_field",
+          "named": true
+        },
+        {
+          "type": "type_parameters",
           "named": true
         }
       ]
@@ -5319,6 +5578,10 @@
           "named": true
         },
         {
+          "type": "projection_type",
+          "named": true
+        },
+        {
           "type": "scoped_type",
           "named": true
         },
@@ -5390,6 +5653,10 @@
         },
         {
           "type": "primitive_type",
+          "named": true
+        },
+        {
+          "type": "projection_type",
           "named": true
         },
         {
@@ -5474,6 +5741,10 @@
             "named": true
           },
           {
+            "type": "projection_type",
+            "named": true
+          },
+          {
             "type": "scoped_type",
             "named": true
           },
@@ -5544,11 +5815,19 @@
           "named": true
         },
         {
+          "type": "integer_literal",
+          "named": true
+        },
+        {
           "type": "pointer_type",
           "named": true
         },
         {
           "type": "primitive_type",
+          "named": true
+        },
+        {
+          "type": "projection_type",
           "named": true
         },
         {
@@ -5583,11 +5862,67 @@
       "required": true,
       "types": [
         {
+          "type": "actor_type",
+          "named": true
+        },
+        {
+          "type": "array_type",
+          "named": true
+        },
+        {
+          "type": "borrow_type",
+          "named": true
+        },
+        {
+          "type": "function_type",
+          "named": true
+        },
+        {
+          "type": "generic_type",
+          "named": true
+        },
+        {
           "type": "identifier",
           "named": true
         },
         {
+          "type": "integer_literal",
+          "named": true
+        },
+        {
+          "type": "pointer_type",
+          "named": true
+        },
+        {
+          "type": "primitive_type",
+          "named": true
+        },
+        {
+          "type": "projection_type",
+          "named": true
+        },
+        {
+          "type": "scoped_type",
+          "named": true
+        },
+        {
+          "type": "slice_type",
+          "named": true
+        },
+        {
           "type": "trait_bounds",
+          "named": true
+        },
+        {
+          "type": "trait_object_type",
+          "named": true
+        },
+        {
+          "type": "tuple_type",
+          "named": true
+        },
+        {
+          "type": "unit_type",
           "named": true
         }
       ]
@@ -5718,6 +6053,10 @@
             "named": true
           },
           {
+            "type": "projection_type",
+            "named": true
+          },
+          {
             "type": "scoped_type",
             "named": true
           },
@@ -5800,6 +6139,10 @@
         },
         {
           "type": "primitive_type",
+          "named": true
+        },
+        {
+          "type": "projection_type",
           "named": true
         },
         {
@@ -5920,6 +6263,10 @@
           "named": true
         },
         {
+          "type": "projection_type",
+          "named": true
+        },
+        {
           "type": "scoped_type",
           "named": true
         },
@@ -5961,7 +6308,7 @@
         ]
       },
       "pattern": {
-        "multiple": false,
+        "multiple": true,
         "required": true,
         "types": [
           {
@@ -5971,7 +6318,7 @@
         ]
       },
       "value": {
-        "multiple": false,
+        "multiple": true,
         "required": true,
         "types": [
           {
@@ -5982,9 +6329,13 @@
       }
     },
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": false,
       "types": [
+        {
+          "type": "expression",
+          "named": true
+        },
         {
           "type": "label",
           "named": true
@@ -6279,10 +6630,6 @@
     "named": false
   },
   {
-    "type": "await_restart",
-    "named": false
-  },
-  {
     "type": "block",
     "named": false
   },
@@ -6297,10 +6644,6 @@
   },
   {
     "type": "break",
-    "named": false
-  },
-  {
-    "type": "brutal_kill",
     "named": false
   },
   {
@@ -6516,10 +6859,6 @@
     "named": false
   },
   {
-    "type": "infinity",
-    "named": false
-  },
-  {
     "type": "init",
     "named": false
   },
@@ -6705,10 +7044,6 @@
     "named": true
   },
   {
-    "type": "shutdown",
-    "named": false
-  },
-  {
     "type": "simple_one_for_one",
     "named": false
   },
@@ -6722,6 +7057,10 @@
   },
   {
     "type": "state",
+    "named": false
+  },
+  {
+    "type": "stop",
     "named": false
   },
   {

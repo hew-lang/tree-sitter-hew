@@ -105,11 +105,11 @@ fn f(b: bool) -> i64 {
                               (integer_literal))))))))))))))))
 
 ================================================================================
-await_restart on a supervised-child accessor
+restarted on a supervised-child accessor
 ================================================================================
 
 fn f() {
-    await_restart sup.child;
+    restarted(sup.child);
 }
 
 --------------------------------------------------------------------------------
@@ -120,12 +120,15 @@ fn f() {
     body: (block
       (expression_statement
         (expression
-          (await_restart_expression
-            (expression
-              (field_expression
-                object: (expression
-                  (identifier))
-                field: (identifier)))))))))
+          (call_expression
+            function: (expression
+              (identifier))
+            (call_argument
+              (expression
+                (field_expression
+                  object: (expression
+                    (identifier))
+                  field: (identifier))))))))))
 
 ================================================================================
 Leading-dot variant patterns in match arms
