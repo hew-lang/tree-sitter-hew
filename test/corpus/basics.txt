@@ -224,16 +224,17 @@ fn main() {
   (function_declaration
     name: (identifier)
     body: (block
-      (while_let_statement
-        pattern: (pattern
-          (constructor_pattern
-            name: (identifier)
-            (pattern
-              (identifier))))
-        value: (expression
-          (method_call_expression
-            object: (identifier)
-            method: (identifier)))
+      (while_statement
+        condition: (let_condition
+          pattern: (pattern
+            (constructor_pattern
+              name: (identifier)
+              (pattern
+                (identifier))))
+          value: (expression
+            (method_call_expression
+              object: (identifier)
+              method: (identifier))))
         body: (block
           (expression_statement
             (expression
@@ -346,13 +347,14 @@ fn main() {
       (expression_statement
         (expression
           (if_expression
-            pattern: (pattern
-              (constructor_pattern
-                name: (identifier)
-                (pattern
-                  (identifier))))
-            value: (expression
-              (identifier))
+            condition: (let_condition
+              pattern: (pattern
+                (constructor_pattern
+                  name: (identifier)
+                  (pattern
+                    (identifier))))
+              value: (expression
+                (identifier)))
             consequence: (block
               (expression_statement
                 (expression
@@ -392,13 +394,14 @@ fn main() {
           (identifier))
         value: (expression
           (if_expression
-            pattern: (pattern
-              (constructor_pattern
-                name: (identifier)
-                (pattern
-                  (identifier))))
-            value: (expression
-              (identifier))
+            condition: (let_condition
+              pattern: (pattern
+                (constructor_pattern
+                  name: (identifier)
+                  (pattern
+                    (identifier))))
+              value: (expression
+                (identifier)))
             consequence: (block
               (expression_statement
                 (expression

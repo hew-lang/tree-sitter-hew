@@ -17,8 +17,9 @@
 (handle_expression) @local.scope
 
 ; Definitions
-(let_statement
-  pattern: (pattern (identifier) @local.definition))
+; Binding patterns keep the same identity in declarations, match arms,
+; loops, select arms and condition chains, including nested payloads.
+(pattern (identifier) @local.definition)
 
 (var_statement
   name: (identifier) @local.definition)
@@ -29,16 +30,9 @@
 (lambda_parameter
   name: (identifier) @local.definition)
 
-(for_statement
-  pattern: (pattern (identifier) @local.definition))
-
 ; Task names use ordinary let bindings; recovery introduces its own binding.
 (handle_expression
   error: (identifier) @local.definition)
-
-; Select arm bindings
-(select_arm
-  binding: (pattern (identifier) @local.definition))
 
 ; References
 (identifier) @local.reference

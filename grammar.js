@@ -46,10 +46,6 @@ export default grammar({
     [$.expression, $.private_capture_list],
     [$.actor_spawn],
     [$.trait_bound],
-    // `expr | …` — at the `|` the parser cannot tell (within LR(1)) whether a
-    // bit-or `expr | expr` or a timeout `expr | after <dur>` follows; the `after`
-    // keyword one token later disambiguates, so GLR explores both branches.
-    [$.binary_expression, $.timeout_expression, $.lambda],
     // `where P , (` — after a where-predicate's trailing comma, a `(` may begin
     // either another predicate (a parenthesized/tuple type) or a record's tuple
     // body `( T, … )`; GLR explores both and only the valid continuation lives.
@@ -524,7 +520,7 @@ export default grammar({
     machine_declaration: $ => seq(
       'machine',
       field('name', $.identifier),
-      optional($.type_parameters),
+      optional($.machine_type_parameters),
       optional($.where_clause),
       '{',
       field('events_header', $.machine_events_header),
@@ -652,12 +648,16 @@ export default grammar({
 
     // ---- Types ----
 
+    machine_type_parameters: $ => seq('<', choice(
+      sep1($.const_parameter, ','),
+      seq(sep1($.type_parameter, ','), optional(seq(',', sep1($.const_parameter, ',')))),
+    ), '>'),
+
+    const_parameter: $ => seq('const', field('name', $.identifier), ':', 'usize', optional(seq('=', $.integer_literal))),
+
     type_parameters: $ => seq('<', sep1($.type_parameter, ','), '>'),
 
-    type_parameter: $ => choice(
-      seq($.identifier, optional(seq(':', $.trait_bounds))),
-      seq('const', $.identifier, ':', $._type, optional(seq('=', $.integer_literal))),
-    ),
+    type_parameter: $ => seq($.identifier, optional(seq(':', $.trait_bounds))),
 
     type_arguments: $ => seq('<', sep1($._type_argument, ','), '>'),
 
@@ -694,7 +694,7 @@ export default grammar({
       $.identifier,
       $.generic_type,
       $.scoped_type,
-      $.projection_type,
+      $.associated_type_projection,
       $.tuple_type,
       $.array_type,
       $.slice_type,
@@ -723,7 +723,7 @@ export default grammar({
       optional($.type_arguments),
     ),
 
-    projection_type: $ => seq('<', $._type, 'as', $._type, '>', '.', $.identifier),
+    associated_type_projection: $ => seq('<', $._type, 'as', $.trait_bound, '>', '.', $.identifier),
 
     tuple_type: $ => seq('(', sep1($._type, ','), ')'),
 
@@ -780,7 +780,6 @@ export default grammar({
 
       $.for_statement,
       $.while_statement,
-      $.while_let_statement,
       $.loop_statement,
       $.break_statement,
       $.continue_statement,
@@ -851,9 +850,9 @@ export default grammar({
 
 
 
-    break_statement: $ => seq('break', optional($.label), optional($.expression), ';'),
+    break_statement: $ => prec.right(seq('break', optional($.label), optional(';'))),
 
-    continue_statement: $ => seq('continue', optional($.label), ';'),
+    continue_statement: $ => prec.right(seq('continue', optional($.label), optional(';'))),
 
     // `return [expr]` is an expression (Never-typed) in Hew, not a statement:
     // it is valid in tail position without `;` and inside larger expressions
@@ -900,7 +899,6 @@ export default grammar({
       $.interpolated_string,
       $.unary_expression,
       $.binary_expression,
-      $.timeout_expression,
       $.call_expression,
       $.method_call_expression,
       $.field_expression,
@@ -1156,7 +1154,7 @@ export default grammar({
       ']',
     ),
 
-    _array_element: $ => choice($.expression, seq('..', $.expression)),
+    _array_element: $ => choice($.expression, seq('..', field('spread', $.expression))),
 
     // Byte array literal `bytes[0x41, 0x42]` (grammar.ebnf:260
     //   Primary `"bytes" "[" ExprList? "]"`). The opener is a single merged
@@ -1197,39 +1195,20 @@ export default grammar({
     // *type* `()` which appears only in type position.
     unit_expression: $ => seq('(', ')'),
 
-    if_expression: $ => prec.right(choice(
-      seq(
-        'if',
-        field('condition', choice($.expression, $.block)),
-        field('consequence', $.block),
-        optional(field('alternative', $.else_clause)),
-      ),
-      seq(
-        'if',
-        'let',
-        field('pattern', $.pattern),
-        '=',
-        field('value', $.expression),
-        repeat($._condition_tail),
-        field('consequence', $.block),
-        optional(field('alternative', $.else_clause)),
-      ),
-      seq(
-        'if',
-        field('condition', $.expression),
-        '&&',
-        $._let_condition,
-        repeat($._condition_tail),
-        field('consequence', $.block),
-        optional(field('alternative', $.else_clause)),
-      ),
+    _condition: $ => choice($.expression, $.block, $.let_condition, $.condition_chain),
+
+    let_condition: $ => prec(PREC.AND + 1, seq('let', field('pattern', $.pattern), '=', field('value', $.expression))),
+
+    condition_chain: $ => prec.left(PREC.AND + 1, seq(
+      choice($.let_condition, $.expression, $.block),
+      repeat1(prec.left(PREC.AND + 1, seq('&&', choice($.let_condition, $.expression, $.block)))),
     )),
 
-    _let_condition: $ => seq('let', field('pattern', $.pattern), '=', field('value', $.expression)),
-    _condition_tail: $ => choice(
-      prec(PREC.AND + 1, seq('&&', $._let_condition)),
-      seq('&&', prec(PREC.AND + 1, $.expression)),
-    ),
+    if_expression: $ => prec.right(seq(
+      'if', field('condition', $._condition),
+      field('consequence', $.block),
+      optional(field('alternative', $.else_clause)),
+    )),
 
     else_clause: $ => seq('else', choice($.if_expression, $.block)),
 
@@ -1241,17 +1220,6 @@ export default grammar({
       optional(alias($._match_final_arm, $.match_arm)),
       '}',
     ),
-
-    // TimeoutExpr (grammar.ebnf:228-230): `RangeExpr ( "|" "after" Expr )?` — any
-    // expression may carry a trailing `| after <duration>` timeout race (e.g.
-    // `match await f.answer() | after 5s { … }`). The `after` keyword right after
-    // `|` is what distinguishes this from a bit-or; it binds looser than `||`.
-    timeout_expression: $ => prec.left(1, seq(
-      field('expr', $.expression),
-      '|',
-      'after',
-      field('duration', $.expression),
-    )),
 
     // Closures are PIPE-style (spec grammar.ebnf:288-295):
     //   Lambda = "move"? "|" LambdaParams? "|" Expr
@@ -1305,7 +1273,7 @@ export default grammar({
     ),
 
     actor_spawn: $ => seq(
-      field('actor', $.identifier),
+      field('actor', $._type),
       optional($.type_arguments),
       optional(seq(
         '(',
@@ -1340,7 +1308,6 @@ export default grammar({
     for_statement: $ => prec(10, seq(
       optional(seq($.label, ':')),
       'for',
-      optional('await'),
       field('pattern', $.pattern),
       'in',
       field('iterable', choice($.expression, $.block)),
@@ -1350,18 +1317,7 @@ export default grammar({
     while_statement: $ => prec(10, seq(
       optional(seq($.label, ':')),
       'while',
-      field('condition', choice($.expression, $.block)),
-      field('body', $.block),
-    )),
-
-    while_let_statement: $ => prec(10, seq(
-      optional(seq($.label, ':')),
-      'while',
-      'let',
-      field('pattern', $.pattern),
-      '=',
-      field('value', $.expression),
-      repeat($._condition_tail),
+      field('condition', $._condition),
       field('body', $.block),
     )),
 
