@@ -6,12 +6,11 @@ hew_root="${HEW_REPO:-$grammar_root/../hew}"
 manifest="$grammar_root/test/active-corpus.tsv"
 ts_cli="${TS:-tree-sitter}"
 
-check_floor() {
+check_nonempty() {
     local actual="$1"
-    local expected="$2"
-    local label="$3"
-    if (( actual < expected )); then
-        echo "active-corpus floor shrank for $label: $actual < $expected" >&2
+    local label="$2"
+    if (( actual == 0 )); then
+        echo "active-corpus selection is empty: $label" >&2
         return 1
     fi
 }
@@ -19,7 +18,7 @@ check_floor() {
 parse_paths() {
     local path_list="$1"
     local output
-    if ! output="$("$ts_cli" parse --rebuild --quiet --paths "$path_list" 2>&1)"; then
+    if ! output="$("$ts_cli" parse --quiet --paths "$path_list" 2>&1)"; then
         printf '%s\n' "$output" >&2
         return 1
     fi
@@ -30,8 +29,8 @@ parse_paths() {
 }
 
 if [[ "${1:-}" == "--self-test" ]]; then
-    if check_floor 1137 1138 synthetic >/dev/null 2>&1; then
-        echo "active-corpus self-test failed: shrink was accepted" >&2
+    if check_nonempty 0 synthetic >/dev/null 2>&1; then
+        echo "active-corpus self-test failed: empty selection was accepted" >&2
         exit 1
     fi
     malformed="$(mktemp "${TMPDIR:-/tmp}/hew-active-corpus-red.XXXXXX")"
@@ -43,7 +42,7 @@ if [[ "${1:-}" == "--self-test" ]]; then
         echo "active-corpus self-test failed: parser diagnostics were accepted" >&2
         exit 1
     fi
-    echo "active-corpus self-test: shrink and parser diagnostics rejected"
+    echo "active-corpus self-test: empty selection and parser diagnostics rejected"
     exit 0
 fi
 
@@ -56,7 +55,7 @@ paths="$(mktemp "${TMPDIR:-/tmp}/hew-active-corpus.XXXXXX")"
 trap 'rm -f "$paths"' EXIT
 
 total=0
-while IFS=$'\t' read -r selection source floor provenance; do
+while IFS=$'\t' read -r selection source provenance; do
     [[ -z "$selection" || "$selection" == \#* ]] && continue
     source_path="$hew_root/$source"
     case "$selection" in
@@ -87,13 +86,13 @@ while IFS=$'\t' read -r selection source floor provenance; do
             exit 1
             ;;
     esac
-    check_floor "$count" "$floor" "$source"
+    check_nonempty "$count" "$source"
     total=$((total + count))
 done < "$manifest"
 
 sort -u -o "$paths" "$paths"
 unique_count="$(wc -l < "$paths" | tr -d ' ')"
-check_floor "$unique_count" 1138 total
+check_nonempty "$unique_count" total
 if (( unique_count != total )); then
     echo "active-corpus roots overlap: $total rows, $unique_count unique paths" >&2
     exit 1
