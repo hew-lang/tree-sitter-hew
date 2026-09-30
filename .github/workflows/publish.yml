@@ -7,7 +7,7 @@
 # caller is refused by the registry.
 #
 # A manual run (workflow_dispatch) performs every check plus
-# `npm publish --dry-run` and never publishes.
+# `npm pack --dry-run` and never publishes.
 
 name: Publish
 
@@ -78,7 +78,7 @@ jobs:
         run: npx --yes tree-sitter-cli@0.25.10 test
 
       - name: Show the package contents
-        run: npm publish --dry-run
+        run: npm pack --dry-run
 
   publish:
     name: Publish to npm
