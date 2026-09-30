@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 #
-# verify-grammar-sync.sh — Check that every Hew keyword, contextual word and
-# builtin type from the compiler's syntax-data.json appears in a TextMate
-# grammar JSON file.
+# verify-grammar-sync.sh — Check that every Hew keyword and builtin type from
+# the compiler's syntax-data.json appears in a TextMate grammar JSON file.
+# Contextual words are scoped only where their construct appears, so they are
+# not required as bare words.
 #
 # Usage: ./scripts/verify-grammar-sync.sh <textmate-grammar.json> [syntax-data.json]
 #
@@ -31,7 +32,6 @@ mapfile -t KEYWORDS < <(node -e '
 const d = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
 const words = [
   ...d.all_keywords,
-  ...Object.keys(d.contextual_identifiers).filter((k) => k !== "description"),
   ...Object.values(d.types).flat(),
 ];
 console.log([...new Set(words)].join("\n"));
