@@ -24,3 +24,9 @@ Run this checklist when bumping the Hew language version.
 - [ ] Grammar sync CI passes
 - [ ] tree-sitter-hew CI passes
 - [ ] VS Code extension CI passes
+
+## Publishing (npm)
+- [ ] Bump the version in `package.json`, `tree-sitter.json`, `Cargo.toml`, `pyproject.toml` and `Makefile`
+- [ ] Run `tree-sitter generate` and commit `src/` (the parser embeds the version)
+- [ ] Push a `vX.Y.Z` tag on that commit; `publish.yml` checks the versions and the parser, runs the corpus, then waits for approval in the `npm` environment
+- [ ] Approve the deployment; npm publishes through trusted publishing with provenance (no token)

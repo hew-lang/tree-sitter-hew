@@ -1,0 +1,117 @@
+# Publishes @hew-lang/tree-sitter-hew to npm when a v* tag is pushed.
+#
+# Authentication is npm trusted publishing (GitHub Actions OIDC): no npm
+# token exists anywhere, and npm attaches a provenance attestation
+# automatically. The npm package's trusted publisher must name this repo,
+# this workflow file (publish.yml) and the `npm` environment; any other
+# caller is refused by the registry.
+#
+# A manual run (workflow_dispatch) performs every check plus
+# `npm publish --dry-run` and never publishes.
+
+name: Publish
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Check every manifest carries one version
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          version=$(node -p 'require("./package.json").version')
+          declare -A found=(
+            [package.json]="$version"
+            [tree-sitter.json]=$(node -p 'require("./tree-sitter.json").metadata.version')
+            [Cargo.toml]=$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -n 1)
+            [pyproject.toml]=$(sed -n 's/^version = "\(.*\)"$/\1/p' pyproject.toml | head -n 1)
+            [Makefile]=$(sed -n 's/^VERSION := //p' Makefile)
+          )
+          status=0
+          for file in "${!found[@]}"; do
+            if [ "${found[$file]}" != "$version" ]; then
+              echo "::error file=$file::version '${found[$file]}' does not match package.json '$version'"
+              status=1
+            fi
+          done
+          if [ "$REF_TYPE" = tag ] && [ "$REF_NAME" != "v$version" ]; then
+            echo "::error::tag $REF_NAME does not match package version v$version"
+            status=1
+          fi
+          exit "$status"
+
+      - name: Check the generated parser matches grammar.js
+        run: |
+          set -euo pipefail
+          npx --yes tree-sitter-cli@0.25.10 generate
+          if ! git diff --exit-code --ignore-space-at-eol -- src/; then
+            echo "::error::src/ is stale; run 'tree-sitter generate' and commit the result"
+            exit 1
+          fi
+
+      - name: Run corpus tests
+        run: npx --yes tree-sitter-cli@0.25.10 test
+
+      - name: Show the package contents
+        run: npm publish --dry-run
+
+  publish:
+    name: Publish to npm
+    needs: verify
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write # npm trusted publishing
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false
+
+      - name: Require an npm that supports trusted publishing
+        run: |
+          set -euo pipefail
+          have=$(npm --version)
+          if [ "$(printf '%s\n' 11.5.1 "$have" | sort -V | head -n 1)" != 11.5.1 ]; then
+            echo "::error::npm $have is older than 11.5.1 and cannot use trusted publishing"
+            exit 1
+          fi
+
+      # No npm token is configured; npm exchanges the job's OIDC token for a
+      # short-lived publish credential. Without the trusted publisher binding
+      # on npmjs.com the registry rejects this step.
+      - name: Publish
+        run: npm publish --access public
