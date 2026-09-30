@@ -7,16 +7,18 @@
 /// <reference types="tree-sitter-cli/dsl" />
 // @ts-check
 
-// Precedence levels (from Pratt parser in hew-parser/src/parser.rs)
+// Binary tiers follow hew-parser precedence.rs (loosest first). All sit above
+// lambda bodies (2) and `handle` (1).
 const PREC = {
-  OR: 3,          // || or
-  BIT_OR: 4,      // |
-  AND: 5,         // && and
-  BIT_AND: 6,     // &
-  BIT_XOR: 6,     // ^
+  COALESCE: 3,    // ?? (right-associative)
+  RANGE: 4,       // .. ..=
+  OR: 5,          // ||
+  AND: 6,         // &&
   EQ: 7,          // == != is
-  REL: 9,         // < <= > >=
-  RANGE: 11,      // .. ..=
+  REL: 8,         // < <= > >=
+  BIT_OR: 9,      // |
+  BIT_XOR: 10,    // ^
+  BIT_AND: 11,    // &
   SHIFT: 12,      // << >>
   ADD: 13,        // + - &+ &-
   MUL: 15,        // * / % &*
@@ -31,6 +33,9 @@ export default grammar({
   extras: $ => [/\s/, $.line_comment, $.block_comment],
 
   word: $ => $.identifier,
+
+  // Inlining keeps each operator's precedence on its right operand.
+  inline: $ => [$._binary_operand],
 
   conflicts: $ => [
     [$._block_arm_value, $.expression],
@@ -971,6 +976,7 @@ export default grammar({
     // The right operand may be a block (`text + { text = other; ":tail" }`):
     // the real parser treats a block as an ordinary primary expression.
     binary_expression: $ => choice(
+      prec.right(PREC.COALESCE, seq($.expression, '??', $._binary_operand)),
       prec.left(PREC.OR, seq($.expression, '||', $._binary_operand)),
       prec.left(PREC.BIT_OR, seq($.expression, '|', $._binary_operand)),
       prec.left(PREC.BIT_XOR, seq($.expression, '^', $._binary_operand)),

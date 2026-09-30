@@ -253,17 +253,17 @@ fn f(a: i64, b: i64, c: i64) -> i64 {
         (expression
           (binary_expression
             (expression
-              (identifier))
+              (binary_expression
+                (expression
+                  (identifier))
+                (expression
+                  (identifier))))
             (expression
               (binary_expression
                 (expression
                   (identifier))
                 (expression
-                  (binary_expression
-                    (expression
-                      (identifier))
-                    (expression
-                      (identifier))))))))))))
+                  (identifier))))))))))
 
 ================================================================================
 Removed regex-match operators (=~ / !~) no longer parse

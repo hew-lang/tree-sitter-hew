@@ -5558,7 +5558,7 @@
       "type": "CHOICE",
       "members": [
         {
-          "type": "PREC_LEFT",
+          "type": "PREC_RIGHT",
           "value": 3,
           "content": {
             "type": "SEQ",
@@ -5569,49 +5569,7 @@
               },
               {
                 "type": "STRING",
-                "value": "||"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "_binary_operand"
-              }
-            ]
-          }
-        },
-        {
-          "type": "PREC_LEFT",
-          "value": 4,
-          "content": {
-            "type": "SEQ",
-            "members": [
-              {
-                "type": "SYMBOL",
-                "name": "expression"
-              },
-              {
-                "type": "STRING",
-                "value": "|"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "_binary_operand"
-              }
-            ]
-          }
-        },
-        {
-          "type": "PREC_LEFT",
-          "value": 6,
-          "content": {
-            "type": "SEQ",
-            "members": [
-              {
-                "type": "SYMBOL",
-                "name": "expression"
-              },
-              {
-                "type": "STRING",
-                "value": "^"
+                "value": "??"
               },
               {
                 "type": "SYMBOL",
@@ -5632,7 +5590,49 @@
               },
               {
                 "type": "STRING",
-                "value": "&&"
+                "value": "||"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_binary_operand"
+              }
+            ]
+          }
+        },
+        {
+          "type": "PREC_LEFT",
+          "value": 9,
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "expression"
+              },
+              {
+                "type": "STRING",
+                "value": "|"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_binary_operand"
+              }
+            ]
+          }
+        },
+        {
+          "type": "PREC_LEFT",
+          "value": 10,
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "expression"
+              },
+              {
+                "type": "STRING",
+                "value": "^"
               },
               {
                 "type": "SYMBOL",
@@ -5644,6 +5644,27 @@
         {
           "type": "PREC_LEFT",
           "value": 6,
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "expression"
+              },
+              {
+                "type": "STRING",
+                "value": "&&"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_binary_operand"
+              }
+            ]
+          }
+        },
+        {
+          "type": "PREC_LEFT",
+          "value": 11,
           "content": {
             "type": "SEQ",
             "members": [
@@ -5698,7 +5719,7 @@
         },
         {
           "type": "PREC_LEFT",
-          "value": 9,
+          "value": 8,
           "content": {
             "type": "SEQ",
             "members": [
@@ -5736,7 +5757,7 @@
         },
         {
           "type": "PREC_RIGHT",
-          "value": 11,
+          "value": 4,
           "content": {
             "type": "SEQ",
             "members": [
@@ -7376,7 +7397,7 @@
     },
     "let_condition": {
       "type": "PREC",
-      "value": 6,
+      "value": 7,
       "content": {
         "type": "SEQ",
         "members": [
@@ -7409,7 +7430,7 @@
     },
     "condition_chain": {
       "type": "PREC_LEFT",
-      "value": 6,
+      "value": 7,
       "content": {
         "type": "SEQ",
         "members": [
@@ -7434,7 +7455,7 @@
             "type": "REPEAT1",
             "content": {
               "type": "PREC_LEFT",
-              "value": 6,
+              "value": 7,
               "content": {
                 "type": "SEQ",
                 "members": [
@@ -9552,7 +9573,9 @@
   ],
   "precedences": [],
   "externals": [],
-  "inline": [],
+  "inline": [
+    "_binary_operand"
+  ],
   "supertypes": [],
   "reserved": {}
 }

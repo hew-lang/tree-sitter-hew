@@ -11,6 +11,8 @@
   "reserved" "optional" "deprecated" "default"
 ] @keyword
 
+(select_arm "from" @keyword)
+
 ; `clone <operand>` — the eager copy-on-write cost operation (a contextual
 ; prefix operator, not a reserved word). The grammar only builds a
 ; `clone_expression` when `clone` is in prefix position, so colouring the
@@ -21,7 +23,7 @@
 (private_capture_list "capture" @keyword)
 (private_capture (identifier) @variable)
 (failure_return "fails" @keyword)
-(child_clause "stop" @keyword)
+(child_clause ["count" "stop"] @keyword)
 
 "receive" @keyword
 
@@ -220,7 +222,7 @@
 ; ---- Operators ----
 [
   "+" "-" "*" "/" "%" "!" "=" "==" "!=" "<" "<=" ">" ">=" "&&" "||"
-  "+=" "-=" "*=" "/=" "%=" ".." "..=" "=>" "->" "?"
+  "+=" "-=" "*=" "/=" "%=" ".." "..=" "=>" "->" "?" "??"
   "<<" ">>" "&=" "|=" "^=" "<<=" ">>="
   "&" "|" "^" "~" "is" "&+" "&-" "&*"
 ] @operator

@@ -1,0 +1,104 @@
+================================================================================
+Optional default associates right below logical operators
+================================================================================
+
+fn f() -> i64 {
+    a ?? b ?? c || d
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (return_type
+      (primitive_type))
+    (block
+      (expression_statement
+        (expression
+          (binary_expression
+            (expression
+              (identifier))
+            (expression
+              (binary_expression
+                (expression
+                  (identifier))
+                (expression
+                  (binary_expression
+                    (expression
+                      (identifier))
+                    (expression
+                      (identifier))))))))))))
+
+================================================================================
+Binary operators follow the compiler precedence tiers
+================================================================================
+
+fn f() {
+    let x = a + 1 && b | c == d;
+    if let .Some(n) = first && n > 10 && let .Ok(text) = second {
+        println(text);
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (binary_expression
+            (expression
+              (binary_expression
+                (expression
+                  (identifier))
+                (expression
+                  (integer_literal))))
+            (expression
+              (binary_expression
+                (expression
+                  (binary_expression
+                    (expression
+                      (identifier))
+                    (expression
+                      (identifier))))
+                (expression
+                  (identifier)))))))
+      (if_statement
+        (if_expression
+          (condition_chain
+            (let_condition
+              (pattern
+                (variant_pattern
+                  (identifier)
+                  (pattern
+                    (identifier))))
+              (expression
+                (identifier)))
+            (expression
+              (binary_expression
+                (expression
+                  (identifier))
+                (expression
+                  (integer_literal))))
+            (let_condition
+              (pattern
+                (variant_pattern
+                  (identifier)
+                  (pattern
+                    (identifier))))
+              (expression
+                (identifier))))
+          (block
+            (expression_statement
+              (expression
+                (call_expression
+                  (expression
+                    (identifier))
+                  (call_argument
+                    (expression
+                      (identifier))))))))))))
