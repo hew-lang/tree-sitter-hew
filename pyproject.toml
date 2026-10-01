@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "tree-sitter-hew"
 description = "Hew grammar for tree-sitter"
-version = "1.1.0"
+version = "1.1.1"
 keywords = ["incremental", "parsing", "tree-sitter", "hew"]
 classifiers = [
   "Intended Audience :: Developers",
