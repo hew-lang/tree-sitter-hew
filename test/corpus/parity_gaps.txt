@@ -1,0 +1,147 @@
+================================================================================
+Short fails clause with no arrow
+================================================================================
+trait Step {
+    fn run(self) fails Oops;
+}
+
+fn main() fails dyn Error {
+    return error f"bad";
+}
+
+actor Vault {
+    receive fn note(amount: i64) fails string {
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (trait_declaration
+    (identifier)
+    (trait_function_signature
+      (identifier)
+      (parameters
+        (parameter
+          (self_parameter
+            (self))))
+      (return_type
+        (failure_return
+          (identifier)))))
+  (function_declaration
+    (identifier)
+    (return_type
+      (failure_return
+        (trait_object_type
+          (trait_bound
+            (identifier)))))
+    (block
+      (expression_statement
+        (expression
+          (return_error_expression
+            (expression
+              (interpolated_string
+                (fstring_start)
+                (string_content))))))))
+  (actor_declaration
+    (identifier)
+    (receive_function
+      (identifier)
+      (parameters
+        (parameter
+          (identifier)
+          (primitive_type)))
+      (return_type
+        (failure_return
+          (primitive_type)))
+      (block))))
+
+================================================================================
+Module-qualified trait bounds
+================================================================================
+fn named(s: dyn shapes.Shape) -> i64 { s.area() }
+fn label<T: alpha.Show + Eq>(value: T) -> string { value.show() }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (trait_object_type
+          (trait_bound
+            (identifier)
+            (identifier)))))
+    (return_type
+      (primitive_type))
+    (block
+      (expression_statement
+        (expression
+          (method_call_expression
+            (identifier)
+            (identifier))))))
+  (function_declaration
+    (identifier)
+    (type_parameters
+      (type_parameter
+        (identifier)
+        (trait_bounds
+          (trait_bound
+            (identifier)
+            (identifier))
+          (trait_bound
+            (identifier)))))
+    (parameters
+      (parameter
+        (identifier)
+        (identifier)))
+    (return_type
+      (primitive_type))
+    (block
+      (expression_statement
+        (expression
+          (method_call_expression
+            (identifier)
+            (identifier)))))))
+
+================================================================================
+Keyword-spelled field name in a machine transition payload
+================================================================================
+machine M {
+    events { E { error: string; } }
+    state A;
+    state B { error: string; }
+    on E: A => B { error: event.error }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (machine_declaration
+    (identifier)
+    (machine_events_header
+      (machine_event_decl
+        (identifier)
+        (struct_field
+          (identifier)
+          (primitive_type))))
+    (machine_state
+      (identifier))
+    (machine_state
+      (identifier)
+      (struct_field
+        (identifier)
+        (primitive_type)))
+    (machine_transition
+      (identifier)
+      (identifier)
+      (identifier)
+      (field_initializer
+        (identifier)
+        (expression
+          (field_expression
+            (expression
+              (identifier))
+            (identifier)))))))

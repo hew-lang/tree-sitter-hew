@@ -53,6 +53,10 @@ export default grammar({
     [$.expression, $.private_capture_list],
     [$.actor_spawn],
     [$.trait_bound],
+    // `-> fn() fails E` — the short `fails E` may belong to the inner callable
+    // type or to the enclosing declaration's return clause; GLR keeps both.
+    [$.function_type],
+    [$.actor_type],
     // `where P , (` — after a where-predicate's trailing comma, a `(` may begin
     // either another predicate (a parenthesized/tuple type) or a record's tuple
     // body `( T, … )`; GLR explores both and only the valid continuation lives.
@@ -386,7 +390,11 @@ export default grammar({
       $.self,
     ),
 
-    return_type: $ => prec.right(seq('->', $._type, optional($.failure_return))),
+    // `-> T`, `-> T fails E`, or the short `fails E` (a `() fails E` function).
+    return_type: $ => prec.right(choice(
+      seq('->', $._type, optional($.failure_return)),
+      $.failure_return,
+    )),
 
     failure_return: $ => seq('fails', field('error', $._type)),
 
@@ -694,7 +702,12 @@ export default grammar({
 
     trait_bounds: $ => sep1($.trait_bound, '+'),
 
-    trait_bound: $ => seq($.identifier, optional($.type_arguments)),
+    // A trait is named by a bare or module-qualified path: `Show`, `alpha.Show`.
+    trait_bound: $ => seq(
+      $.identifier,
+      repeat(seq('.', $.identifier)),
+      optional($.type_arguments),
+    ),
 
     where_clause: $ => seq(
       'where',
@@ -1182,7 +1195,10 @@ export default grammar({
 
     field_initializer: $ => seq(
       choice(
-        seq(field('name', $.identifier), ':', field('value', $.expression)),
+        // `error` lexes as a keyword where a statement could start (`return
+        // error`, bare `error` expression); alias it so `{ error: v }` still
+        // reads as a field initializer.
+        seq(field('name', choice($.identifier, alias('error', $.identifier))), ':', field('value', $.expression)),
         seq('..', field('spread', $.expression)),
       ),
     ),
