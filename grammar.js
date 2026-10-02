@@ -57,6 +57,9 @@ export default grammar({
     // either another predicate (a parenthesized/tuple type) or a record's tuple
     // body `( T, … )`; GLR explores both and only the valid continuation lives.
     [$.where_clause],
+    // `return error` — a failure return or a binding named `error`; the next
+    // token decides, and a payload that fits both reads as the failure return.
+    [$.return_error_expression, $.expression],
     // `import a.b.c` — at each `.` the parser cannot tell (within LR(1))
     // whether another path segment or the import selection follows; GLR explores
     // both and only the valid continuation survives.
@@ -224,14 +227,19 @@ export default grammar({
 
     enum_body: $ => seq('{', repeat($.variant), '}'),
 
+    // A `#[wire]` / `#[serial]` enum tags each variant with `@N` after its
+    // payload: `Pending @0;`, `Push(i64) @1;`, `Move { x: i32; } @2;`.
+    // A struct variant ends at `}` unless it carries a tag.
     variant: $ => seq(
       field('name', $.identifier),
       choice(
-        ';',
-        seq('(', sep1($._type, ','), optional(','), ')', ';'),
-        seq('{', repeat($.struct_field), '}'),
+        seq(optional($.variant_tag), ';'),
+        seq('(', sep1($._type, ','), optional(','), ')', optional($.variant_tag), ';'),
+        seq('{', repeat($.struct_field), '}', optional(seq($.variant_tag, ';'))),
       ),
     ),
+
+    variant_tag: $ => seq('@', $.integer_literal),
 
     // NOTE: the legacy bare `wire` keyword item form (`wire struct/enum/type
     // Name { … }`) was removed from the compiler in hew commit 60c50daef
@@ -869,6 +877,14 @@ export default grammar({
     // Statement position is handled by `expression_statement` (optional `;`).
     return_expression: $ => prec.right(seq('return', optional($.expression))),
 
+    // `return error <expr>` returns the failure of a `fails E` function. After
+    // `return`, `error` begins a failure return unless an operator, call, index,
+    // `?`, `as` or terminator follows, in which case it stays an ordinary
+    // binding (hew-parser core.rs eat_error_return_marker). The grammar cannot see
+    // whitespace, so an attached `return error.f()` or `return error(x)` also
+    // reads as a failure return; the compiler refuses the attached forms.
+    return_error_expression: $ => prec.dynamic(1, prec.right(seq('return', 'error', choice($.expression, $.block)))),
+
     // Deferred cleanup may be an expression statement or a scoped block.
     // `defer <expr>;` or `defer { … }` — a block body needs no `;`
     // (hew-parser statements.rs `Token::Defer`).
@@ -950,6 +966,8 @@ export default grammar({
       $.scope_expression,
       $.yield_expression,
       $.return_expression,
+      $.return_error_expression,
+      alias('error', $.identifier),
       $.gen_block_expression,
       $.qualified_expression,
       $.generic_call_expression,

@@ -1,0 +1,238 @@
+================================================================================
+rc5: fn[suspends] types, fails clause, #[offload] extern
+================================================================================
+
+extern "C" {
+    #[offload]
+    fn sqlite_exec_text(path: string, sql: string) -> string;
+}
+
+fn run(cb: fn[suspends](i64) -> i64) -> i64 fails string {
+    return error "bad";
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (extern_block
+    (string_literal
+      (string_content))
+    (attribute
+      (identifier))
+    (extern_function
+      (identifier)
+      (parameters
+        (parameter
+          (identifier)
+          (primitive_type))
+        (parameter
+          (identifier)
+          (primitive_type)))
+      (return_type
+        (primitive_type))))
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (function_type
+          (callable_capabilities)
+          (primitive_type)
+          (return_type
+            (primitive_type)))))
+    (return_type
+      (primitive_type)
+      (failure_return
+        (primitive_type)))
+    (block
+      (expression_statement
+        (expression
+          (return_error_expression
+            (expression
+              (string_literal
+                (string_content)))))))))
+
+================================================================================
+rc5: return error forms and the binding fallback
+================================================================================
+
+fn f() -> i64 fails Problem {
+    return error .Invalid;
+    return error { .Invalid };
+    return error e;
+    return error;
+    return error + 1;
+    return 1;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (return_type
+      (primitive_type)
+      (failure_return
+        (identifier)))
+    (block
+      (expression_statement
+        (expression
+          (return_error_expression
+            (expression
+              (contextual_variant_expression
+                (identifier))))))
+      (expression_statement
+        (expression
+          (return_error_expression
+            (block
+              (expression_statement
+                (expression
+                  (contextual_variant_expression
+                    (identifier))))))))
+      (expression_statement
+        (expression
+          (return_error_expression
+            (expression
+              (identifier)))))
+      (expression_statement
+        (expression
+          (return_expression
+            (expression
+              (identifier)))))
+      (expression_statement
+        (expression
+          (return_expression
+            (expression
+              (binary_expression
+                (expression
+                  (identifier))
+                (expression
+                  (integer_literal)))))))
+      (expression_statement
+        (expression
+          (return_expression
+            (expression
+              (integer_literal))))))))
+
+================================================================================
+rc5: serial attributes and tagged variants
+================================================================================
+
+#[wire]
+#[serial(case = "camelCase")]
+type User {
+    id: u64 @1;
+    #[serial(key = "id")]
+    internal_id: string @2;
+}
+
+#[wire]
+enum Command {
+    Start @0;
+    Push(i64) @1;
+    Move { x: i32; y: i32; } @2;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (attribute
+    (identifier))
+  (attribute
+    (identifier)
+    (identifier)
+    (string_literal
+      (string_content)))
+  (struct_declaration
+    (identifier)
+    (struct_body
+      (struct_field
+        (identifier)
+        (primitive_type)
+        (integer_literal))
+      (struct_field
+        (attribute
+          (identifier)
+          (identifier)
+          (string_literal
+            (string_content)))
+        (identifier)
+        (primitive_type)
+        (integer_literal))))
+  (attribute
+    (identifier))
+  (enum_declaration
+    (identifier)
+    (enum_body
+      (variant
+        (identifier)
+        (variant_tag
+          (integer_literal)))
+      (variant
+        (identifier)
+        (primitive_type)
+        (variant_tag
+          (integer_literal)))
+      (variant
+        (identifier)
+        (struct_field
+          (identifier)
+          (primitive_type))
+        (struct_field
+          (identifier)
+          (primitive_type))
+        (variant_tag
+          (integer_literal))))))
+
+================================================================================
+rc5: contextual variant expressions
+================================================================================
+
+fn g() {
+    let s = .Active;
+    h(.Some(1));
+    match s { .Active => 1, .Pending => 2 }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (contextual_variant_expression
+            (identifier))))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (identifier))
+            (call_argument
+              (expression
+                (call_expression
+                  (expression
+                    (contextual_variant_expression
+                      (identifier)))
+                  (call_argument
+                    (expression
+                      (integer_literal)))))))))
+      (match_statement
+        (match_expression
+          (expression
+            (identifier))
+          (match_arm
+            (pattern
+              (variant_pattern
+                (identifier)))
+            (expression
+              (integer_literal)))
+          (match_arm
+            (pattern
+              (variant_pattern
+                (identifier)))
+            (expression
+              (integer_literal))))))))

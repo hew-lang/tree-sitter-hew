@@ -23,6 +23,7 @@
 (private_capture_list "capture" @keyword)
 (private_capture (identifier) @variable)
 (failure_return "fails" @keyword)
+(return_error_expression "error" @keyword)
 (child_clause ["count" "stop"] @keyword)
 
 "receive" @keyword
@@ -195,6 +196,14 @@
 (supervisor_strategy_value) @constant.builtin
 
 (variant
+  name: (identifier) @constant)
+(variant_tag "@" @punctuation.special)
+(variant_tag (integer_literal) @number)
+
+; `.Variant` and `.Variant { .. }` take their enum from the expected type.
+(contextual_variant_expression
+  name: (identifier) @constant)
+(contextual_variant_record_init
   name: (identifier) @constant)
 
 ; ---- Struct init ----

@@ -2054,6 +2054,10 @@
           "named": true
         },
         {
+          "type": "return_error_expression",
+          "named": true
+        },
+        {
           "type": "return_expression",
           "named": true
         },
@@ -4832,6 +4836,25 @@
     }
   },
   {
+    "type": "return_error_expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "return_expression",
     "named": true,
     "fields": {},
@@ -6316,6 +6339,10 @@
         {
           "type": "unit_type",
           "named": true
+        },
+        {
+          "type": "variant_tag",
+          "named": true
         }
       ]
     }
@@ -6345,6 +6372,21 @@
         },
         {
           "type": "pattern_field",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "variant_tag",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "integer_literal",
           "named": true
         }
       ]
@@ -6850,6 +6892,10 @@
   },
   {
     "type": "enum",
+    "named": false
+  },
+  {
+    "type": "error",
     "named": false
   },
   {
