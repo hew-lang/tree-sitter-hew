@@ -145,3 +145,70 @@ machine M {
             (expression
               (identifier))
             (identifier)))))))
+
+================================================================================
+Failure edge on fn types and closures
+================================================================================
+fn apply(f: fn(i64) -> i64 fails string, step: fn() fails string) -> i64 fails string {
+    let g = |x: i64| -> i64 fails string { f(x)? };
+    g(1)?
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (function_type
+          (primitive_type)
+          (return_type
+            (primitive_type)
+            (failure_return
+              (primitive_type)))))
+      (parameter
+        (identifier)
+        (function_type
+          (return_type
+            (failure_return
+              (primitive_type))))))
+    (return_type
+      (primitive_type)
+      (failure_return
+        (primitive_type)))
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (lambda
+            (lambda_parameter
+              (identifier)
+              (primitive_type))
+            (return_type
+              (primitive_type)
+              (failure_return
+                (primitive_type)))
+            (block
+              (expression_statement
+                (expression
+                  (try_expression
+                    (expression
+                      (call_expression
+                        (expression
+                          (identifier))
+                        (call_argument
+                          (expression
+                            (identifier))))))))))))
+      (expression_statement
+        (expression
+          (try_expression
+            (expression
+              (call_expression
+                (expression
+                  (identifier))
+                (call_argument
+                  (expression
+                    (integer_literal)))))))))))
