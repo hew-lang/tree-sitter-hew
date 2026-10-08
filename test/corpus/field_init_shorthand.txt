@@ -1,0 +1,327 @@
+================================================================================
+Field-init shorthand in record literals and record update
+================================================================================
+
+fn f(host: string, port: i64, old: Config) {
+    let a = Config { host, port: 80 };
+    let b = Config { ..old, port };
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (primitive_type))
+      (parameter
+        (identifier)
+        (primitive_type))
+      (parameter
+        (identifier)
+        (identifier)))
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (struct_init
+            (identifier)
+            (field_initializer
+              (identifier))
+            (field_initializer
+              (identifier)
+              (expression
+                (integer_literal))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (struct_init
+            (identifier)
+            (field_initializer
+              (expression
+                (identifier)))
+            (field_initializer
+              (identifier))))))))
+
+================================================================================
+Field-init shorthand in enum struct variants, spawn and emit
+================================================================================
+
+fn f(radius: f64, count: i64) {
+    let a = Shape.Circle { radius };
+    let b: Shape = .Circle { radius };
+    let c = spawn Counter(count);
+    emit Tick { count };
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (primitive_type))
+      (parameter
+        (identifier)
+        (primitive_type)))
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (struct_init
+            (path_expression
+              (identifier)
+              (identifier))
+            (field_initializer
+              (identifier)))))
+      (let_statement
+        (pattern
+          (identifier))
+        (identifier)
+        (expression
+          (contextual_variant_record_init
+            (identifier)
+            (field_initializer
+              (identifier)))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (spawn_expression
+            (actor_spawn
+              (identifier)
+              (call_argument
+                (expression
+                  (identifier)))))))
+      (emit_statement
+        (identifier)
+        (field_initializer
+          (identifier))))))
+
+================================================================================
+Lone name after a transition head is the body; a list is the payload
+================================================================================
+
+machine Meter {
+    events { Tick; Reset; }
+    state Watching { peak: i64; seen: i64; }
+    on Tick: Watching => Watching { state }
+    on Reset: Watching => Watching { peak, seen: 0 }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (machine_declaration
+    (identifier)
+    (machine_events_header
+      (machine_event_decl
+        (identifier))
+      (machine_event_decl
+        (identifier)))
+    (machine_state
+      (identifier)
+      (struct_field
+        (identifier)
+        (primitive_type))
+      (struct_field
+        (identifier)
+        (primitive_type)))
+    (machine_transition
+      (identifier)
+      (identifier)
+      (identifier)
+      (block
+        (expression_statement
+          (expression
+            (identifier)))))
+    (machine_transition
+      (identifier)
+      (identifier)
+      (identifier)
+      (field_initializer
+        (identifier))
+      (field_initializer
+        (identifier)
+        (expression
+          (integer_literal))))))
+
+================================================================================
+Lone name after an if-let scrutinee or for iterable is the body
+================================================================================
+
+fn f(cached: Option<i64>, n: i64) -> i64 {
+    for i in 0..n { i }
+    if let .Some(v) = cached { v } else { 0 }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (generic_type
+          (identifier)
+          (type_arguments
+            (primitive_type))))
+      (parameter
+        (identifier)
+        (primitive_type)))
+    (return_type
+      (primitive_type))
+    (block
+      (for_statement
+        (pattern
+          (identifier))
+        (expression
+          (binary_expression
+            (expression
+              (integer_literal))
+            (expression
+              (identifier))))
+        (block
+          (expression_statement
+            (expression
+              (identifier)))))
+      (if_statement
+        (if_expression
+          (let_condition
+            (pattern
+              (variant_pattern
+                (identifier)
+                (pattern
+                  (identifier))))
+            (expression
+              (identifier)))
+          (block
+            (expression_statement
+              (expression
+                (identifier))))
+          (else_clause
+            (block
+              (expression_statement
+                (expression
+                  (integer_literal))))))))))
+
+================================================================================
+One-field shorthand literal after a statement, returned and as the tail
+================================================================================
+
+fn m2(x: i64) -> Point {
+    println("m2");
+    return Point { x };
+}
+
+fn m6(x: i64) -> Point {
+    println("m6");
+    Point { x }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (primitive_type)))
+    (return_type
+      (identifier))
+    (block
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (identifier))
+            (call_argument
+              (expression
+                (string_literal
+                  (string_content)))))))
+      (expression_statement
+        (expression
+          (return_expression
+            (expression
+              (struct_init
+                (identifier)
+                (field_initializer
+                  (identifier)))))))))
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (primitive_type)))
+    (return_type
+      (identifier))
+    (block
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (identifier))
+            (call_argument
+              (expression
+                (string_literal
+                  (string_content)))))))
+      (expression_statement
+        (expression
+          (struct_init
+            (identifier)
+            (field_initializer
+              (identifier))))))))
+
+================================================================================
+Shorthand field named error
+================================================================================
+
+fn f(error: string, code: i64) {
+    let r = R { error, code };
+    let s = R { error: error, code };
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (primitive_type))
+      (parameter
+        (identifier)
+        (primitive_type)))
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (struct_init
+            (identifier)
+            (field_initializer
+              (identifier))
+            (field_initializer
+              (identifier)))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (struct_init
+            (identifier)
+            (field_initializer
+              (identifier)
+              (expression
+                (identifier)))
+            (field_initializer
+              (identifier))))))))

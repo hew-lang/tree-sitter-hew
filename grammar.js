@@ -627,10 +627,23 @@ export default grammar({
       // A bodyless transition needs a semicolon; a body ends at `}`.
       choice(
         ';',
+        // A lone shorthand `{ name }` is the block yielding `name`, so a
+        // payload opens with a written field or with a shorthand field and
+        // `,` (hew-parser `is_struct_init_body`).
         field('payload', seq(
           '{',
-          sep1($.field_initializer, ','),
-          optional(','),
+          choice(
+            seq(
+              alias($._written_field_initializer, $.field_initializer),
+              repeat(seq(',', $.field_initializer)),
+              optional(','),
+            ),
+            seq(
+              alias($._shorthand_field_initializer, $.field_initializer),
+              ',',
+              optional(seq(sep1($.field_initializer, ','), optional(','))),
+            ),
+          ),
           '}',
         )),
         field('body', $.block),
@@ -1193,15 +1206,21 @@ export default grammar({
       '}',
     )),
 
-    field_initializer: $ => seq(
-      choice(
-        // `error` lexes as a keyword where a statement could start (`return
-        // error`, bare `error` expression); alias it so `{ error: v }` still
-        // reads as a field initializer.
-        seq(field('name', choice($.identifier, alias('error', $.identifier))), ':', field('value', $.expression)),
-        seq('..', field('spread', $.expression)),
-      ),
+    field_initializer: $ => choice(
+      $._written_field_initializer,
+      $._shorthand_field_initializer,
     ),
+
+    // `error` lexes as a keyword where a statement could start (`return
+    // error`, bare `error` expression); alias it so `{ error: v }` and
+    // `{ error }` still read as field initializers.
+    _written_field_initializer: $ => choice(
+      seq(field('name', choice($.identifier, alias('error', $.identifier))), ':', field('value', $.expression)),
+      seq('..', field('spread', $.expression)),
+    ),
+
+    // Shorthand `name` stands for `name: name`.
+    _shorthand_field_initializer: $ => field('name', choice($.identifier, alias('error', $.identifier))),
 
     array_expression: $ => seq(
       '[',

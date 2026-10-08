@@ -336,11 +336,21 @@ fn main() {
               (identifier))))))))
 
 ================================================================================
-Retired join keyword — brace form errors, paren form is an ordinary call
+Retired join keyword — brace form errors
+:error
 ================================================================================
 
 fn main() {
     let both = join { a(), b() };
+}
+
+--------------------------------------------------------------------------------
+
+================================================================================
+Retired join keyword — paren form is an ordinary call
+================================================================================
+
+fn main() {
     let paren = join (c(), d());
 }
 
@@ -350,15 +360,6 @@ fn main() {
   (function_declaration
     name: (identifier)
     body: (block
-      (let_statement
-        pattern: (pattern
-          (identifier))
-        value: (expression
-          (struct_init
-            name: (identifier)
-            (ERROR
-              (identifier)
-              (identifier)))))
       (let_statement
         pattern: (pattern
           (identifier))
