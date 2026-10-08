@@ -523,7 +523,7 @@ export default grammar({
       field('name', $.identifier),
       ':',
       field('actor', $._type),
-      optional(seq('(', optional(sep1($.call_argument, ',')), optional(','), ')')),
+      optional($.spawn_keys),
       repeat($.child_clause),
       ';',
     ),
@@ -617,7 +617,7 @@ export default grammar({
     machine_transition: $ => seq(
       'on',
       field('event', $.identifier),
-      optional(seq('(', field('payload_bindings', sep1($.identifier, ',')), ')')),
+      optional(seq('{', field('payload_bindings', sep1($.identifier, ',')), optional(','), '}')),
       ':',
       field('source', choice(seq($.identifier, repeat(seq('.', $.identifier))), '_')),
       '=>',
@@ -1349,12 +1349,16 @@ export default grammar({
     actor_spawn: $ => seq(
       field('actor', $._type),
       optional($.type_arguments),
-      optional(seq(
-        '(',
-        optional(sep1($.call_argument, ',')),
-        optional(','),
-        ')',
-      )),
+      optional($.spawn_keys),
+    ),
+
+    // Keys of a spawn or supervisor child, keyed like a record literal:
+    // `{ key: value, key }`. An empty list is written without braces.
+    spawn_keys: $ => seq(
+      '{',
+      sep1($.field_initializer, ','),
+      optional(','),
+      '}',
     ),
 
     select_expression: $ => seq(

@@ -231,7 +231,7 @@ Spawn actor by name (v0.5 unchanged)
 ================================================================================
 
 fn main() {
-    let a = spawn Counter(42);
+    let a = spawn Counter { count: 42 };
 }
 
 --------------------------------------------------------------------------------
@@ -247,9 +247,11 @@ fn main() {
           (spawn_expression
             (actor_spawn
               actor: (identifier)
-              (call_argument
-                (expression
-                  (integer_literal))))))))))
+              (spawn_keys
+                (field_initializer
+                  name: (identifier)
+                  value: (expression
+                    (integer_literal)))))))))))
 
 ================================================================================
 Scope expression (plain, no fork)
@@ -452,7 +454,7 @@ machine Bucket {
     events { Add { amount: i64; } Drain; }
     state Empty;
     state Full { level: i64; }
-    on Add(amount): Empty => Full when amount > 0 { Full { level: amount } }
+    on Add { amount }: Empty => Full when amount > 0 { Full { level: amount } }
     default { state }
 }
 

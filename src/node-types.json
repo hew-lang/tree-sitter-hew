@@ -274,7 +274,7 @@
       "required": false,
       "types": [
         {
-          "type": "call_argument",
+          "type": "spawn_keys",
           "named": true
         },
         {
@@ -1501,11 +1501,11 @@
       "required": false,
       "types": [
         {
-          "type": "call_argument",
+          "type": "child_clause",
           "named": true
         },
         {
-          "type": "child_clause",
+          "type": "spawn_keys",
           "named": true
         }
       ]
@@ -5246,6 +5246,21 @@
       "types": [
         {
           "type": "actor_spawn",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "spawn_keys",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "field_initializer",
           "named": true
         }
       ]

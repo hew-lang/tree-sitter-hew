@@ -54,7 +54,7 @@ Field-init shorthand in enum struct variants, spawn and emit
 fn f(radius: f64, count: i64) {
     let a = Shape.Circle { radius };
     let b: Shape = .Circle { radius };
-    let c = spawn Counter(count);
+    let c = spawn Counter { count };
     emit Tick { count };
 }
 
@@ -97,8 +97,8 @@ fn f(radius: f64, count: i64) {
           (spawn_expression
             (actor_spawn
               (identifier)
-              (call_argument
-                (expression
+              (spawn_keys
+                (field_initializer
                   (identifier)))))))
       (emit_statement
         (identifier)

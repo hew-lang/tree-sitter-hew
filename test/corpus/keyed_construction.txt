@@ -1,0 +1,133 @@
+================================================================================
+Spawn keys in braces, bare spawn and generic spawn
+================================================================================
+
+fn main() {
+    let p = spawn Pair { b, a: 2 };
+    let s = spawn Store;
+    let c = spawn Cache<string, i64> { entries };
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (spawn_expression
+            (actor_spawn
+              (identifier)
+              (spawn_keys
+                (field_initializer
+                  (identifier))
+                (field_initializer
+                  (identifier)
+                  (expression
+                    (integer_literal))))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (spawn_expression
+            (actor_spawn
+              (identifier)))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (spawn_expression
+            (actor_spawn
+              (generic_type
+                (identifier)
+                (type_arguments
+                  (primitive_type)
+                  (primitive_type)))
+              (spawn_keys
+                (field_initializer
+                  (identifier))))))))))
+
+================================================================================
+Supervisor child keys in braces
+================================================================================
+
+supervisor RoleBranch(plan: Plan) {
+    strategy: one_for_one;
+    child role: RoleWorker { plan } restart: transient;
+    pool workers: Worker { id: 0 } count: 4;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (supervisor_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (identifier)))
+    (supervisor_field
+      (supervisor_strategy_value))
+    (child_spec
+      (identifier)
+      (identifier)
+      (spawn_keys
+        (field_initializer
+          (identifier)))
+      (child_clause))
+    (child_spec
+      (identifier)
+      (identifier)
+      (spawn_keys
+        (field_initializer
+          (identifier)
+          (expression
+            (integer_literal))))
+      (child_clause
+        (integer_literal)))))
+
+================================================================================
+Transition head binds event fields in braces
+================================================================================
+
+machine Door {
+    events {
+        Open { by: string; }
+    }
+    state Shut;
+    state Ajar { by: string; }
+    on Open { by }: Shut => Ajar { by: by }
+    default { state }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (machine_declaration
+    (identifier)
+    (machine_events_header
+      (machine_event_decl
+        (identifier)
+        (struct_field
+          (identifier)
+          (primitive_type))))
+    (machine_state
+      (identifier))
+    (machine_state
+      (identifier)
+      (struct_field
+        (identifier)
+        (primitive_type)))
+    (machine_transition
+      (identifier)
+      (identifier)
+      (identifier)
+      (identifier)
+      (field_initializer
+        (identifier)
+        (expression
+          (identifier))))
+    (machine_default)))

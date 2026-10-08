@@ -346,6 +346,8 @@ fn main() {
 
 --------------------------------------------------------------------------------
 
+
+
 ================================================================================
 Retired join keyword — paren form is an ordinary call
 ================================================================================
@@ -819,7 +821,7 @@ Supervisor members use declaration terminators
 supervisor Tree {
     strategy: one_for_one;
     intensity: 3 within 10s;
-    child w1: Worker(1) restart: permanent;
+    child w1: Worker { id: 1 } restart: permanent;
     pool workers: Worker count: 4 stop: 5s;
     child last: Worker;
 }
@@ -838,9 +840,11 @@ supervisor Tree {
     (child_spec
       (identifier)
       (identifier)
-      (call_argument
-        (expression
-          (integer_literal)))
+      (spawn_keys
+        (field_initializer
+          (identifier)
+          (expression
+            (integer_literal))))
       (child_clause))
     (child_spec
       (identifier)
