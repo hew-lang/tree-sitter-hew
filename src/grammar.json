@@ -5503,6 +5503,19 @@
       "members": [
         {
           "type": "SYMBOL",
+          "name": "_callable_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "spawn_expression"
+        }
+      ]
+    },
+    "_callable_expression": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
           "name": "identifier"
         },
         {
@@ -5625,10 +5638,6 @@
         {
           "type": "SYMBOL",
           "name": "actor_expression"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "spawn_expression"
         },
         {
           "type": "SYMBOL",
@@ -6118,8 +6127,13 @@
             "type": "FIELD",
             "name": "function",
             "content": {
-              "type": "SYMBOL",
-              "name": "expression"
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_callable_expression"
+              },
+              "named": true,
+              "value": "expression"
             }
           },
           {
@@ -9742,7 +9756,7 @@
   "conflicts": [
     [
       "_block_arm_value",
-      "expression"
+      "_callable_expression"
     ],
     [
       "_block_arm_value",
@@ -9750,22 +9764,22 @@
     ],
     [
       "if_statement",
-      "expression"
+      "_callable_expression"
     ],
     [
       "match_statement",
-      "expression"
+      "_callable_expression"
     ],
     [
       "block_like_statement",
-      "expression"
+      "_callable_expression"
     ],
     [
       "block_like_statement",
       "fork_expression"
     ],
     [
-      "expression",
+      "_callable_expression",
       "struct_init"
     ],
     [
@@ -9773,12 +9787,12 @@
       "map_literal"
     ],
     [
-      "expression",
+      "_callable_expression",
       "_member_object",
       "path_expression"
     ],
     [
-      "expression",
+      "_callable_expression",
       "_member_object"
     ],
     [
@@ -9790,7 +9804,7 @@
       "bare_generic_call_expression"
     ],
     [
-      "expression",
+      "_callable_expression",
       "private_capture_list"
     ],
     [
@@ -9810,7 +9824,7 @@
     ],
     [
       "return_error_expression",
-      "expression"
+      "_callable_expression"
     ],
     [
       "module_path"

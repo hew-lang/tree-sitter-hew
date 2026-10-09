@@ -237,3 +237,52 @@ fn main() {
             (call_argument
               (expression
                 (identifier)))))))))
+
+================================================================================
+Retired race braces are rejected
+:error
+================================================================================
+
+fn main() { let winner = race { first(), second(), }; }
+
+--------------------------------------------------------------------------------
+
+
+
+================================================================================
+Propagation applies after awaiting a race or a saved task
+================================================================================
+
+fn main() {
+    await race [first(), second()]?;
+    await pending?;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (expression_statement
+        (expression
+          (try_expression
+            (expression
+              (await_expression
+                (expression
+                  (race_expression
+                    (expression
+                      (call_expression
+                        (expression
+                          (identifier))))
+                    (expression
+                      (call_expression
+                        (expression
+                          (identifier)))))))))))
+      (expression_statement
+        (expression
+          (try_expression
+            (expression
+              (await_expression
+                (expression
+                  (identifier))))))))))

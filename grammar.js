@@ -40,19 +40,19 @@ export default grammar({
   inline: $ => [$._binary_operand],
 
   conflicts: $ => [
-    [$._block_arm_value, $.expression],
+    [$._block_arm_value, $._callable_expression],
     [$._block_arm_value, $.fork_expression],
-    [$.if_statement, $.expression],
-    [$.match_statement, $.expression],
-    [$.block_like_statement, $.expression],
+    [$.if_statement, $._callable_expression],
+    [$.match_statement, $._callable_expression],
+    [$.block_like_statement, $._callable_expression],
     [$.block_like_statement, $.fork_expression],
-    [$.expression, $.struct_init],
+    [$._callable_expression, $.struct_init],
     [$.block, $.map_literal],
-    [$.expression, $._member_object, $.path_expression],
-    [$.expression, $._member_object],
+    [$._callable_expression, $._member_object, $.path_expression],
+    [$._callable_expression, $._member_object],
     [$.qualified_expression, $.field_expression],
     [$.generic_apply_expression, $.bare_generic_call_expression],
-    [$.expression, $.private_capture_list],
+    [$._callable_expression, $.private_capture_list],
     [$.actor_spawn],
     [$.trait_bound],
     // `-> fn() fails E` — the short `fails E` may belong to the inner callable
@@ -65,7 +65,7 @@ export default grammar({
     [$.where_clause],
     // `return error` — a failure return or a binding named `error`; the next
     // token decides, and a payload that fits both reads as the failure return.
-    [$.return_error_expression, $.expression],
+    [$.return_error_expression, $._callable_expression],
     // `import a.b.c` — at each `.` the parser cannot tell (within LR(1))
     // whether another path segment or the import selection follows; GLR explores
     // both and only the valid continuation survives.
@@ -953,6 +953,13 @@ export default grammar({
     // ---- Expressions ----
 
     expression: $ => choice(
+      $._callable_expression,
+      $.spawn_expression,
+    ),
+
+    // A bare spawn ends after its actor and optional keys. Parentheses after
+    // the actor are retired construction syntax, not a call on that spawn.
+    _callable_expression: $ => choice(
       $.identifier,
       alias('capture', $.identifier),
       $.self,
@@ -983,7 +990,6 @@ export default grammar({
       $.match_expression,
       $.lambda,
       $.actor_expression,
-      $.spawn_expression,
       $.select_expression,
       $.race_expression,
       $.fork_expression,
@@ -1041,7 +1047,7 @@ export default grammar({
     // Left associativity keeps postfix calls composable after a completed
     // field/call chain (`value.slice(...).to_lower()`).
     call_expression: $ => prec.left(PREC.FIELD + 1, seq(
-      field('function', $.expression),
+      field('function', alias($._callable_expression, $.expression)),
       '(',
       optional(sep1($.call_argument, ',')),
       optional(','),
