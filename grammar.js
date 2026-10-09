@@ -22,9 +22,11 @@ const PREC = {
   SHIFT: 12,      // << >>
   ADD: 13,        // + - &+ &-
   MUL: 15,        // * / % &*
-  UNARY: 17,      // ! - ~ await
-  POSTFIX: 19,    // . () [] ?
-  FIELD: 19,      // field access (same left-associative postfix tier)
+  UNARY: 17,      // ! - ~ clone
+  TRY: 18,        // ?
+  TASK: 19,       // await fork
+  POSTFIX: 20,    // . () []
+  FIELD: 20,      // field access (same left-associative postfix tier)
 };
 
 export default grammar({
@@ -885,7 +887,7 @@ export default grammar({
       $.scope_expression,
       $.unsafe_expression,
       $.select_expression,
-      seq('fork', $.block),
+      prec(PREC.TASK, seq('fork', $.block)),
     ),
 
 
@@ -938,8 +940,7 @@ export default grammar({
       $.unsafe_expression,
       $.scope_expression,
       $.select_expression,
-      $.race_expression,
-      alias(seq('fork', $.block), $.fork_expression),
+      alias(prec(PREC.TASK, seq('fork', $.block)), $.fork_expression),
       $.gen_block_expression,
     )),
 
@@ -1145,7 +1146,7 @@ export default grammar({
       ']',
     )),
 
-    try_expression: $ => prec(PREC.POSTFIX, seq(
+    try_expression: $ => prec(PREC.TRY, seq(
       $.expression,
       '?',
     )),
@@ -1156,7 +1157,7 @@ export default grammar({
       field('type', $._type),
     )),
 
-    await_expression: $ => prec(PREC.UNARY, seq(
+    await_expression: $ => prec(PREC.TASK, seq(
       'await',
       choice($.expression, $.block),
     )),
@@ -1413,10 +1414,10 @@ export default grammar({
     ),
 
     race_expression: $ => seq(
-      'race', '{', optional(seq(sep1($.expression, ','), optional(','))), '}',
+      'race', '[', optional(seq(sep1($.expression, ','), optional(','))), ']',
     ),
 
-    fork_expression: $ => prec.right(seq('fork', choice($.expression, $.block))),
+    fork_expression: $ => prec.right(PREC.TASK, seq('fork', choice($.expression, $.block))),
 
     handle_expression: $ => prec.left(1, seq(
       field('operand', $.expression), 'handle', field('error', $.identifier),

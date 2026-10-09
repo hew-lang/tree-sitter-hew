@@ -5124,17 +5124,21 @@
           "name": "select_expression"
         },
         {
-          "type": "SEQ",
-          "members": [
-            {
-              "type": "STRING",
-              "value": "fork"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "block"
-            }
-          ]
+          "type": "PREC",
+          "value": 19,
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "fork"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "block"
+              }
+            ]
+          }
         }
       ]
     },
@@ -5458,23 +5462,23 @@
             "name": "select_expression"
           },
           {
-            "type": "SYMBOL",
-            "name": "race_expression"
-          },
-          {
             "type": "ALIAS",
             "content": {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "STRING",
-                  "value": "fork"
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "block"
-                }
-              ]
+              "type": "PREC",
+              "value": 19,
+              "content": {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": "fork"
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "block"
+                  }
+                ]
+              }
             },
             "named": true,
             "value": "fork_expression"
@@ -6106,7 +6110,7 @@
     },
     "call_expression": {
       "type": "PREC_LEFT",
-      "value": 20,
+      "value": 21,
       "content": {
         "type": "SEQ",
         "members": [
@@ -6179,7 +6183,7 @@
       "value": 2,
       "content": {
         "type": "PREC_LEFT",
-        "value": 21,
+        "value": 22,
         "content": {
           "type": "SEQ",
           "members": [
@@ -6307,7 +6311,7 @@
     },
     "qualified_expression": {
       "type": "PREC_LEFT",
-      "value": 19,
+      "value": 20,
       "content": {
         "type": "SEQ",
         "members": [
@@ -6339,7 +6343,7 @@
       "value": 1,
       "content": {
         "type": "PREC",
-        "value": 19,
+        "value": 20,
         "content": {
           "type": "SEQ",
           "members": [
@@ -6417,7 +6421,7 @@
       "value": -1,
       "content": {
         "type": "PREC",
-        "value": 19,
+        "value": 20,
         "content": {
           "type": "SEQ",
           "members": [
@@ -6480,7 +6484,7 @@
     },
     "bare_generic_call_expression": {
       "type": "PREC",
-      "value": 19,
+      "value": 20,
       "content": {
         "type": "SEQ",
         "members": [
@@ -6633,7 +6637,7 @@
     },
     "field_expression": {
       "type": "PREC",
-      "value": 19,
+      "value": 20,
       "content": {
         "type": "SEQ",
         "members": [
@@ -6671,7 +6675,7 @@
     },
     "index_expression": {
       "type": "PREC",
-      "value": 19,
+      "value": 20,
       "content": {
         "type": "SEQ",
         "members": [
@@ -6759,7 +6763,7 @@
     },
     "try_expression": {
       "type": "PREC",
-      "value": 19,
+      "value": 18,
       "content": {
         "type": "SEQ",
         "members": [
@@ -6776,7 +6780,7 @@
     },
     "cast_expression": {
       "type": "PREC",
-      "value": 19,
+      "value": 20,
       "content": {
         "type": "SEQ",
         "members": [
@@ -6805,7 +6809,7 @@
     },
     "await_expression": {
       "type": "PREC",
-      "value": 17,
+      "value": 19,
       "content": {
         "type": "SEQ",
         "members": [
@@ -7052,7 +7056,7 @@
     },
     "contextual_variant_expression": {
       "type": "PREC",
-      "value": 19,
+      "value": 20,
       "content": {
         "type": "SEQ",
         "members": [
@@ -8633,7 +8637,7 @@
         },
         {
           "type": "STRING",
-          "value": "{"
+          "value": "["
         },
         {
           "type": "CHOICE",
@@ -8687,13 +8691,13 @@
         },
         {
           "type": "STRING",
-          "value": "}"
+          "value": "]"
         }
       ]
     },
     "fork_expression": {
       "type": "PREC_RIGHT",
-      "value": 0,
+      "value": 19,
       "content": {
         "type": "SEQ",
         "members": [

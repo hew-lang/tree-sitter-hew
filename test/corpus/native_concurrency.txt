@@ -8,7 +8,7 @@ fn work(value: i64) -> i64 fails Error {
 
 fn main() {
     scope within 2s {
-        let winner = race { work(1), work(2), };
+        let winner = await race [work(1), work(2),];
         let task = fork work(winner);
         await task
     } handle failure {
@@ -49,21 +49,23 @@ fn main() {
                     (pattern
                       (identifier))
                     (expression
-                      (race_expression
+                      (await_expression
                         (expression
-                          (call_expression
+                          (race_expression
                             (expression
-                              (identifier))
-                            (call_argument
-                              (expression
-                                (integer_literal)))))
-                        (expression
-                          (call_expression
+                              (call_expression
+                                (expression
+                                  (identifier))
+                                (call_argument
+                                  (expression
+                                    (integer_literal)))))
                             (expression
-                              (identifier))
-                            (call_argument
-                              (expression
-                                (integer_literal))))))))
+                              (call_expression
+                                (expression
+                                  (identifier))
+                                (call_argument
+                                  (expression
+                                    (integer_literal))))))))))
                   (let_statement
                     (pattern
                       (identifier))

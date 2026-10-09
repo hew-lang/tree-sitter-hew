@@ -1108,10 +1108,6 @@
           "named": true
         },
         {
-          "type": "race_expression",
-          "named": true
-        },
-        {
           "type": "scope_expression",
           "named": true
         },

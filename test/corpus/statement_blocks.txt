@@ -154,43 +154,6 @@ fn f() -> Result<i64, string> {
                 (integer_literal)))))))))
 
 ================================================================================
-Statement race ends before a dotted tail
-================================================================================
-
-fn f() -> Result<i64, string> {
-    race { work(), }
-    .Ok(1)
-}
-
---------------------------------------------------------------------------------
-
-(source_file
-  (function_declaration
-    (identifier)
-    (return_type
-      (generic_type
-        (identifier)
-        (type_arguments
-          (primitive_type)
-          (primitive_type))))
-    (block
-      (block_like_statement
-        (race_expression
-          (expression
-            (call_expression
-              (expression
-                (identifier))))))
-      (expression_statement
-        (expression
-          (call_expression
-            (expression
-              (contextual_variant_expression
-                (identifier)))
-            (call_argument
-              (expression
-                (integer_literal)))))))))
-
-================================================================================
 Statement fork block ends before a dotted tail
 ================================================================================
 
