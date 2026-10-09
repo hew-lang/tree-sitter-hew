@@ -192,3 +192,39 @@ fn reply() -> actor(i64) -> i64 {
               (expression_statement
                 (expression
                   (identifier))))))))))
+
+================================================================================
+Module-qualified error types can share a primitive spelling
+================================================================================
+
+fn parse(value: Result<i64, string.NumberError>) -> Result<i64, string.NumberError> {
+    value
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (generic_type
+          (identifier)
+          (type_arguments
+            (primitive_type)
+            (scoped_type
+              (identifier)
+              (identifier))))))
+    (return_type
+      (generic_type
+        (identifier)
+        (type_arguments
+          (primitive_type)
+          (scoped_type
+            (identifier)
+            (identifier)))))
+    (block
+      (expression_statement
+        (expression
+          (identifier))))))

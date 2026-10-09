@@ -760,8 +760,9 @@ export default grammar({
     // Qualified type name: `mod.Type` or `a.b.C`, with an optional trailing
     // type-arg list (e.g. `mod.Worker<T>`). Dotted paths are used throughout
     // the current surface for cross-module types (`net.NetError`, `fs.IoError`).
+    // A module can share a primitive spelling, as in `string.NumberError`.
     scoped_type: $ => seq(
-      $.identifier,
+      choice($.identifier, alias($.primitive_type, $.identifier)),
       repeat1(seq('.', $.identifier)),
       optional($.type_arguments),
     ),
