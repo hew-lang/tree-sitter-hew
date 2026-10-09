@@ -4643,10 +4643,31 @@
           }
         },
         {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_tail_expression"
+              },
+              "named": true,
+              "value": "expression_statement"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
           "type": "STRING",
           "value": "}"
         }
       ]
+    },
+    "_tail_expression": {
+      "type": "SYMBOL",
+      "name": "expression"
     },
     "_statement": {
       "type": "CHOICE",
@@ -5399,29 +5420,17 @@
       ]
     },
     "expression_statement": {
-      "type": "PREC_RIGHT",
-      "value": 0,
-      "content": {
-        "type": "SEQ",
-        "members": [
-          {
-            "type": "SYMBOL",
-            "name": "expression"
-          },
-          {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "STRING",
-                "value": ";"
-              },
-              {
-                "type": "BLANK"
-              }
-            ]
-          }
-        ]
-      }
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "expression"
+        },
+        {
+          "type": "STRING",
+          "value": ";"
+        }
+      ]
     },
     "empty_statement": {
       "type": "STRING",
@@ -5508,6 +5517,46 @@
         {
           "type": "SYMBOL",
           "name": "spawn_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "unary_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "binary_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "await_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "clone_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "lambda"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "fork_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "handle_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "yield_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "return_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "return_error_expression"
         }
       ]
     },
@@ -5541,14 +5590,6 @@
         },
         {
           "type": "SYMBOL",
-          "name": "unary_expression"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "binary_expression"
-        },
-        {
-          "type": "SYMBOL",
           "name": "call_expression"
         },
         {
@@ -5570,14 +5611,6 @@
         {
           "type": "SYMBOL",
           "name": "cast_expression"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "await_expression"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "clone_expression"
         },
         {
           "type": "SYMBOL",
@@ -5633,10 +5666,6 @@
         },
         {
           "type": "SYMBOL",
-          "name": "lambda"
-        },
-        {
-          "type": "SYMBOL",
           "name": "actor_expression"
         },
         {
@@ -5649,27 +5678,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "fork_expression"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "handle_expression"
-        },
-        {
-          "type": "SYMBOL",
           "name": "scope_expression"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "yield_expression"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "return_expression"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "return_error_expression"
         },
         {
           "type": "ALIAS",

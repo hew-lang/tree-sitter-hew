@@ -83,6 +83,7 @@ fn current(value: Outcome) -> net.Result<string> {
 
 ================================================================================
 Legacy path separators are rejected
+:error
 ================================================================================
 
 import net::io;
@@ -93,26 +94,7 @@ fn legacy() {
 
 --------------------------------------------------------------------------------
 
-(source_file
-  (import_declaration
-    (module_path
-      (identifier))
-    (ERROR
-      (identifier)))
-  (function_declaration
-    (identifier)
-    (block
-      (expression_statement
-        (expression
-          (identifier)))
-      (ERROR)
-      (expression_statement
-        (expression
-          (identifier)))
-      (ERROR)
-      (expression_statement
-        (expression
-          (identifier))))))
+
 
 ================================================================================
 Glob imports are rejected
@@ -131,6 +113,7 @@ import net.io.*;
 
 ================================================================================
 Turbofish forms are rejected
+:error
 ================================================================================
 
 fn legacy() {
@@ -139,25 +122,7 @@ fn legacy() {
 
 --------------------------------------------------------------------------------
 
-(source_file
-  (function_declaration
-    (identifier)
-    (block
-      (expression_statement
-        (expression
-          (identifier)))
-      (ERROR)
-      (expression_statement
-        (expression
-          (binary_expression
-            (expression
-              (identifier))
-            (ERROR)
-            (ERROR)
-            (expression
-              (call_expression
-                (expression
-                  (identifier))))))))))
+
 
 ================================================================================
 Anonymous actor type

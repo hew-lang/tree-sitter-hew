@@ -808,7 +808,9 @@ export default grammar({
 
     // ---- Statements ----
 
-    block: $ => seq('{', repeat($._statement), '}'),
+    block: $ => seq('{', repeat($._statement), optional(alias($._tail_expression, $.expression_statement)), '}'),
+
+    _tail_expression: $ => $.expression,
 
     _statement: $ => choice(
       // A stray `;` after a statement is accepted by the compiler with an
@@ -900,7 +902,7 @@ export default grammar({
     // it is valid in tail position without `;` and inside larger expressions
     // (`b || return 0`, `g(if c { 1 } else { return 0 })`). See hew commit
     // 480456ec5 (return-as-expression) and hew-parser expressions.rs:1125-1150.
-    // Statement position is handled by `expression_statement` (optional `;`).
+    // Statement position is handled by `expression_statement`; a tail omits `;`.
     return_expression: $ => prec.right(seq('return', optional($.expression))),
 
     // `return error <expr>` returns the failure of a `fails E` function. After
@@ -924,9 +926,8 @@ export default grammar({
       ';',
     ),
 
-    // prec.right keeps the `;` attached to the expression it ends instead of
-    // parsing it as an empty statement.
-    expression_statement: $ => prec.right(seq($.expression, optional(';'))),
+    // Ordinary expressions omit their semicolon only at the end of a block.
+    expression_statement: $ => seq($.expression, ';'),
 
     empty_statement: $ => ';',
 
@@ -955,26 +956,33 @@ export default grammar({
     expression: $ => choice(
       $._callable_expression,
       $.spawn_expression,
+      $.unary_expression,
+      $.binary_expression,
+      $.await_expression,
+      $.clone_expression,
+      $.lambda,
+      $.fork_expression,
+      $.handle_expression,
+      $.yield_expression,
+      $.return_expression,
+      $.return_error_expression,
     ),
 
-    // A bare spawn ends after its actor and optional keys. Parentheses after
-    // the actor are retired construction syntax, not a call on that spawn.
+    // Postfix calls bind inside prefix and infix operands. In particular,
+    // `return spawn Worker()` cannot become a call on `return spawn Worker`.
+    // A bare spawn ends after its actor and optional brace-delimited keys.
     _callable_expression: $ => choice(
       $.identifier,
       alias('capture', $.identifier),
       $.self,
       $._literal,
       $.interpolated_string,
-      $.unary_expression,
-      $.binary_expression,
       $.call_expression,
       $.method_call_expression,
       $.field_expression,
       $.index_expression,
       $.try_expression,
       $.cast_expression,
-      $.await_expression,
-      $.clone_expression,
       $.struct_init,
       $.generic_struct_init,
       $.contextual_variant_expression,
@@ -988,16 +996,10 @@ export default grammar({
       $.parenthesized_expression,
       $.if_expression,
       $.match_expression,
-      $.lambda,
       $.actor_expression,
       $.select_expression,
       $.race_expression,
-      $.fork_expression,
-      $.handle_expression,
       $.scope_expression,
-      $.yield_expression,
-      $.return_expression,
-      $.return_error_expression,
       alias('error', $.identifier),
       $.gen_block_expression,
       $.qualified_expression,
