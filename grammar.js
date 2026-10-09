@@ -603,7 +603,7 @@ export default grammar({
       $.machine_state,
     ),
 
-    // on EventIdent [ "(" Ident { "," Ident } ")" ] : Source => Target
+    // on EventIdent [ "{" Ident { "," Ident } "}" ] : Source => Target
     //   [ "reenter" ] [ "when" Expr ] TransitionBody
     // Source = Ident ( "." Ident )* | "_"  (hew-parser/src/parser/actor_machine_supervisor.rs
     //   parse_state_pattern: a leading "." is rejected on the source; a
@@ -831,9 +831,6 @@ export default grammar({
       $.block_like_statement,
     ),
 
-    // LetStmt (grammar.ebnf): the initializer is optional — `let x: i64;` is a
-    // bare declaration whose definite-assignment is checked later by the move
-    // checker (examples/v05/checked-mir/reject/init_before_use.hew).
     let_statement: $ => seq(
       'let',
       field('pattern', $.pattern),
@@ -850,9 +847,10 @@ export default grammar({
     var_statement: $ => seq(
       'var',
       field('name', $.identifier),
-      optional(seq(':', field('type', $._type))),
-      '=',
-      field('value', $.expression),
+      choice(
+        seq(':', field('type', $._type), optional(seq('=', field('value', $.expression)))),
+        seq('=', field('value', $.expression)),
+      ),
       ';',
     ),
 
