@@ -24,6 +24,7 @@
 (private_capture (identifier) @variable)
 (failure_return "fails" @keyword)
 (return_error_expression "error" @keyword)
+(defer_statement "err" @keyword)
 (child_clause ["count" "stop"] @keyword)
 
 "receive" @keyword
@@ -231,7 +232,7 @@
 ; ---- Operators ----
 [
   "+" "-" "*" "/" "%" "!" "=" "==" "!=" "<" "<=" ">" ">=" "&&" "||"
-  "+=" "-=" "*=" "/=" "%=" ".." "..=" "=>" "->" "?" "??"
+  "+=" "-=" "*=" "/=" "%=" ".." "..=" "=>" "->" "?" "?." "??"
   "<<" ">>" "&=" "|=" "^=" "<<=" ">>="
   "&" "|" "^" "~" "is" "&+" "&-" "&*"
 ] @operator

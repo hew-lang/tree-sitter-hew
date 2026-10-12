@@ -102,3 +102,83 @@ fn f() {
                   (call_argument
                     (expression
                       (identifier))))))))))))
+
+================================================================================
+Optional chains retain their member and index structure
+================================================================================
+
+fn main() {
+    let city = user?.address?.city.len() ?? 0;
+    let item = maybe?.items[index];
+    let propagated = (value?).field;
+}
+
+---
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (binary_expression
+            (expression
+              (method_call_expression
+                (field_expression
+                  (expression
+                    (field_expression
+                      (expression
+                        (identifier))
+                      (identifier)))
+                  (identifier))
+                (identifier)))
+            (expression
+              (integer_literal)))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (index_expression
+            (expression
+              (field_expression
+                (expression
+                  (identifier))
+                (identifier)))
+            (expression
+              (identifier)))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (field_expression
+            (expression
+              (parenthesized_expression
+                (expression
+                  (try_expression
+                    (expression
+                      (identifier))))))
+            (identifier)))))))
+
+================================================================================
+Failure-only deferred block
+================================================================================
+
+fn main() {
+    defer err { cleanup(); }
+}
+
+---
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (defer_statement
+        (block
+          (expression_statement
+            (expression
+              (call_expression
+                (expression
+                  (identifier))))))))))

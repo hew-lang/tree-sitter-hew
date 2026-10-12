@@ -6754,6 +6754,10 @@
     "named": false
   },
   {
+    "type": "?.",
+    "named": false
+  },
+  {
     "type": "??",
     "named": false
   },
@@ -6908,6 +6912,10 @@
   },
   {
     "type": "enum",
+    "named": false
+  },
+  {
+    "type": "err",
     "named": false
   },
   {
