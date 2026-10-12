@@ -2014,6 +2014,10 @@
           "named": true
         },
         {
+          "type": "macro_invocation",
+          "named": true
+        },
+        {
           "type": "map_literal",
           "named": true
         },
@@ -3912,6 +3916,32 @@
         },
         {
           "type": "type_parameter",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "macro_invocation",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "expression",
           "named": true
         }
       ]

@@ -979,6 +979,7 @@ export default grammar({
       $._literal,
       $.interpolated_string,
       $.call_expression,
+      $.macro_invocation,
       $.method_call_expression,
       $.field_expression,
       $.index_expression,
@@ -1055,6 +1056,11 @@ export default grammar({
       optional(sep1($.call_argument, ',')),
       optional(','),
       ')',
+    )),
+
+    macro_invocation: $ => prec(PREC.POSTFIX, seq(
+      field('name', $.identifier), '!', '(',
+      optional(sep1($.expression, ',')), optional(','), ')',
     )),
 
     // A member call must remain a single postfix expression even where `(`
