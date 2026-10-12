@@ -1,0 +1,64 @@
+==================
+Compile-time input invocations compose with calls and fields
+==================
+
+const TEXT: string = include_str!("assets/message.txt");
+fn main() {
+    println(include_bytes!("assets/logo.png").len());
+    println(stringify!(unknown + 1));
+    let here = location!();
+}
+
+---
+
+(source_file
+  (const_declaration
+    (identifier)
+    (primitive_type)
+    (expression
+      (macro_invocation
+        (identifier)
+        (expression
+          (string_literal
+            (string_content))))))
+  (function_declaration
+    (identifier)
+    (block
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (identifier))
+            (call_argument
+              (expression
+                (call_expression
+                  (expression
+                    (field_expression
+                      (expression
+                        (macro_invocation
+                          (identifier)
+                          (expression
+                            (string_literal
+                              (string_content)))))
+                      (identifier)))))))))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (identifier))
+            (call_argument
+              (expression
+                (macro_invocation
+                  (identifier)
+                  (expression
+                    (binary_expression
+                      (expression
+                        (identifier))
+                      (expression
+                        (integer_literal))))))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (macro_invocation
+            (identifier)))))))

@@ -138,6 +138,8 @@
 
 (self) @variable.builtin
 
+(macro_invocation name: (identifier) @function.macro)
+
 (field_expression
   field: (identifier) @property)
 
