@@ -917,7 +917,7 @@ export default grammar({
     // Deferred cleanup may be an expression statement or a scoped block.
     // `defer <expr>;` or `defer { … }` — a block body needs no `;`
     // (hew-parser statements.rs `Token::Defer`).
-    defer_statement: $ => seq('defer', choice(seq($.expression, ';'), $.block)),
+    defer_statement: $ => seq('defer', optional('err'), choice(seq($.expression, ';'), $.block)),
 
     // emit EventName { field: value, … } ;  — Mealy output inside a transition body
     emit_statement: $ => seq(
@@ -1139,7 +1139,7 @@ export default grammar({
 
     field_expression: $ => prec(PREC.FIELD, seq(
       field('object', $.expression),
-      '.',
+      choice('.', '?.'),
       field('field', choice($.identifier, $.integer_literal)),
     )),
 
