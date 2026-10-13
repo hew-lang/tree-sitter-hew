@@ -13,6 +13,8 @@
   (supervisor_declaration)
   (machine_declaration)
   (extern_block)
+  (macro_declaration)
+  (macro_template)
   (receive_function)
   (receive_gen_function)
   (if_expression)

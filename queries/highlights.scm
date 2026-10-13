@@ -5,7 +5,7 @@
   "fn" "let" "var" "const" "mut" "pub" "return" "if" "else" "match" "for" "while"
   "loop" "break" "continue" "in" "spawn" "await" "select" "race"
   "import" "extern" "gen" "yield" "scope" "move" "fork"
-  "type" "where" "dyn" "unsafe" "defer"
+  "type" "where" "dyn" "unsafe" "defer" "macro"
   "init" "child" "pool" "restart" "wired_to"
   "package" "after"
   "reserved" "optional" "deprecated" "default"
@@ -20,6 +20,7 @@
 ; where `clone` stays an ordinary identifier.
 (clone_expression "clone" @keyword.operator)
 (callable_capabilities ["var" "once" "clone" "suspends"] @keyword)
+(trait_method_effect "suspends" @keyword)
 (private_capture_list "capture" @keyword)
 (private_capture (identifier) @variable)
 (failure_return "fails" @keyword)
@@ -61,7 +62,13 @@
 (attribute "#" @punctuation.special)
 (attribute "[" @punctuation.special)
 (attribute "]" @punctuation.special)
-(attribute (identifier) @attribute)
+(attribute name: (identifier) @attribute)
+
+(macro_declaration name: (identifier) @function.macro)
+(macro_rule category: ["expr" "items"] @keyword)
+(macro_function_capture ["fn" "method" "fails"] @keyword)
+(macro_variable (identifier) @variable.parameter)
+"$" @punctuation.special
 
 ; ---- Literals ----
 (integer_literal) @number
@@ -139,6 +146,7 @@
 (self) @variable.builtin
 
 (macro_invocation name: (identifier) @function.macro)
+(macro_invocation name: (path_expression (identifier) @function.macro))
 
 (field_expression
   field: (identifier) @property)

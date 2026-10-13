@@ -18,7 +18,7 @@ fn main() {
     (expression
       (macro_invocation
         (identifier)
-        (expression
+        (token_tree
           (string_literal
             (string_content))))))
   (function_declaration
@@ -37,7 +37,7 @@ fn main() {
                       (expression
                         (macro_invocation
                           (identifier)
-                          (expression
+                          (token_tree
                             (string_literal
                               (string_content)))))
                       (identifier)))))))))
@@ -50,15 +50,13 @@ fn main() {
               (expression
                 (macro_invocation
                   (identifier)
-                  (expression
-                    (binary_expression
-                      (expression
-                        (identifier))
-                      (expression
-                        (integer_literal))))))))))
+                  (token_tree
+                    (identifier)
+                    (integer_literal))))))))
       (let_statement
         (pattern
           (identifier))
         (expression
           (macro_invocation
-            (identifier)))))))
+            (identifier)
+            (token_tree)))))))

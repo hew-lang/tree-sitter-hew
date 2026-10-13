@@ -105,23 +105,68 @@ export default grammar({
         $.supervisor_declaration,
         $.machine_declaration,
         $.type_alias,
+        $.macro_declaration,
+        $.macro_invocation,
       ),
     ),
 
-    // Attribute args accept both a positional list (`#[derive(Debug, Clone)]`)
-    // and `key = value` pairs (`#[wire(version = 2, min_version = 1)]`), matching
-    // the real parser's AttributeArg forms (hew-parser wire.rs
-    // reads `version`/`min_version` as KeyValue args).
-    attribute: $ => seq('#', '[', $.identifier, optional(seq('(', optional(sep1($._attribute_arg, ',')), ')')), ']'),
-
-    _attribute_arg: $ => choice(
-      seq($.identifier, '=', choice($.identifier, $._literal)),
-      // Unit-bearing limits such as `#[max_heap(64 kb)]` are accepted by the
-      // compiler as one attribute argument.
-      seq($.integer_literal, $.identifier),
-      $.identifier,
-      $._literal,
+    attribute: $ => seq(
+      '#', '[', field('name', $.identifier),
+      repeat(seq('.', field('name', $.identifier))),
+      optional(seq('(', repeat($._macro_token), ')')), ']',
     ),
+
+    macro_declaration: $ => seq(
+      'macro', field('name', $.identifier), '{', repeat1($.macro_rule), '}',
+    ),
+
+    macro_rule: $ => seq(
+      choice(
+        field('pattern', $.macro_pattern),
+        seq('#', '[', field('pattern', $.macro_pattern), ']', $.macro_function_capture),
+      ),
+      '=>', field('category', choice('expr', 'items')),
+      field('template', $.macro_template),
+    ),
+
+    macro_pattern: $ => seq('(', repeat($._macro_token), ')'),
+    macro_template: $ => seq('{', repeat($._macro_token), '}'),
+
+    macro_function_capture: $ => seq(
+      $.macro_variable, ':', choice('fn', 'method'), optional('fails'),
+    ),
+
+    macro_variable: $ => prec(1, seq('$', $.identifier)),
+
+    token_tree: $ => choice(
+      seq('(', repeat($._macro_token), ')'),
+      seq('[', repeat($._macro_token), ']'),
+      seq('{', repeat($._macro_token), '}'),
+    ),
+
+    // Expansion owns fragment and repetition checks; these remain balanced tokens.
+    _macro_token: $ => choice(
+      $.token_tree, $.macro_variable, $.identifier, $._literal,
+      alias($.macro_interpolated_string, $.interpolated_string),
+      ',', ';', ':', '.', '@', '#', '$',
+      '+', '-', '*', '/', '%', '!', '~', '&', '|', '^',
+      '=', '<', '>', '?', '??', '?.', '=>', '->', '..', '..=',
+      '==', '!=', '<=', '>=', '&&', '||', '<<', '>>',
+      '+=', '-=', '*=', '/=', '%=', '&=', '|=', '^=', '<<=', '>>=',
+      '&+', '&-', '&*',
+    ),
+
+    macro_interpolated_string: $ => seq(
+      $.fstring_start,
+      repeat(choice(
+        alias($.interpolated_string_content, $.string_content),
+        $.escape_sequence,
+        alias($.macro_interpolation, $.interpolation),
+      )),
+      '"',
+    ),
+
+    macro_interpolation: $ => seq(token.immediate('{'), repeat($._macro_token), '}'),
 
     // Import (hew-parser: import item):
     //   Import     = "import" ( StringLit | ModulePath ( "." ImportSelection )? ) ";"
@@ -295,6 +340,7 @@ export default grammar({
 
     trait_function_signature: $ => seq(
       'fn',
+      optional($.trait_method_effect),
       field('name', $.identifier),
       optional($.type_parameters),
       '(',
@@ -304,6 +350,8 @@ export default grammar({
       optional($.where_clause),
       choice(';', field('body', $.block)),
     ),
+
+    trait_method_effect: $ => seq('[', 'suspends', ']'),
 
     associated_type: $ => seq(
       'type',
@@ -1059,8 +1107,8 @@ export default grammar({
     )),
 
     macro_invocation: $ => prec(PREC.POSTFIX, seq(
-      field('name', $.identifier), '!', '(',
-      optional(sep1($.expression, ',')), optional(','), ')',
+      field('name', choice($.identifier, alias('capture', $.identifier), $.path_expression)), '!',
+      field('arguments', alias($.macro_pattern, $.token_tree)),
     )),
 
     // A member call must remain a single postfix expression even where `(`

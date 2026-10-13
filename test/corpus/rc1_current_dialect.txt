@@ -100,7 +100,7 @@ extern "C" {
     (string_literal
       (string_content))
     (attribute
-      (identifier)
+      name: (identifier)
       (identifier))
     (extern_function
       name: (identifier)
