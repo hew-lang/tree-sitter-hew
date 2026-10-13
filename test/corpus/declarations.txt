@@ -269,7 +269,7 @@ actor Worker {
   (actor_declaration
     name: (identifier)
     (attribute
-      (identifier)
+      name: (identifier)
       (identifier))
     (function_declaration
       name: (identifier)
@@ -307,7 +307,7 @@ actor Counter {
       name: (identifier)
       type: (primitive_type))
     (attribute
-      (identifier)
+      name: (identifier)
       (identifier))
     (function_declaration
       name: (identifier)
@@ -318,7 +318,7 @@ actor Counter {
           right: (expression
             (integer_literal)))))
     (attribute
-      (identifier)
+      name: (identifier)
       (identifier))
     (function_declaration
       name: (identifier)

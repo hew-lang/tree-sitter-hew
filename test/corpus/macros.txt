@@ -1,0 +1,278 @@
+==================
+Declarative rules preserve captures and balanced token trees
+==================
+
+pub macro collect {
+    ($name:ident, $ty:ty; $($value:expr),*) => items {
+        fn $name() -> Vec<$ty> { Vec.from([$($value),*]) }
+    }
+    ($pattern:pat => $body:block, $label:literal) => expr {
+        { match input { $pattern => $body } f"{$label}: {$body}" }
+    }
+    ($($value:literal)?) => expr { [$( $value )?] }
+}
+collect!(values, i64; 1, 2, 3)
+fn main() { println(tools.collect!([one, two], { nested(call()) })); }
+
+---
+
+(source_file
+  (visibility)
+  (macro_declaration
+    (identifier)
+    (macro_rule
+      (macro_pattern
+        (macro_variable
+          (identifier))
+        (identifier)
+        (macro_variable
+          (identifier))
+        (identifier)
+        (token_tree
+          (macro_variable
+            (identifier))
+          (identifier)))
+      (macro_template
+        (identifier)
+        (macro_variable
+          (identifier))
+        (token_tree)
+        (identifier)
+        (macro_variable
+          (identifier))
+        (token_tree
+          (identifier)
+          (identifier)
+          (token_tree
+            (token_tree
+              (token_tree
+                (macro_variable
+                  (identifier))))))))
+    (macro_rule
+      (macro_pattern
+        (macro_variable
+          (identifier))
+        (identifier)
+        (macro_variable
+          (identifier))
+        (identifier)
+        (macro_variable
+          (identifier))
+        (identifier))
+      (macro_template
+        (token_tree
+          (identifier)
+          (identifier)
+          (token_tree
+            (macro_variable
+              (identifier))
+            (macro_variable
+              (identifier)))
+          (interpolated_string
+            (fstring_start)
+            (interpolation
+              (macro_variable
+                (identifier)))
+            (string_content)
+            (interpolation
+              (macro_variable
+                (identifier)))))))
+    (macro_rule
+      (macro_pattern
+        (token_tree
+          (macro_variable
+            (identifier))
+          (identifier)))
+      (macro_template
+        (token_tree
+          (token_tree
+            (macro_variable
+              (identifier)))))))
+  (macro_invocation
+    (identifier)
+    (token_tree
+      (identifier)
+      (identifier)
+      (integer_literal)
+      (integer_literal)
+      (integer_literal)))
+  (function_declaration
+    (identifier)
+    (block
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (identifier))
+            (call_argument
+              (expression
+                (macro_invocation
+                  (path_expression
+                    (identifier)
+                    (identifier))
+                  (token_tree
+                    (token_tree
+                      (identifier)
+                      (identifier))
+                    (token_tree
+                      (identifier)
+                      (token_tree
+                        (identifier)
+                        (token_tree)))))))))))))
+
+==================
+Attribute rules and qualified invocation preserve function projections
+==================
+
+macro wrap {
+    #[($label:literal)] $m:method fails => items {
+        $m.vis fn $m.name $m.generics ($m.params) $m.ret $m.where {
+            helper($m.args);
+            $m.body
+        }
+    }
+    #[()] $f:fn => items { #[tests.observed("wrapped")] $f }
+    ($value:expr) => expr { $value + 1 }
+}
+#[wrappers.wrap("outer")]
+#[wrap]
+fn answer() -> i64 { wrap!(41) }
+trait Answers {
+    #[wrap]
+    fn[suspends] answer(self) -> i64 { 42 }
+}
+
+---
+
+(source_file
+  (macro_declaration
+    (identifier)
+    (macro_rule
+      (macro_pattern
+        (macro_variable
+          (identifier))
+        (identifier))
+      (macro_function_capture
+        (macro_variable
+          (identifier)))
+      (macro_template
+        (macro_variable
+          (identifier))
+        (identifier)
+        (identifier)
+        (macro_variable
+          (identifier))
+        (identifier)
+        (macro_variable
+          (identifier))
+        (identifier)
+        (token_tree
+          (macro_variable
+            (identifier))
+          (identifier))
+        (macro_variable
+          (identifier))
+        (identifier)
+        (macro_variable
+          (identifier))
+        (identifier)
+        (token_tree
+          (identifier)
+          (token_tree
+            (macro_variable
+              (identifier))
+            (identifier))
+          (macro_variable
+            (identifier))
+          (identifier))))
+    (macro_rule
+      (macro_pattern)
+      (macro_function_capture
+        (macro_variable
+          (identifier)))
+      (macro_template
+        (token_tree
+          (identifier)
+          (identifier)
+          (token_tree
+            (string_literal
+              (string_content))))
+        (macro_variable
+          (identifier))))
+    (macro_rule
+      (macro_pattern
+        (macro_variable
+          (identifier))
+        (identifier))
+      (macro_template
+        (macro_variable
+          (identifier))
+        (integer_literal))))
+  (attribute
+    (identifier)
+    (identifier)
+    (string_literal
+      (string_content)))
+  (attribute
+    (identifier))
+  (function_declaration
+    (identifier)
+    (return_type
+      (primitive_type))
+    (block
+      (expression_statement
+        (expression
+          (macro_invocation
+            (identifier)
+            (token_tree
+              (integer_literal)))))))
+  (trait_declaration
+    (identifier)
+    (attribute
+      (identifier))
+    (trait_function_signature
+      (trait_method_effect)
+      (identifier)
+      (parameters
+        (parameter
+          (self_parameter
+            (self))))
+      (return_type
+        (primitive_type))
+      (block
+        (expression_statement
+          (expression
+            (integer_literal)))))))
+
+==================
+Macro declaration requires a rule
+:error
+==================
+
+macro empty {}
+
+---
+
+(source_file)
+
+==================
+Macro token trees require matching delimiters
+:error
+==================
+
+macro broken { ($value:expr] => expr { $value } }
+
+---
+
+(source_file)
+
+==================
+Macro rules have no semicolon after their bodies
+:error
+==================
+
+macro broken { () => expr { 1 }; }
+
+---
+
+(source_file)
