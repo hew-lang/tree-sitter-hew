@@ -647,7 +647,7 @@ export default grammar({
       ),
     ),
 
-    // [ "initial" ] StateDecl  — depth-1 composite substate
+    // [ "initial" ] StateDecl — direct leaf or compound child
     machine_composite_member: $ => seq(
       optional('initial'),
       $.machine_state,
@@ -657,8 +657,8 @@ export default grammar({
     //   [ "reenter" ] [ "when" Expr ] TransitionBody
     // Source = Ident ( "." Ident )* | "_"  (hew-parser/src/parser/actor_machine_supervisor.rs
     //   parse_state_pattern: a leading "." is rejected on the source; a
-    //   "Composite.Leaf" qualifier strips to "Leaf")
-    // Target = Ident | "." Ident | "_"  (same fn: the "." Ident contextual
+    //   qualified ancestry is retained and checked)
+    // Target = Ident ( "." Ident )* | "." Ident | "_" (the contextual
     //   form is the bare-variant target the checker's fix-it steers authors
     //   towards; "._" is rejected, so the wildcard stays plain "_")
     // TransitionBody = ";" | "{" FieldInitList "}" | Block
@@ -671,7 +671,7 @@ export default grammar({
       ':',
       field('source', choice(seq($.identifier, repeat(seq('.', $.identifier))), '_')),
       '=>',
-      field('target', choice($.identifier, $.contextual_variant_expression, '_')),
+      field('target', choice(seq($.identifier, repeat(seq('.', $.identifier))), $.contextual_variant_expression, '_')),
       optional('reenter'),
       optional(seq('when', field('guard', $.expression))),
       // A bodyless transition needs a semicolon; a body ends at `}`.
