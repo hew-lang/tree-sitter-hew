@@ -1287,6 +1287,10 @@
           {
             "type": "expression",
             "named": true
+          },
+          {
+            "type": "range_argument",
+            "named": true
           }
         ]
       }
@@ -1301,6 +1305,10 @@
         },
         {
           "type": "expression",
+          "named": true
+        },
+        {
+          "type": "range_argument",
           "named": true
         }
       ]
@@ -5007,6 +5015,32 @@
           "named": true
         }
       ]
+    }
+  },
+  {
+    "type": "range_argument",
+    "named": true,
+    "fields": {
+      "end": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      },
+      "start": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {
