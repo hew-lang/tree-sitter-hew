@@ -1186,9 +1186,18 @@ export default grammar({
     // general expression set so a statement-level `{` still opens a block
     // statement.
     call_argument: $ => choice(
-      seq(field('name', $.identifier), ':', field('value', choice($.expression, $.block))),
+      seq(field('name', $.identifier), ':', field('value', choice($.expression, $.block, $.range_argument))),
       $.expression,
       $.block,
+      $.range_argument,
+    ),
+
+    // Closed ranges remain ordinary binary expressions. Open bounds are
+    // accepted as arguments; an inclusive range still requires its end.
+    range_argument: $ => choice(
+      seq('..', optional(field('end', $.expression))),
+      seq('..=', field('end', $.expression)),
+      seq(field('start', $.expression), '..'),
     ),
 
     field_expression: $ => prec(PREC.FIELD, seq(

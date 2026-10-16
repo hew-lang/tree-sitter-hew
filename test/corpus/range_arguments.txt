@@ -1,0 +1,153 @@
+================================================================================
+Open and closed range arguments compose with calls
+================================================================================
+
+fn ranges(text: string, end: i64) {
+    text.get(..);
+    text.get(..end);
+    text.get(..=end);
+    text.get(end..);
+    text.get(1..end);
+    text.get(1..=end);
+    text.get((end + 1)..);
+    accept(range: ..end, other: 2);
+    accept(.., 2);
+    accept(if true { 1 } else { 2 }, end + 1);
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (primitive_type))
+      (parameter
+        (identifier)
+        (primitive_type)))
+    (block
+      (expression_statement
+        (expression
+          (method_call_expression
+            (identifier)
+            (identifier)
+            (call_argument
+              (range_argument)))))
+      (expression_statement
+        (expression
+          (method_call_expression
+            (identifier)
+            (identifier)
+            (call_argument
+              (range_argument
+                (expression
+                  (identifier)))))))
+      (expression_statement
+        (expression
+          (method_call_expression
+            (identifier)
+            (identifier)
+            (call_argument
+              (range_argument
+                (expression
+                  (identifier)))))))
+      (expression_statement
+        (expression
+          (method_call_expression
+            (identifier)
+            (identifier)
+            (call_argument
+              (range_argument
+                (expression
+                  (identifier)))))))
+      (expression_statement
+        (expression
+          (method_call_expression
+            (identifier)
+            (identifier)
+            (call_argument
+              (expression
+                (binary_expression
+                  (expression
+                    (integer_literal))
+                  (expression
+                    (identifier))))))))
+      (expression_statement
+        (expression
+          (method_call_expression
+            (identifier)
+            (identifier)
+            (call_argument
+              (expression
+                (binary_expression
+                  (expression
+                    (integer_literal))
+                  (expression
+                    (identifier))))))))
+      (expression_statement
+        (expression
+          (method_call_expression
+            (identifier)
+            (identifier)
+            (call_argument
+              (range_argument
+                (expression
+                  (parenthesized_expression
+                    (expression
+                      (binary_expression
+                        (expression
+                          (identifier))
+                        (expression
+                          (integer_literal)))))))))))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (identifier))
+            (call_argument
+              (identifier)
+              (range_argument
+                (expression
+                  (identifier))))
+            (call_argument
+              (identifier)
+              (expression
+                (integer_literal))))))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (identifier))
+            (call_argument
+              (range_argument))
+            (call_argument
+              (expression
+                (integer_literal))))))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (identifier))
+            (call_argument
+              (expression
+                (if_expression
+                  (expression
+                    (boolean_literal))
+                  (block
+                    (expression_statement
+                      (expression
+                        (integer_literal))))
+                  (else_clause
+                    (block
+                      (expression_statement
+                        (expression
+                          (integer_literal))))))))
+            (call_argument
+              (expression
+                (binary_expression
+                  (expression
+                    (identifier))
+                  (expression
+                    (integer_literal)))))))))))
