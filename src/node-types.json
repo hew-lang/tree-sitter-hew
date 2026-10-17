@@ -2595,6 +2595,10 @@
           "named": true
         },
         {
+          "type": "type_parameters",
+          "named": true
+        },
+        {
           "type": "unit_type",
           "named": true
         }
@@ -3436,6 +3440,10 @@
           },
           {
             "type": "lambda_parameter",
+            "named": true
+          },
+          {
+            "type": "type_parameters",
             "named": true
           },
           {

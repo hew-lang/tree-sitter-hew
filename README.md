@@ -2,6 +2,12 @@
 
 [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) grammar for the [Hew](https://hew.sh) programming language.
 
+The grammar includes Hew v0.6.1 generic closures and callable types:
+`|<T: Eq> left: T, right: T| -> bool { left == right }` and
+`fn<T: Eq>(T, T) -> bool`. Use the
+[released SDK](https://github.com/hew-lang/hew/releases/tag/v0.6.1) for type
+checking and execution; an editor parse is not a compiler acceptance check.
+
 ## Usage
 
 ### Neovim (nvim-treesitter)

@@ -827,6 +827,7 @@ export default grammar({
 
     function_type: $ => prec(1, seq(
       'fn', optional($.callable_capabilities),
+      optional($.type_parameters),
       '(', optional(sep1($._type, ',')), ')', optional($.return_type),
     )),
 
@@ -1369,7 +1370,7 @@ export default grammar({
     // Closures are PIPE-style (spec grammar.ebnf:288-295):
     //   Lambda = "move"? "|" LambdaParams? "|" Expr
     //          | "move"? "||" Expr
-    //          | "move"? "|" LambdaParams? "|" RetType Block ;
+    //          | "move"? "|" TypeParams? LambdaParams? "|" RetType Block ;
     // The paren-arrow `(params) => body` form was removed in v0.5
     // (compiler emits E_CLOSURE_PIPE_SYNTAX). An empty parameter list is the
     // single `||` token because the lexer fuses adjacent pipes; the bracketed
@@ -1380,7 +1381,7 @@ export default grammar({
       optional($.private_capture_list),
       field('parameters', choice(
         '||',
-        seq('|', optional(sep1($.lambda_parameter, ',')), '|'),
+        seq('|', optional($.type_parameters), optional(sep1($.lambda_parameter, ',')), '|'),
       )),
       choice(
         seq($.return_type, field('body', $.block)),
