@@ -101,6 +101,7 @@
 
 (type_parameters "<" @punctuation.bracket)
 (type_parameters ">" @punctuation.bracket)
+(type_parameter (identifier) @type)
 (machine_type_parameters "<" @punctuation.bracket)
 (machine_type_parameters ">" @punctuation.bracket)
 (const_parameter name: (identifier) @constant)

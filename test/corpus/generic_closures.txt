@@ -1,0 +1,138 @@
+================================================================================
+Quantified closure and function type binders
+================================================================================
+
+fn make() -> fn[clone]<T: Eq, U: Clone>(T, U) -> T {
+    |<T: Eq, U: Clone> value: T, other: U| -> T { value }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (return_type
+      (function_type
+        (callable_capabilities)
+        (type_parameters
+          (type_parameter
+            (identifier)
+            (trait_bounds
+              (trait_bound
+                (identifier))))
+          (type_parameter
+            (identifier)
+            (trait_bounds
+              (trait_bound
+                (identifier)))))
+        (identifier)
+        (identifier)
+        (return_type
+          (identifier))))
+    (block
+      (expression_statement
+        (expression
+          (lambda
+            (type_parameters
+              (type_parameter
+                (identifier)
+                (trait_bounds
+                  (trait_bound
+                    (identifier))))
+              (type_parameter
+                (identifier)
+                (trait_bounds
+                  (trait_bound
+                    (identifier)))))
+            (lambda_parameter
+              (identifier)
+              (identifier))
+            (lambda_parameter
+              (identifier)
+              (identifier))
+            (return_type
+              (identifier))
+            (block
+              (expression_statement
+                (expression
+                  (identifier))))))))))
+
+================================================================================
+Generic closure after capture prefixes, including no value parameters
+================================================================================
+
+fn main() {
+    let direct = |<T>| { 1 };
+    var next = move capture(var count) |<T> value: T| { count += 1; value };
+    let ordinary = |x: i64| { x < 2 };
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (lambda
+            (type_parameters
+              (type_parameter
+                (identifier)))
+            (block
+              (expression_statement
+                (expression
+                  (integer_literal)))))))
+      (var_statement
+        (identifier)
+        (expression
+          (lambda
+            (private_capture_list
+              (private_capture
+                (identifier)))
+            (type_parameters
+              (type_parameter
+                (identifier)))
+            (lambda_parameter
+              (identifier)
+              (identifier))
+            (block
+              (assignment_statement
+                (expression
+                  (identifier))
+                (expression
+                  (integer_literal)))
+              (expression_statement
+                (expression
+                  (identifier)))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (lambda
+            (lambda_parameter
+              (identifier)
+              (primitive_type))
+            (block
+              (expression_statement
+                (expression
+                  (binary_expression
+                    (expression
+                      (identifier))
+                    (expression
+                      (integer_literal))))))))))))
+
+================================================================================
+Retired generic arrow closure remains invalid
+:error
+================================================================================
+
+fn main() {
+    let identity = <T>(value: T) => value;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file)
