@@ -89,6 +89,10 @@
           "named": true
         },
         {
+          "type": "private_capture_list",
+          "named": true
+        },
+        {
           "type": "return_type",
           "named": true
         }

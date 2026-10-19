@@ -1391,7 +1391,7 @@ export default grammar({
     )),
 
     private_capture_list: $ => seq(
-      'capture', '(', sep1($.private_capture, ','), ')',
+      'capture', '(', sep1($.private_capture, ','), optional(','), ')',
     ),
 
     private_capture: $ => seq('var', field('name', $.identifier)),
@@ -1401,11 +1401,11 @@ export default grammar({
       optional(seq(':', field('type', $._type))),
     ),
 
-    // actor [move] |params| [-> Ret] { body } — inline actor literal (v0.5)
-    // Replaces the removed `spawn (...) => ...` lambda-actor form.
+    // Actor literals share the closure prefix for private mutable captures.
     actor_expression: $ => prec(2, seq(
       'actor',
       optional('move'),
+      optional($.private_capture_list),
       '|',
       optional(sep1($.lambda_parameter, ',')),
       '|',
