@@ -1,0 +1,98 @@
+================================================================================
+Lambda actor private captures
+================================================================================
+
+fn main() {
+    let total: i64 = 0;
+    let add = actor capture(var total) |n: i64| -> i64 {
+        total += n;
+        total
+    };
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (primitive_type)
+        (expression
+          (integer_literal)))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (actor_expression
+            (private_capture_list
+              (private_capture
+                (identifier)))
+            (lambda_parameter
+              (identifier)
+              (primitive_type))
+            (return_type
+              (primitive_type))
+            (block
+              (assignment_statement
+                (expression
+                  (identifier))
+                (expression
+                  (identifier)))
+              (expression_statement
+                (expression
+                  (identifier))))))))))
+
+================================================================================
+Lambda actor move private captures
+================================================================================
+
+fn main() {
+    let seen: Vec<i64> = [];
+    let count = actor move capture(var seen,) || -> i64 {
+        seen.push(1);
+        seen.len()
+    };
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (generic_type
+          (identifier)
+          (type_arguments
+            (primitive_type)))
+        (expression
+          (array_expression)))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (actor_expression
+            (private_capture_list
+              (private_capture
+                (identifier)))
+            (return_type
+              (primitive_type))
+            (block
+              (expression_statement
+                (expression
+                  (method_call_expression
+                    (identifier)
+                    (identifier)
+                    (call_argument
+                      (expression
+                        (integer_literal))))))
+              (expression_statement
+                (expression
+                  (method_call_expression
+                    (identifier)
+                    (identifier)))))))))))
