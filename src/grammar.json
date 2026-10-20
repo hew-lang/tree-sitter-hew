@@ -1080,27 +1080,6 @@
               {
                 "type": "SYMBOL",
                 "name": "reserved_declaration"
-              },
-              {
-                "type": "SEQ",
-                "members": [
-                  {
-                    "type": "CHOICE",
-                    "members": [
-                      {
-                        "type": "SYMBOL",
-                        "name": "visibility"
-                      },
-                      {
-                        "type": "BLANK"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "SYMBOL",
-                    "name": "function_declaration"
-                  }
-                ]
               }
             ]
           }
