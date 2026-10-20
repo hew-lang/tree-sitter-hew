@@ -7763,6 +7763,10 @@
     "named": false
   },
   {
+    "type": "timestamp",
+    "named": false
+  },
+  {
     "type": "trait",
     "named": false
   },

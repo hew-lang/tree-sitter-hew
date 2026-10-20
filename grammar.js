@@ -799,6 +799,7 @@ export default grammar({
     primitive_type: $ => choice(
       'i8', 'i16', 'i32', 'i64', 'u8', 'u16', 'u32', 'u64', 'isize', 'usize',
       'f32', 'f64', 'bool', 'char', 'string', 'bytes', 'duration', 'instant',
+      'timestamp',
     ),
 
     generic_type: $ => prec(1, seq($.identifier, $.type_arguments)),

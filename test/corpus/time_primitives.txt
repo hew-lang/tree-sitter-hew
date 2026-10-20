@@ -1,0 +1,25 @@
+================================================================================
+Wall-clock and monotonic time use distinct builtin type nodes
+================================================================================
+
+type Schedule {
+    wall: timestamp;
+    elapsed: duration;
+    mono: instant;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (struct_declaration
+    (identifier)
+    (struct_body
+      (struct_field
+        (identifier)
+        (primitive_type))
+      (struct_field
+        (identifier)
+        (primitive_type))
+      (struct_field
+        (identifier)
+        (primitive_type)))))

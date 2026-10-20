@@ -4694,6 +4694,10 @@
         {
           "type": "STRING",
           "value": "instant"
+        },
+        {
+          "type": "STRING",
+          "value": "timestamp"
         }
       ]
     },
