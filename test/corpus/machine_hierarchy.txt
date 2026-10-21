@@ -1,0 +1,236 @@
+================================================================================
+Machine hierarchy and parallel child initialization
+================================================================================
+
+machine Workflow {
+    events { Start; Pause; Resume; }
+    emits { Trace { label: string; } }
+    state Idle;
+    parallel state Working {
+        generation: i64;
+        entry { emit Trace { label: "working" }; }
+        region left {
+            state Editing {
+                draft: string;
+                initial state Typing;
+                state Saved;
+            }
+            initial Editing { draft: "new".to_upper() };
+        }
+        region right {
+            initial state Waiting;
+            state Sent;
+        }
+    }
+    on Start: Idle => Working { generation: 1 }
+    on Pause: Working => Idle;
+    on Resume: Idle => Working history reenter;
+    default { state }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (machine_declaration
+    (identifier)
+    (machine_events_header
+      (machine_event_decl
+        (identifier))
+      (machine_event_decl
+        (identifier))
+      (machine_event_decl
+        (identifier)))
+    (machine_emits_header
+      (machine_event_decl
+        (identifier)
+        (struct_field
+          (identifier)
+          (primitive_type))))
+    (machine_state
+      (identifier))
+    (machine_parallel_state
+      (identifier)
+      (struct_field
+        (identifier)
+        (primitive_type))
+      (block
+        (emit_statement
+          (identifier)
+          (field_initializer
+            (identifier)
+            (expression
+              (string_literal
+                (string_content))))))
+      (machine_region
+        (identifier)
+        (machine_composite_member
+          (machine_state
+            (identifier)
+            (struct_field
+              (identifier)
+              (primitive_type))
+            (machine_composite_member
+              (machine_state
+                (identifier)))
+            (machine_composite_member
+              (machine_state
+                (identifier)))))
+        (machine_initial
+          (struct_init
+            (identifier)
+            (field_initializer
+              (identifier)
+              (expression
+                (method_call_expression
+                  (string_literal
+                    (string_content))
+                  (identifier)))))))
+      (machine_region
+        (identifier)
+        (machine_composite_member
+          (machine_state
+            (identifier)))
+        (machine_composite_member
+          (machine_state
+            (identifier)))))
+    (machine_transition
+      (identifier)
+      (identifier)
+      (identifier)
+      (field_initializer
+        (identifier)
+        (expression
+          (integer_literal))))
+    (machine_transition
+      (identifier)
+      (identifier)
+      (identifier))
+    (machine_transition
+      (identifier)
+      (identifier)
+      (identifier))
+    (machine_default)))
+
+================================================================================
+Machine completion and eventless triggers
+================================================================================
+
+machine Delivery {
+    events { Send; }
+    state Ready;
+    state Running {
+        initial state Waiting;
+        final state Sent;
+        on Send: Waiting => Sent;
+    }
+    final state Finished;
+    on Send: Ready => Running;
+    on completion: Running => Finished;
+    always: Ready => Finished when false;
+    default { state }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (machine_declaration
+    (identifier)
+    (machine_events_header
+      (machine_event_decl
+        (identifier)))
+    (machine_state
+      (identifier))
+    (machine_state
+      (identifier)
+      (machine_composite_member
+        (machine_state
+          (identifier)))
+      (machine_composite_member
+        (machine_state
+          (identifier)))
+      (machine_transition
+        (identifier)
+        (identifier)
+        (identifier)))
+    (machine_state
+      (identifier))
+    (machine_transition
+      (identifier)
+      (identifier)
+      (identifier))
+    (machine_transition
+      (identifier)
+      (identifier))
+    (machine_transition
+      (identifier)
+      (identifier)
+      (expression
+        (boolean_literal)))
+    (machine_default)))
+
+================================================================================
+Machine contextual words stay ordinary identifiers
+================================================================================
+
+fn history(parallel: i64, region: i64, initial: i64, final: i64,
+           completion: i64, always: i64, reenter: i64) -> i64 {
+    parallel + region + initial + final + completion + always + reenter
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (primitive_type))
+      (parameter
+        (identifier)
+        (primitive_type))
+      (parameter
+        (identifier)
+        (primitive_type))
+      (parameter
+        (identifier)
+        (primitive_type))
+      (parameter
+        (identifier)
+        (primitive_type))
+      (parameter
+        (identifier)
+        (primitive_type))
+      (parameter
+        (identifier)
+        (primitive_type)))
+    (return_type
+      (primitive_type))
+    (block
+      (expression_statement
+        (expression
+          (binary_expression
+            (expression
+              (binary_expression
+                (expression
+                  (binary_expression
+                    (expression
+                      (binary_expression
+                        (expression
+                          (binary_expression
+                            (expression
+                              (binary_expression
+                                (expression
+                                  (identifier))
+                                (expression
+                                  (identifier))))
+                            (expression
+                              (identifier))))
+                        (expression
+                          (identifier))))
+                    (expression
+                      (identifier))))
+                (expression
+                  (identifier))))
+            (expression
+              (identifier))))))))

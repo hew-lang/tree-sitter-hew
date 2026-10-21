@@ -1,0 +1,35 @@
+machine Delivery {
+// <- keyword.type
+    events { Send; }
+    state Ready;
+    parallel state Working {
+//  ^^^^^^^^ keyword
+        region payment {
+//      ^^^^^^ keyword
+            state Waiting { count: i64; }
+            initial Waiting { count: 0 };
+//          ^^^^^^^ keyword
+            final state Paid;
+//          ^^^^^ keyword
+        }
+        region stock { initial state Empty; final state Reserved; }
+    }
+    final state Finished;
+    on Send: Ready => Working history reenter;
+//                            ^^^^^^^ keyword
+    on completion: Working => Finished;
+//     ^^^^^^^^^^ keyword
+    always: Ready => Finished when false;
+//  ^^^^^^ keyword
+    default { state }
+}
+
+fn history(parallel: i64) -> i64 { parallel }
+// ^^^^^^^ function
+
+// parallel region history final completion always
+// ^^^^^^^^ comment
+fn label() {
+    let text = "parallel region history final completion always";
+//              ^^^^^^^^ string
+}
