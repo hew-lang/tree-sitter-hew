@@ -3710,6 +3710,10 @@
       "required": true,
       "types": [
         {
+          "type": "machine_parallel_state",
+          "named": true
+        },
+        {
           "type": "machine_state",
           "named": true
         }
@@ -3757,6 +3761,10 @@
       "types": [
         {
           "type": "machine_default",
+          "named": true
+        },
+        {
+          "type": "machine_parallel_state",
           "named": true
         },
         {
@@ -3840,11 +3848,43 @@
     }
   },
   {
-    "type": "machine_state",
+    "type": "machine_initial",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "contextual_variant_expression",
+            "named": true
+          },
+          {
+            "type": "contextual_variant_record_init",
+            "named": true
+          },
+          {
+            "type": "generic_struct_init",
+            "named": true
+          },
+          {
+            "type": "identifier",
+            "named": true
+          },
+          {
+            "type": "struct_init",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "machine_parallel_state",
     "named": true,
     "fields": {
       "entry_body": {
-        "multiple": false,
+        "multiple": true,
         "required": false,
         "types": [
           {
@@ -3854,7 +3894,95 @@
         ]
       },
       "exit_body": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "block",
+            "named": true
+          }
+        ]
+      },
+      "name": {
         "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "machine_region",
+          "named": true
+        },
+        {
+          "type": "machine_transition",
+          "named": true
+        },
+        {
+          "type": "struct_field",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "machine_region",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "machine_composite_member",
+          "named": true
+        },
+        {
+          "type": "machine_initial",
+          "named": true
+        },
+        {
+          "type": "machine_transition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "machine_state",
+    "named": true,
+    "fields": {
+      "entry_body": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "block",
+            "named": true
+          }
+        ]
+      },
+      "exit_body": {
+        "multiple": true,
         "required": false,
         "types": [
           {
@@ -3880,6 +4008,10 @@
       "types": [
         {
           "type": "machine_composite_member",
+          "named": true
+        },
+        {
+          "type": "machine_initial",
           "named": true
         },
         {
@@ -3909,7 +4041,7 @@
       },
       "event": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "identifier",
@@ -4000,6 +4132,20 @@
           {
             "type": "identifier",
             "named": true
+          }
+        ]
+      },
+      "trigger": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "always",
+            "named": false
+          },
+          {
+            "type": "completion",
+            "named": false
           }
         ]
       }
@@ -7277,6 +7423,10 @@
     "named": false
   },
   {
+    "type": "always",
+    "named": false
+  },
+  {
     "type": "as",
     "named": false
   },
@@ -7331,6 +7481,10 @@
   },
   {
     "type": "coalesce",
+    "named": false
+  },
+  {
+    "type": "completion",
     "named": false
   },
   {
@@ -7450,6 +7604,10 @@
     "named": false
   },
   {
+    "type": "final",
+    "named": false
+  },
+  {
     "type": "float_literal",
     "named": true
   },
@@ -7483,6 +7641,10 @@
   },
   {
     "type": "handle",
+    "named": false
+  },
+  {
+    "type": "history",
     "named": false
   },
   {
@@ -7651,6 +7813,10 @@
     "named": false
   },
   {
+    "type": "parallel",
+    "named": false
+  },
+  {
     "type": "permanent",
     "named": false
   },
@@ -7681,6 +7847,10 @@
   {
     "type": "regex_literal",
     "named": true
+  },
+  {
+    "type": "region",
+    "named": false
   },
   {
     "type": "repeated",

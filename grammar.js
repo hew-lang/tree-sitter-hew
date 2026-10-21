@@ -598,6 +598,7 @@ export default grammar({
       optional(field('emits_header', $.machine_emits_header)),
       repeat(choice(
         $.machine_state,
+        $.machine_parallel_state,
         $.machine_transition,
         $.machine_default,
       )),
@@ -627,19 +628,24 @@ export default grammar({
       '}',
     ),
 
-    // States may contain fields, hooks, substates and transition rules.
+    // Hierarchy is authored here; the compiler checks initial-child and
+    // final-state constraints after parsing.
     machine_state: $ => seq(
+      optional('final'),
       'state',
       field('name', $.identifier),
       choice(
         ';',
         seq(
           '{',
-          repeat($.struct_field),
-          optional(seq('entry', field('entry_body', $.block))),
-          optional(seq('exit', field('exit_body', $.block))),
-          repeat($.machine_composite_member),
-          repeat($.machine_transition),
+          repeat(choice(
+            $.struct_field,
+            seq('entry', field('entry_body', $.block)),
+            seq('exit', field('exit_body', $.block)),
+            $.machine_composite_member,
+            $.machine_initial,
+            $.machine_transition,
+          )),
           '}',
         ),
       ),
@@ -648,11 +654,38 @@ export default grammar({
     // [ "initial" ] StateDecl — direct leaf or compound child
     machine_composite_member: $ => seq(
       optional('initial'),
-      $.machine_state,
+      choice($.machine_state, $.machine_parallel_state),
+    ),
+
+    machine_parallel_state: $ => seq(
+      'parallel', 'state', field('name', $.identifier), '{',
+      repeat(choice(
+        $.struct_field,
+        seq('entry', field('entry_body', $.block)),
+        seq('exit', field('exit_body', $.block)),
+        $.machine_region,
+        $.machine_transition,
+      )),
+      '}',
+    ),
+
+    machine_region: $ => seq(
+      'region', field('name', $.identifier), '{',
+      repeat(choice($.machine_composite_member, $.machine_initial, $.machine_transition)),
+      '}',
+    ),
+
+    machine_initial: $ => seq(
+      'initial',
+      field('value', choice(
+        $.identifier, $.struct_init, $.generic_struct_init,
+        $.contextual_variant_expression, $.contextual_variant_record_init,
+      )),
+      ';',
     ),
 
     // on EventIdent [ "{" Ident { "," Ident } "}" ] : Source => Target
-    //   [ "reenter" ] [ "when" Expr ] TransitionBody
+    //   [ "reenter" | "history" ] [ "when" Expr ] TransitionBody
     // Source = Ident ( "." Ident )* | "_"  (hew-parser/src/parser/actor_machine_supervisor.rs
     //   parse_state_pattern: a leading "." is rejected on the source; a
     //   qualified ancestry is retained and checked)
@@ -663,14 +696,18 @@ export default grammar({
     //   The `{ FieldInitList }` form supplies the target state's payload, e.g.
     //   `=> Holding { handle: handle }` or `=> .Holding { handle: handle }`.
     machine_transition: $ => seq(
-      'on',
-      field('event', $.identifier),
-      optional(seq('{', field('payload_bindings', sep1($.identifier, ',')), optional(','), '}')),
+      choice(
+        seq('on', choice(
+          seq(field('event', $.identifier), optional(seq('{', field('payload_bindings', sep1($.identifier, ',')), optional(','), '}'))),
+          field('trigger', 'completion'),
+        )),
+        field('trigger', 'always'),
+      ),
       ':',
       field('source', choice(seq($.identifier, repeat(seq('.', $.identifier))), '_')),
       '=>',
       field('target', choice(seq($.identifier, repeat(seq('.', $.identifier))), $.contextual_variant_expression, '_')),
-      optional('reenter'),
+      optional(choice(seq('reenter', optional('history')), seq('history', optional('reenter')))),
       optional(seq('when', field('guard', $.expression))),
       // A bodyless transition needs a semicolon; a body ends at `}`.
       choice(

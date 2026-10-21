@@ -50,6 +50,11 @@
   "mailbox" "overflow" "strategy" "intensity" "within"
 ] @keyword
 
+(machine_state "final" @keyword)
+(machine_parallel_state "parallel" @keyword)
+(machine_region "region" @keyword)
+(machine_transition ["history" "completion" "always"] @keyword)
+
 [
   "block" "drop_new" "drop_old" "fail" "coalesce" "fallback"
 ] @constant.builtin
