@@ -274,7 +274,7 @@ export default grammar({
       field('body', $.enum_body),
     ),
 
-    enum_body: $ => seq('{', repeat($.variant), '}'),
+    enum_body: $ => seq('{', repeat(choice($.variant, $.reserved_declaration)), '}'),
 
     // A `#[wire]` / `#[serial]` enum tags each variant with `@N` after its
     // payload: `Pending @0;`, `Push(i64) @1;`, `Move { x: i32; } @2;`.
@@ -297,7 +297,7 @@ export default grammar({
     // both struct-shaped and enum-shaped wire types use the generic `#[wire]`
     // attribute on ordinary `type` / `enum` declarations.
 
-    // `reserved @N, @M;` inside a `#[wire] type` body reserves wire field
+    // `reserved @N, @M;` inside a `#[wire] type` or enum body reserves wire tag
     // numbers (hew-parser wire.rs:222-248 expects `@` markers, comma-separated,
     // terminated by `;`). The old parenthesised `reserved(N, M);` form is not
     // accepted by the compiler.
