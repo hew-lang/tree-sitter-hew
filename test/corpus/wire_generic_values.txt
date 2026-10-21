@@ -1,0 +1,59 @@
+==================
+Generic wire values reserve record and enum tags
+==================
+
+#[wire]
+type Parcel<T> {
+    item: T;
+    id: i64 @7;
+    reserved @2;
+}
+
+#[wire]
+enum Status<T> {
+    reserved @0, @2;
+    Pending;
+    Value(T) @7;
+    Empty;
+}
+
+---
+
+(source_file
+  (attribute
+    (identifier))
+  (struct_declaration
+    (identifier)
+    (type_parameters
+      (type_parameter
+        (identifier)))
+    (struct_body
+      (struct_field
+        (identifier)
+        (identifier))
+      (struct_field
+        (identifier)
+        (primitive_type)
+        (integer_literal))
+      (reserved_declaration
+        (integer_literal))))
+  (attribute
+    (identifier))
+  (enum_declaration
+    (identifier)
+    (type_parameters
+      (type_parameter
+        (identifier)))
+    (enum_body
+      (reserved_declaration
+        (integer_literal)
+        (integer_literal))
+      (variant
+        (identifier))
+      (variant
+        (identifier)
+        (identifier)
+        (variant_tag
+          (integer_literal)))
+      (variant
+        (identifier)))))

@@ -1874,6 +1874,10 @@
       "required": false,
       "types": [
         {
+          "type": "reserved_declaration",
+          "named": true
+        },
+        {
           "type": "variant",
           "named": true
         }
