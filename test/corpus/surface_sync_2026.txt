@@ -73,11 +73,13 @@ impl Buffer {
               (identifier))))))))
 
 ================================================================================
-Receivers in type body methods
+Receivers in impl methods
 ================================================================================
 
 type Handle {
     fd: i64;
+}
+impl Handle {
     fn close(consume self) { hew_close(self.fd); }
     fn id(self) -> i64 { self.fd }
 }
@@ -90,40 +92,42 @@ type Handle {
     (struct_body
       (struct_field
         (identifier)
+        (primitive_type))))
+  (impl_declaration
+    (identifier)
+    (function_declaration
+      (identifier)
+      (parameters
+        (parameter
+          (self_parameter
+            (self))))
+      (block
+        (expression_statement
+          (expression
+            (call_expression
+              (expression
+                (identifier))
+              (call_argument
+                (expression
+                  (field_expression
+                    (expression
+                      (self))
+                    (identifier)))))))))
+    (function_declaration
+      (identifier)
+      (parameters
+        (parameter
+          (self_parameter
+            (self))))
+      (return_type
         (primitive_type))
-      (function_declaration
-        (identifier)
-        (parameters
-          (parameter
-            (self_parameter
-              (self))))
-        (block
-          (expression_statement
-            (expression
-              (call_expression
-                (expression
-                  (identifier))
-                (call_argument
-                  (expression
-                    (field_expression
-                      (expression
-                        (self))
-                      (identifier)))))))))
-      (function_declaration
-        (identifier)
-        (parameters
-          (parameter
-            (self_parameter
-              (self))))
-        (return_type
-          (primitive_type))
-        (block
-          (expression_statement
-            (expression
-              (field_expression
-                (expression
-                  (self))
-                (identifier)))))))))
+      (block
+        (expression_statement
+          (expression
+            (field_expression
+              (expression
+                (self))
+              (identifier))))))))
 
 ================================================================================
 this is an ordinary identifier

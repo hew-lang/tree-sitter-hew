@@ -221,8 +221,7 @@ export default grammar({
       ';',
     ),
 
-    // TypeDecl (grammar.ebnf:47, 65): `type Name { ... }` whose body may hold
-    // struct fields, variants, AND fn declarations (TypeBody). The alias form
+    // A type body holds fields; methods belong in a sibling impl block. The alias form
     // `type Name = Type;` is handled separately by `type_alias`.
     struct_declaration: $ => seq(
       'type',
@@ -235,7 +234,6 @@ export default grammar({
     struct_body: $ => seq('{', repeat(choice(
       $.struct_field,
       $.reserved_declaration,
-      seq(optional($.visibility), $.function_declaration),
     )), '}'),
 
     // StructFieldDecl / WireStructFieldDecl (grammar.ebnf:68, 76):
@@ -801,6 +799,7 @@ export default grammar({
     primitive_type: $ => choice(
       'i8', 'i16', 'i32', 'i64', 'u8', 'u16', 'u32', 'u64', 'isize', 'usize',
       'f32', 'f64', 'bool', 'char', 'string', 'bytes', 'duration', 'instant',
+      'timestamp',
     ),
 
     generic_type: $ => prec(1, seq($.identifier, $.type_arguments)),

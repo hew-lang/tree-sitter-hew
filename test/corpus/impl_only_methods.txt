@@ -1,0 +1,17 @@
+================================================================================
+Inline type methods are syntax errors
+================================================================================
+
+type Invalid { fn old(self) {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (struct_declaration
+    (identifier)
+    (ERROR
+      (identifier)
+      (identifier)
+      (identifier))
+    (struct_body))
+  (ERROR))

@@ -5706,19 +5706,11 @@
       "required": false,
       "types": [
         {
-          "type": "function_declaration",
-          "named": true
-        },
-        {
           "type": "reserved_declaration",
           "named": true
         },
         {
           "type": "struct_field",
-          "named": true
-        },
-        {
-          "type": "visibility",
           "named": true
         }
       ]
@@ -7768,6 +7760,10 @@
   },
   {
     "type": "temporary",
+    "named": false
+  },
+  {
+    "type": "timestamp",
     "named": false
   },
   {
