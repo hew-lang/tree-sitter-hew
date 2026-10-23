@@ -33,6 +33,8 @@
 ; spelling used as an ordinary identifier.
 (self_parameter "consume" @keyword)
 (parameter "consume" @keyword)
+(function_type "consume" @keyword)
+(lambda_parameter "consume" @keyword)
 
 "indirect" @keyword
 

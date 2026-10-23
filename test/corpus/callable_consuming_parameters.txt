@@ -1,0 +1,119 @@
+================================================================================
+Consuming callable parameters compose with generic types and actor literals
+================================================================================
+
+fn forward(f: fn[clone, suspends](consume Item, i64) -> Item,
+           nested: fn(consume fn(consume Item) -> Item) -> Item) {
+    let typed = |consume item: Item| item;
+    let inferred = |consume item| item;
+    let generic = |<T> consume item: T| item;
+    let worker = actor |consume item: Item| -> Item { item };
+    let consume = 3;
+    let identity = |consume| consume;
+    let typed_name = |consume: Item| consume;
+    let contextual: fn(consume) -> consume = identity;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (function_type
+          (callable_capabilities)
+          (identifier)
+          (primitive_type)
+          (return_type
+            (identifier))))
+      (parameter
+        (identifier)
+        (function_type
+          (function_type
+            (identifier)
+            (return_type
+              (identifier)))
+          (return_type
+            (identifier)))))
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (lambda
+            (lambda_parameter
+              (identifier)
+              (identifier))
+            (expression
+              (identifier)))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (lambda
+            (lambda_parameter
+              (identifier))
+            (expression
+              (identifier)))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (lambda
+            (type_parameters
+              (type_parameter
+                (identifier)))
+            (lambda_parameter
+              (identifier)
+              (identifier))
+            (expression
+              (identifier)))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (actor_expression
+            (lambda_parameter
+              (identifier)
+              (identifier))
+            (return_type
+              (identifier))
+            (block
+              (expression_statement
+                (expression
+                  (identifier)))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (integer_literal)))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (lambda
+            (lambda_parameter
+              (identifier))
+            (expression
+              (identifier)))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (lambda
+            (lambda_parameter
+              (identifier)
+              (identifier))
+            (expression
+              (identifier)))))
+      (let_statement
+        (pattern
+          (identifier))
+        (function_type
+          (identifier)
+          (return_type
+            (identifier)))
+        (expression
+          (identifier))))))
