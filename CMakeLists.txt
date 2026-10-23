@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
 project(tree-sitter-hew
-        VERSION "1.2.4"
+        VERSION "1.3.0"
         DESCRIPTION "Hew grammar for tree-sitter"
         HOMEPAGE_URL "https://github.com/tree-sitter/tree-sitter-hew"
         LANGUAGES C)
