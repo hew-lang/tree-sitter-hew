@@ -324,8 +324,7 @@ supervisor Sup {
       (supervisor_strategy_value))
     (supervisor_field
       (integer_literal)
-      (duration_literal
-        (integer_literal)))
+      (duration_literal))
     (child_spec
       (identifier)
       (identifier))))

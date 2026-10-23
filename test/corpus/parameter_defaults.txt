@@ -1,0 +1,192 @@
+================================================================================
+Value parameter defaults share declaration syntax
+================================================================================
+
+fn schedule(delay: duration = 0.25s, values: Vec<i64> = [1, 2]) {}
+fn derived(base: i64, next: i64 = base + 1) -> i64 { next }
+fn invoke(action: fn(i64) -> i64 = |value| value) -> i64 { action(42) }
+trait Reader {
+    fn read(self, limit: i64 = 20) -> i64;
+}
+impl Reader for File {
+    fn read(self, limit: i64 = 20) -> i64 { limit }
+}
+actor Worker {
+    receive fn run(delay: duration = 0.5ms) { sleep(delay); }
+}
+fn main() { schedule(values: [3, 4]); }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (primitive_type)
+        (expression
+          (duration_literal)))
+      (parameter
+        (identifier)
+        (generic_type
+          (identifier)
+          (type_arguments
+            (primitive_type)))
+        (expression
+          (array_expression
+            (expression
+              (integer_literal))
+            (expression
+              (integer_literal))))))
+    (block))
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (primitive_type))
+      (parameter
+        (identifier)
+        (primitive_type)
+        (expression
+          (binary_expression
+            (expression
+              (identifier))
+            (expression
+              (integer_literal))))))
+    (return_type
+      (primitive_type))
+    (block
+      (expression_statement
+        (expression
+          (identifier)))))
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (function_type
+          (primitive_type)
+          (return_type
+            (primitive_type)))
+        (expression
+          (lambda
+            (lambda_parameter
+              (identifier))
+            (expression
+              (identifier))))))
+    (return_type
+      (primitive_type))
+    (block
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (identifier))
+            (call_argument
+              (expression
+                (integer_literal))))))))
+  (trait_declaration
+    (identifier)
+    (trait_function_signature
+      (identifier)
+      (parameters
+        (parameter
+          (self_parameter
+            (self)))
+        (parameter
+          (identifier)
+          (primitive_type)
+          (expression
+            (integer_literal))))
+      (return_type
+        (primitive_type))))
+  (impl_declaration
+    (identifier)
+    (identifier)
+    (function_declaration
+      (identifier)
+      (parameters
+        (parameter
+          (self_parameter
+            (self)))
+        (parameter
+          (identifier)
+          (primitive_type)
+          (expression
+            (integer_literal))))
+      (return_type
+        (primitive_type))
+      (block
+        (expression_statement
+          (expression
+            (identifier))))))
+  (actor_declaration
+    (identifier)
+    (receive_function
+      (identifier)
+      (parameters
+        (parameter
+          (identifier)
+          (primitive_type)
+          (expression
+            (duration_literal))))
+      (block
+        (expression_statement
+          (expression
+            (call_expression
+              (expression
+                (identifier))
+              (call_argument
+                (expression
+                  (identifier)))))))))
+  (function_declaration
+    (identifier)
+    (block
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (identifier))
+            (call_argument
+              (identifier)
+              (expression
+                (array_expression
+                  (expression
+                    (integer_literal))
+                  (expression
+                    (integer_literal)))))))))))
+
+================================================================================
+Receivers cannot have defaults
+:error
+================================================================================
+
+impl File { fn wrong(self = 1) {} }
+
+--------------------------------------------------------------------------------
+
+(ERROR)
+
+================================================================================
+Closure parameters cannot have declaration defaults
+:error
+================================================================================
+
+fn main() { let action = |value: i64 = 1| value; }
+
+--------------------------------------------------------------------------------
+
+(ERROR)
+
+================================================================================
+Function value types cannot have declaration defaults
+:error
+================================================================================
+
+fn main() { let action: fn(i64 = 1) -> i64; }
+
+--------------------------------------------------------------------------------
+
+(ERROR)

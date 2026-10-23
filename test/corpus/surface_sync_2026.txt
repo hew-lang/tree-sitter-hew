@@ -418,12 +418,12 @@ fn main() {
                 (integer_literal)))))))))
 
 ================================================================================
-Closure private captures
+Closure inferred captures
 ================================================================================
 
 fn main() {
-    let counter = move capture(var n) || { n = n + 1; n };
-    let adder = capture(var total, var count) |x: i64| { total = total + x; count = count + 1; };
+    let counter = move || { n = n + 1; n };
+    let adder = |x: i64| { total = total + x; count = count + 1; };
     let plain = move |x| x + 1;
 }
 
@@ -438,9 +438,6 @@ fn main() {
           (identifier))
         (expression
           (lambda
-            (private_capture_list
-              (private_capture
-                (identifier)))
             (block
               (assignment_statement
                 (expression
@@ -459,11 +456,6 @@ fn main() {
           (identifier))
         (expression
           (lambda
-            (private_capture_list
-              (private_capture
-                (identifier))
-              (private_capture
-                (identifier)))
             (lambda_parameter
               (identifier)
               (primitive_type))
@@ -839,8 +831,7 @@ supervisor Tree {
       (supervisor_strategy_value))
     (supervisor_field
       (integer_literal)
-      (duration_literal
-        (integer_literal)))
+      (duration_literal))
     (child_spec
       (identifier)
       (identifier)
@@ -857,8 +848,7 @@ supervisor Tree {
         (integer_literal))
       (child_clause
         (expression
-          (duration_literal
-            (integer_literal)))))
+          (duration_literal))))
     (child_spec
       (identifier)
       (identifier))))

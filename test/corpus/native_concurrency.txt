@@ -42,8 +42,7 @@ fn main() {
             (expression
               (scope_expression
                 (expression
-                  (duration_literal
-                    (integer_literal)))
+                  (duration_literal))
                 (block
                   (let_statement
                     (pattern
@@ -225,8 +224,7 @@ fn main() {
                         (identifier)))))))
             (select_arm
               (expression
-                (duration_literal
-                  (integer_literal)))
+                (duration_literal))
               (expression
                 (integer_literal))))))
       (expression_statement

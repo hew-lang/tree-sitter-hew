@@ -284,8 +284,7 @@ fn main() {
     (identifier)
     (attribute
       (identifier)
-      (duration_literal
-        (integer_literal)))
+      (duration_literal))
     (receive_function
       (identifier)
       (block))

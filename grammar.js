@@ -52,7 +52,6 @@ export default grammar({
     [$._callable_expression, $._member_object],
     [$.qualified_expression, $.field_expression],
     [$.generic_apply_expression, $.bare_generic_call_expression],
-    [$._callable_expression, $.private_capture_list],
     [$.actor_spawn],
     [$.trait_bound],
     // `-> fn() fails E` — the short `fails E` may belong to the inner callable
@@ -430,6 +429,7 @@ export default grammar({
         field('name', $.identifier),
         ':',
         field('type', $._type),
+        optional(seq('=', field('default', $.expression))),
       ),
     ),
 
@@ -584,7 +584,7 @@ export default grammar({
     ),
 
     // @sync:duration_suffixes
-    duration_literal: $ => seq($.integer_literal, choice('ns', 'us', 'ms', 's', 'm', 'h')),
+    duration_literal: $ => token(seq(/[0-9][0-9_]*(\.[0-9][0-9_]*)?/, choice('ns', 'us', 'ms', 's', 'm', 'h'))),
 
     // ---- Machines ----
 
@@ -1059,7 +1059,6 @@ export default grammar({
     // A bare spawn ends after its actor and optional brace-delimited keys.
     _callable_expression: $ => choice(
       $.identifier,
-      alias('capture', $.identifier),
       $.self,
       $._literal,
       $.interpolated_string,
@@ -1144,7 +1143,7 @@ export default grammar({
     )),
 
     macro_invocation: $ => prec(PREC.POSTFIX, seq(
-      field('name', choice($.identifier, alias('capture', $.identifier), $.path_expression)), '!',
+      field('name', choice($.identifier, $.path_expression)), '!',
       field('arguments', alias($.macro_pattern, $.token_tree)),
     )),
 
@@ -1414,7 +1413,6 @@ export default grammar({
     // braced body (hew-parser/src/parser.rs:7691 parse_pipe_lambda).
     lambda: $ => prec.right(2, seq(
       optional('move'),
-      optional($.private_capture_list),
       field('parameters', choice(
         '||',
         seq('|', optional($.type_parameters), optional(sep1($.lambda_parameter, ',')), '|'),
@@ -1426,22 +1424,15 @@ export default grammar({
       ),
     )),
 
-    private_capture_list: $ => seq(
-      'capture', '(', sep1($.private_capture, ','), optional(','), ')',
-    ),
-
-    private_capture: $ => seq('var', field('name', $.identifier)),
-
     lambda_parameter: $ => seq(
       field('name', $.identifier),
       optional(seq(':', field('type', $._type))),
     ),
 
-    // Actor literals share the closure prefix for private mutable captures.
+    // Actor literals infer captured state from their bodies, like closures.
     actor_expression: $ => prec(2, seq(
       'actor',
       optional('move'),
-      optional($.private_capture_list),
       '|',
       optional(sep1($.lambda_parameter, ',')),
       '|',

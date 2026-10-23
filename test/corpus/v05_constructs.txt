@@ -205,8 +205,7 @@ fn main() {
             operand: (expression
               (scope_expression
                 duration: (expression
-                  (duration_literal
-                    (integer_literal)))
+                  (duration_literal))
                 body: (block
                   (expression_statement
                     (expression

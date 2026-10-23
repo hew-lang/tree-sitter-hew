@@ -141,8 +141,7 @@ fn choose(task: Task<i64>, sup: Supervisor) -> i64 {
                 (identifier)))
             (select_arm
               (expression
-                (duration_literal
-                  (integer_literal)))
+                (duration_literal))
               (expression
                 (integer_literal))))))
       (expression_statement

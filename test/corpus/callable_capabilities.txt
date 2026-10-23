@@ -1,13 +1,13 @@
 ================================================================================
-Callable guarantees and private mutable capture
+Callable guarantees and inferred mutable capture
 ================================================================================
 
 fn invoke(f: fn[clone](i64) -> i64, g: fn[var, clone]() -> i64,
           h: fn[once]() -> i64, i: fn[var]() -> i64,
           j: fn[once, clone]() -> i64, k: fn() -> i64) {
     let count: i64 = 0;
-    var next = capture(var count) || { count = count + 1; count };
-    let moved = move capture(var count) |step: i64| { count = count + step; count };
+    var next = || { count = count + 1; count };
+    let moved = move |step: i64| { count = count + step; count };
     let explicit = id<i64>;
 }
 
@@ -64,9 +64,6 @@ fn invoke(f: fn[clone](i64) -> i64, g: fn[var, clone]() -> i64,
         (identifier)
         (expression
           (lambda
-            (private_capture_list
-              (private_capture
-                (identifier)))
             (block
               (assignment_statement
                 (expression
@@ -85,9 +82,6 @@ fn invoke(f: fn[clone](i64) -> i64, g: fn[var, clone]() -> i64,
           (identifier))
         (expression
           (lambda
-            (private_capture_list
-              (private_capture
-                (identifier)))
             (lambda_parameter
               (identifier)
               (primitive_type))
