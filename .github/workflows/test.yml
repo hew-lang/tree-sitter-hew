@@ -13,7 +13,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install tree-sitter CLI
-        run: npm install -g tree-sitter-cli
+        run: |
+          cli_version=$(node -p 'require("./package.json").devDependencies["tree-sitter-cli"]')
+          npm install -g "tree-sitter-cli@$cli_version"
 
       - name: Run corpus tests
         run: tree-sitter test

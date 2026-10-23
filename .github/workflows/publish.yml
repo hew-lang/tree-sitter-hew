@@ -68,14 +68,17 @@ jobs:
       - name: Check the generated parser matches grammar.js
         run: |
           set -euo pipefail
-          npx --yes tree-sitter-cli@0.25.10 generate
+          cli_version=$(node -p 'require("./package.json").devDependencies["tree-sitter-cli"]')
+          npx --yes "tree-sitter-cli@$cli_version" generate
           if ! git diff --exit-code --ignore-space-at-eol -- src/; then
             echo "::error::src/ is stale; run 'tree-sitter generate' and commit the result"
             exit 1
           fi
 
       - name: Run corpus tests
-        run: npx --yes tree-sitter-cli@0.25.10 test
+        run: |
+          cli_version=$(node -p 'require("./package.json").devDependencies["tree-sitter-cli"]')
+          npx --yes "tree-sitter-cli@$cli_version" test
 
       - name: Show the package contents
         run: npm pack --dry-run
