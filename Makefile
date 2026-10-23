@@ -1,6 +1,6 @@
 LANGUAGE_NAME := tree-sitter-hew
 HOMEPAGE_URL := https://github.com/tree-sitter/tree-sitter-hew
-VERSION := 1.2.4
+VERSION := 1.3.0
 
 # repository
 SRC_DIR := src
