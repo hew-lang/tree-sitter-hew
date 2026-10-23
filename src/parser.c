@@ -251403,7 +251403,7 @@ TS_PUBLIC const TSLanguage *tree_sitter_hew(void) {
     .max_reserved_word_set_size = 0,
     .metadata = {
       .major_version = 1,
-      .minor_version = 3,
+      .minor_version = 4,
       .patch_version = 1,
     },
   };
