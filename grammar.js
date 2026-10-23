@@ -864,7 +864,7 @@ export default grammar({
     function_type: $ => prec(1, seq(
       'fn', optional($.callable_capabilities),
       optional($.type_parameters),
-      '(', optional(sep1($._type, ',')), ')', optional($.return_type),
+      '(', optional(sep1(choice($._type, seq('consume', $._type), alias('consume', $.identifier)), ',')), ')', optional($.return_type),
     )),
 
     // actor(M) [-> R] — the type of an anonymous actor handle
@@ -1425,7 +1425,8 @@ export default grammar({
     )),
 
     lambda_parameter: $ => seq(
-      field('name', $.identifier),
+      optional('consume'),
+      field('name', choice($.identifier, alias('consume', $.identifier))),
       optional(seq(':', field('type', $._type))),
     ),
 

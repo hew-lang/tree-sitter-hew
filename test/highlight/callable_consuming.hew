@@ -1,0 +1,15 @@
+fn forward(f: fn(consume Item) -> Item) {
+//               ^^^^^^^ keyword
+    let next = |consume item: Item| item;
+//              ^^^^^^^ keyword
+    let worker = actor |consume item: Item| { item };
+//                      ^^^^^^^ keyword
+    let named = |consume: Item| consume;
+//               ^^^^^^^ variable.parameter
+    let identity = |consume| consume;
+//                  ^^^^^^^ variable.parameter
+    let text = "consume";
+//              ^^^^^^^ string
+    // consume
+//     ^^^^^^^ comment
+}
