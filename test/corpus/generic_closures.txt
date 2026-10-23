@@ -58,12 +58,12 @@ fn make() -> fn[clone]<T: Eq, U: Clone>(T, U) -> T {
                   (identifier))))))))))
 
 ================================================================================
-Generic closure after capture prefixes, including no value parameters
+Generic move closures, including no value parameters
 ================================================================================
 
 fn main() {
     let direct = |<T>| { 1 };
-    var next = move capture(var count) |<T> value: T| { count += 1; value };
+    var next = move |<T> value: T| { count += 1; value };
     let ordinary = |x: i64| { x < 2 };
 }
 
@@ -89,9 +89,6 @@ fn main() {
         (identifier)
         (expression
           (lambda
-            (private_capture_list
-              (private_capture
-                (identifier)))
             (type_parameters
               (type_parameter
                 (identifier)))

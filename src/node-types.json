@@ -89,10 +89,6 @@
           "named": true
         },
         {
-          "type": "private_capture_list",
-          "named": true
-        },
-        {
           "type": "return_type",
           "named": true
         }
@@ -1801,21 +1797,6 @@
     }
   },
   {
-    "type": "duration_literal",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "integer_literal",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "else_clause",
     "named": true,
     "fields": {},
@@ -3466,13 +3447,9 @@
       }
     },
     "children": {
-      "multiple": true,
+      "multiple": false,
       "required": false,
       "types": [
-        {
-          "type": "private_capture_list",
-          "named": true
-        },
         {
           "type": "return_type",
           "named": true
@@ -4797,6 +4774,16 @@
     "type": "parameter",
     "named": true,
     "fields": {
+      "default": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      },
       "name": {
         "multiple": false,
         "required": false,
@@ -5106,37 +5093,6 @@
     "type": "primitive_type",
     "named": true,
     "fields": {}
-  },
-  {
-    "type": "private_capture",
-    "named": true,
-    "fields": {
-      "name": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "identifier",
-            "named": true
-          }
-        ]
-      }
-    }
-  },
-  {
-    "type": "private_capture_list",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "private_capture",
-          "named": true
-        }
-      ]
-    }
   },
   {
     "type": "qualified_expression",
@@ -7464,10 +7420,6 @@
     "named": false
   },
   {
-    "type": "capture",
-    "named": false
-  },
-  {
     "type": "char",
     "named": false
   },
@@ -7530,6 +7482,10 @@
   {
     "type": "duration",
     "named": false
+  },
+  {
+    "type": "duration_literal",
+    "named": true
   },
   {
     "type": "dyn",
@@ -7640,10 +7596,6 @@
     "named": false
   },
   {
-    "type": "h",
-    "named": false
-  },
-  {
     "type": "handle",
     "named": false
   },
@@ -7745,10 +7697,6 @@
     "named": false
   },
   {
-    "type": "m",
-    "named": false
-  },
-  {
     "type": "machine",
     "named": false
   },
@@ -7773,20 +7721,12 @@
     "named": false
   },
   {
-    "type": "ms",
-    "named": false
-  },
-  {
     "type": "mut",
     "named": false
   },
   {
     "type": "none_literal",
     "named": true
-  },
-  {
-    "type": "ns",
-    "named": false
   },
   {
     "type": "on",
@@ -7874,10 +7814,6 @@
   },
   {
     "type": "return",
-    "named": false
-  },
-  {
-    "type": "s",
     "named": false
   },
   {
@@ -7974,10 +7910,6 @@
   },
   {
     "type": "unsafe",
-    "named": false
-  },
-  {
-    "type": "us",
     "named": false
   },
   {

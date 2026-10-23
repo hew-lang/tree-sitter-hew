@@ -1,0 +1,77 @@
+================================================================================
+Exact decimal durations alongside floats and integer durations
+================================================================================
+
+fn main() {
+    let short = 0.25s;
+    let fine = 0.1us;
+    let mixed = 2_000.000_001ms;
+    let negative = -1.5ms;
+    let whole = 10ns;
+    let ratio = 1.5;
+    scope within 0.125s { sleep(0.5ms); };
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (duration_literal)))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (duration_literal)))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (duration_literal)))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (unary_expression
+            (expression
+              (duration_literal)))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (duration_literal)))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (float_literal)))
+      (block_like_statement
+        (scope_expression
+          (expression
+            (duration_literal))
+          (block
+            (expression_statement
+              (expression
+                (call_expression
+                  (expression
+                    (identifier))
+                  (call_argument
+                    (expression
+                      (duration_literal)))))))))
+      (empty_statement))))
+
+================================================================================
+Duration units cannot be separated from the numeric literal
+:error
+================================================================================
+
+fn main() { let delay = 0.5 ms; }
+
+--------------------------------------------------------------------------------
+
+(ERROR)

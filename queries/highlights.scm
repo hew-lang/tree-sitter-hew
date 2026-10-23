@@ -21,8 +21,6 @@
 (clone_expression "clone" @keyword.operator)
 (callable_capabilities ["var" "once" "clone" "suspends"] @keyword)
 (trait_method_effect "suspends" @keyword)
-(private_capture_list "capture" @keyword)
-(private_capture (identifier) @variable)
 (failure_return "fails" @keyword)
 (return_error_expression "error" @keyword)
 (defer_statement "err" @keyword)

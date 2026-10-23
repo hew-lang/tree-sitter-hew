@@ -139,8 +139,7 @@ fn f() -> Result<i64, string> {
         (select_expression
           (select_arm
             (expression
-              (duration_literal
-                (integer_literal)))
+              (duration_literal))
             (expression
               (integer_literal)))))
       (expression_statement
