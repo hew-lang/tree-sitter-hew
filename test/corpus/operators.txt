@@ -182,3 +182,47 @@ fn main() {
               (call_expression
                 (expression
                   (identifier))))))))))
+
+================================================================================
+Prefix operators bind tighter than as, and as tighter than binary operators
+================================================================================
+
+fn f() {
+    -x as u8;
+    a * b as i64;
+    x as i32 as i64;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (identifier)
+    (block
+      (expression_statement
+        (expression
+          (cast_expression
+            (expression
+              (unary_expression
+                (expression
+                  (identifier))))
+            (primitive_type))))
+      (expression_statement
+        (expression
+          (binary_expression
+            (expression
+              (identifier))
+            (expression
+              (cast_expression
+                (expression
+                  (identifier))
+                (primitive_type))))))
+      (expression_statement
+        (expression
+          (cast_expression
+            (expression
+              (cast_expression
+                (expression
+                  (identifier))
+                (primitive_type)))
+            (primitive_type)))))))

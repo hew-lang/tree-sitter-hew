@@ -22,6 +22,7 @@ const PREC = {
   SHIFT: 12,      // << >>
   ADD: 13,        // + - &+ &-
   MUL: 15,        // * / % &*
+  CAST: 16,       // as (below every prefix: `-x as T` is `(-x) as T`)
   UNARY: 17,      // ! - ~ clone
   TRY: 18,        // ?
   TASK: 19,       // await fork
@@ -1259,7 +1260,7 @@ export default grammar({
       '?',
     )),
 
-    cast_expression: $ => prec(PREC.POSTFIX, seq(
+    cast_expression: $ => prec.left(PREC.CAST, seq(
       field('value', $.expression),
       'as',
       field('type', $._type),

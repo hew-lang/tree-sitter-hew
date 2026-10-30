@@ -7854,8 +7854,8 @@
       }
     },
     "cast_expression": {
-      "type": "PREC",
-      "value": 20,
+      "type": "PREC_LEFT",
+      "value": 16,
       "content": {
         "type": "SEQ",
         "members": [
