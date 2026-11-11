@@ -1,0 +1,170 @@
+================================================================================
+Supervisor and child backoff policies compose with neighbouring clauses
+================================================================================
+
+import std.restart;
+
+actor Client {
+    let url: string;
+}
+actor Cache {}
+
+supervisor Gateway(url: string) {
+    strategy: one_for_one;
+    intensity: 10 within 60s;
+    backoff: restart.exponential(initial: 100ms, maximum: 5s);
+    child upstream: Client { url } restart: permanent backoff: restart.exponential(initial: 1s, maximum: 1m);
+    child cache: Cache restart: permanent backoff: restart.immediate();
+}
+
+fn main() {
+    let backoff = 4;
+    println(backoff);
+    let gateway = spawn Gateway { url: "local" };
+    stop(gateway);
+    stopped(gateway);
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (import_declaration
+    (module_path
+      (identifier)
+      (identifier)))
+  (actor_declaration
+    (identifier)
+    (actor_field
+      (identifier)
+      (primitive_type)))
+  (actor_declaration
+    (identifier))
+  (supervisor_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (primitive_type)))
+    (supervisor_field
+      (supervisor_strategy_value))
+    (supervisor_field
+      (integer_literal)
+      (duration_literal))
+    (supervisor_field
+      (expression
+        (method_call_expression
+          (identifier)
+          (identifier)
+          (call_argument
+            (identifier)
+            (expression
+              (duration_literal)))
+          (call_argument
+            (identifier)
+            (expression
+              (duration_literal))))))
+    (child_spec
+      (identifier)
+      (identifier)
+      (spawn_keys
+        (field_initializer
+          (identifier)))
+      (child_clause)
+      (child_clause
+        (expression
+          (method_call_expression
+            (identifier)
+            (identifier)
+            (call_argument
+              (identifier)
+              (expression
+                (duration_literal)))
+            (call_argument
+              (identifier)
+              (expression
+                (duration_literal)))))))
+    (child_spec
+      (identifier)
+      (identifier)
+      (child_clause)
+      (child_clause
+        (expression
+          (method_call_expression
+            (identifier)
+            (identifier))))))
+  (function_declaration
+    (identifier)
+    (block
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (integer_literal)))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (identifier))
+            (call_argument
+              (expression
+                (identifier))))))
+      (let_statement
+        (pattern
+          (identifier))
+        (expression
+          (spawn_expression
+            (actor_spawn
+              (identifier)
+              (spawn_keys
+                (field_initializer
+                  (identifier)
+                  (expression
+                    (string_literal
+                      (string_content)))))))))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (identifier))
+            (call_argument
+              (expression
+                (identifier))))))
+      (expression_statement
+        (expression
+          (call_expression
+            (expression
+              (identifier))
+            (call_argument
+              (expression
+                (identifier)))))))))
+
+================================================================================
+Backoff needs a policy expression
+:error
+================================================================================
+
+supervisor App { backoff: ; child worker: Worker; }
+
+--------------------------------------------------------------------------------
+
+
+
+================================================================================
+Child backoff needs a policy expression
+:error
+================================================================================
+
+supervisor App { child worker: Worker restart: permanent backoff: ; }
+
+--------------------------------------------------------------------------------
+
+
+
+================================================================================
+Supervisor backoff requires a terminator
+:error
+================================================================================
+
+supervisor App { backoff: restart.immediate() child worker: Worker; }
+
+--------------------------------------------------------------------------------

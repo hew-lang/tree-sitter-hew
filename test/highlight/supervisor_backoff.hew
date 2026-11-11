@@ -1,0 +1,14 @@
+supervisor App {
+    backoff: restart.exponential(initial: 100ms);
+//  ^^^^^^^ keyword
+    child worker: Worker restart: permanent backoff: restart.immediate();
+//                                         ^^^^^^^ keyword
+}
+
+fn backoff() {
+// ^^^^^^^ function
+    let message = "backoff";
+//                 ^^^^^^^ string
+    // backoff
+//     ^^^^^^^ comment
+}

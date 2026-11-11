@@ -1426,7 +1426,18 @@
   {
     "type": "child_clause",
     "named": true,
-    "fields": {},
+    "fields": {
+      "backoff": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": true,
       "required": false,
@@ -6060,6 +6071,16 @@
     "type": "supervisor_field",
     "named": true,
     "fields": {
+      "backoff": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      },
       "restarts": {
         "multiple": false,
         "required": false,
@@ -7392,6 +7413,10 @@
   },
   {
     "type": "await",
+    "named": false
+  },
+  {
+    "type": "backoff",
     "named": false
   },
   {
