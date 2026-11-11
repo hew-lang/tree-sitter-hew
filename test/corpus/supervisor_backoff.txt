@@ -14,7 +14,7 @@ supervisor Gateway(url: string) {
     intensity: 10 within 60s;
     backoff: restart.exponential(initial: 100ms, maximum: 5s);
     child upstream: Client { url } restart: permanent backoff: restart.exponential(initial: 1s, maximum: 1m);
-    child cache: Cache restart: permanent backoff: restart.immediate();
+    child cache: Cache backoff: restart.immediate() stop: 5s restart: permanent;
 }
 
 fn main() {
@@ -86,12 +86,15 @@ fn main() {
     (child_spec
       (identifier)
       (identifier)
-      (child_clause)
       (child_clause
         (expression
           (method_call_expression
             (identifier)
-            (identifier))))))
+            (identifier))))
+      (child_clause
+        (expression
+          (duration_literal)))
+      (child_clause)))
   (function_declaration
     (identifier)
     (block
@@ -168,3 +171,5 @@ Supervisor backoff requires a terminator
 supervisor App { backoff: restart.immediate() child worker: Worker; }
 
 --------------------------------------------------------------------------------
+
+
