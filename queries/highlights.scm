@@ -24,7 +24,8 @@
 (failure_return "fails" @keyword)
 (return_error_expression "error" @keyword)
 (defer_statement "err" @keyword)
-(child_clause ["count" "stop"] @keyword)
+(child_clause ["count" "stop" "backoff"] @keyword)
+(supervisor_field "backoff" @keyword)
 
 "receive" @keyword
 

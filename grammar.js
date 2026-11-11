@@ -560,10 +560,12 @@ export default grammar({
     // SupervisorField (spec grammar.ebnf:142-144):
     //   "strategy" ":" SupervisorStrategy
     //   "intensity" ":" IntLit "within" DurationLit
+    //   "backoff" ":" Expression
     // `within` is a contextual keyword used only here. DurationLit is reused.
     supervisor_field: $ => choice(
       seq('strategy', ':', field('strategy', $.supervisor_strategy_value), ';'),
       seq('intensity', ':', field('restarts', $.integer_literal), 'within', field('window', $.duration_literal), ';'),
+      seq('backoff', ':', field('backoff', $.expression), ';'),
     ),
 
     child_spec: $ => seq(
@@ -580,6 +582,7 @@ export default grammar({
     child_clause: $ => choice(
       seq('count', ':', $.integer_literal),
       seq('restart', ':', choice('permanent', 'transient', 'temporary')),
+      seq('backoff', ':', field('backoff', $.expression)),
       seq('stop', ':', $.expression),
       seq('wired_to', ':', '{', repeat(seq($.identifier, optional(seq(':', $.identifier)), optional(','))), '}'),
     ),
