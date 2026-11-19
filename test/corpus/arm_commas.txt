@@ -1,0 +1,81 @@
+==================
+Optional commas on nested block-bodied arms
+==================
+
+fn score() -> i64 {
+    select {
+        reply from fetch() => {
+            match reply {
+                .Some(value) => {
+                    value
+                },
+                .None => 0,
+            }
+        },
+        after 1s => {
+            -1
+        }
+    }
+}
+
+---
+
+(source_file
+  (function_declaration
+    (identifier)
+    (return_type
+      (primitive_type))
+    (block
+      (block_like_statement
+        (select_expression
+          (select_arm
+            (pattern
+              (identifier))
+            (expression
+              (call_expression
+                (expression
+                  (identifier))))
+            (block
+              (match_statement
+                (match_expression
+                  (expression
+                    (identifier))
+                  (match_arm
+                    (pattern
+                      (variant_pattern
+                        (identifier)
+                        (pattern
+                          (identifier))))
+                    (block
+                      (expression_statement
+                        (expression
+                          (identifier)))))
+                  (match_arm
+                    (pattern
+                      (variant_pattern
+                        (identifier)))
+                    (expression
+                      (integer_literal)))))))
+          (select_arm
+            (expression
+              (duration_literal))
+            (block
+              (expression_statement
+                (expression
+                  (unary_expression
+                    (expression
+                      (integer_literal))))))))))))
+
+==================
+An expression arm still needs a comma before the next arm
+:error
+==================
+
+fn score() -> i64 {
+    match reply {
+        .Some(value) => value
+        .None => 0,
+    }
+}
+
+---

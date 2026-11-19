@@ -965,13 +965,14 @@ export default grammar({
 
     match_arm: $ => prec(3, seq(
       $._match_arm_head,
-      field('value', choice($._block_arm_value, seq($.expression, ','))),
+      field('value', choice(seq($._block_arm_value, optional(',')), seq($.expression, ','))),
     )),
 
     _match_final_arm: $ => prec(3, seq($._match_arm_head, field('value', $.expression))),
 
     // Match and select share the compiler's source-token classification:
-    // brace-bodied expressions end at `}`, while other expressions need `,`.
+    // brace-bodied arms may add one comma, while expression arms need it
+    // before the next arm.
     _block_arm_value: $ => choice(
       $.block,
       $.if_expression,
@@ -1479,7 +1480,7 @@ export default grammar({
     // stays usable as an ordinary name everywhere else.
     select_arm: $ => prec(3, seq(
       $._select_arm_head,
-      field('body', choice($._block_arm_value, seq($.expression, ','))),
+      field('body', choice(seq($._block_arm_value, optional(',')), seq($.expression, ','))),
     )),
 
     _select_arm_head: $ => choice(
