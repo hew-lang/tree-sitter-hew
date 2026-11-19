@@ -1728,7 +1728,7 @@ export default grammar({
 
     regex_literal: $ => token(seq(
       're"',
-      /[^"]*/,
+      /([^"\\]|\\.)*/,
       '"',
     )),
 
