@@ -1,0 +1,10 @@
+fn quoted(input: string) -> bool {
+    match input {
+        re"^\"(?P<word>[^\"]+)\"$" if word != "" => true,
+//            ^^^^^^^^^ string.regexp
+//                                 ^^ keyword
+        re"\\\\" => false,
+//                  ^^^^^ boolean
+        _ => false,
+    }
+}
