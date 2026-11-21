@@ -2652,7 +2652,7 @@
       },
       "yield_type": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "actor_type",
@@ -2717,6 +2717,10 @@
       "multiple": true,
       "required": false,
       "types": [
+        {
+          "type": "failure_return",
+          "named": true
+        },
         {
           "type": "parameters",
           "named": true
@@ -5251,7 +5255,7 @@
       },
       "yield_type": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "actor_type",

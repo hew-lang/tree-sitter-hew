@@ -1,0 +1,70 @@
+==================
+Generator result and failure clause
+==================
+
+gen fn read() -> i64 fails string {
+    yield 7;
+    return error "end";
+}
+
+gen fn unit() {
+    yield ();
+}
+
+gen fn fail_unit() fails string {
+    return error "end";
+}
+
+actor UnitReader {
+    receive gen fn read() { yield (); }
+}
+
+---
+
+(source_file
+  (gen_function_declaration
+    (identifier)
+    (primitive_type)
+    (failure_return
+      (primitive_type))
+    (block
+      (expression_statement
+        (expression
+          (yield_expression
+            (expression
+              (integer_literal)))))
+      (expression_statement
+        (expression
+          (return_error_expression
+            (expression
+              (string_literal
+                (string_content))))))))
+  (gen_function_declaration
+    (identifier)
+    (block
+      (expression_statement
+        (expression
+          (yield_expression
+            (expression
+              (unit_expression)))))))
+  (gen_function_declaration
+    (identifier)
+    (failure_return
+      (primitive_type))
+    (block
+      (expression_statement
+        (expression
+          (return_error_expression
+            (expression
+              (string_literal
+                (string_content))))))))
+  (actor_declaration
+    (identifier)
+    (receive_gen_function
+      (identifier)
+      (block
+        (expression_statement
+          (expression
+            (yield_expression
+              (expression
+                (unit_expression)))))))))
