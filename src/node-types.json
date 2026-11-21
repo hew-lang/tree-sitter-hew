@@ -2346,6 +2346,11 @@
     }
   },
   {
+    "type": "field_visibility",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "for_statement",
     "named": true,
     "fields": {
@@ -5948,6 +5953,16 @@
             "named": true
           }
         ]
+      },
+      "visibility": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "field_visibility",
+            "named": true
+          }
+        ]
       }
     },
     "children": {
@@ -7791,6 +7806,10 @@
   },
   {
     "type": "pool",
+    "named": false
+  },
+  {
+    "type": "private",
     "named": false
   },
   {

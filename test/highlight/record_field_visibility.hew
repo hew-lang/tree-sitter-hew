@@ -1,0 +1,7 @@
+type Slot {
+    private value: i64;
+//  ^^^^^^^ keyword
+//          ^^^^^ property
+    private: i64;
+//  ^^^^^^^ property
+}
