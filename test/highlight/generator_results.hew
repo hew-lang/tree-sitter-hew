@@ -1,0 +1,4 @@
+gen fn read() -> i64 fails string { yield 7; }
+//                   ^^^^^ keyword
+gen fn unit() fails string {}
+//            ^^^^^ keyword
