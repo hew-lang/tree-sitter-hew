@@ -1,0 +1,96 @@
+==================
+Contextual private fields in named records
+==================
+
+type Cache<T> {
+    private entries: Vec<T>;
+    private: i64;
+}
+type Slot { private private: i64; }
+fn private(private: Slot) -> i64 { private.private }
+
+---
+
+(source_file
+  (struct_declaration
+    (identifier)
+    (type_parameters
+      (type_parameter
+        (identifier)))
+    (struct_body
+      (struct_field
+        (field_visibility)
+        (identifier)
+        (generic_type
+          (identifier)
+          (type_arguments
+            (identifier))))
+      (struct_field
+        (identifier)
+        (primitive_type))))
+  (struct_declaration
+    (identifier)
+    (struct_body
+      (struct_field
+        (field_visibility)
+        (identifier)
+        (primitive_type))))
+  (function_declaration
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (identifier)))
+    (return_type
+      (primitive_type))
+    (block
+      (expression_statement
+        (expression
+          (field_expression
+            (expression
+              (identifier))
+            (identifier)))))))
+
+==================
+Private cannot mark an enum variant field
+:error
+==================
+
+enum Event { Set { private value: i64; } }
+
+---
+
+
+
+==================
+Private cannot mark a machine state field
+:error
+==================
+
+machine Connection {
+    state Open { private requests: i64; }
+}
+
+---
+
+
+
+==================
+Private cannot mark an actor field
+:error
+==================
+
+actor Connection { private requests: i64; }
+
+---
+
+
+
+==================
+Private cannot mark a field with a wire tag
+:error
+==================
+
+#[wire] type Packet { private serial: i64 @1; }
+
+---

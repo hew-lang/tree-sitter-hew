@@ -159,6 +159,9 @@
   field: (identifier) @property)
 
 (struct_field
+  visibility: (field_visibility) @keyword)
+
+(struct_field
   name: (identifier) @property)
 
 (actor_field

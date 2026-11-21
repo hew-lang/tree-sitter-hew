@@ -233,6 +233,7 @@ export default grammar({
 
     struct_body: $ => seq('{', repeat(choice(
       $.struct_field,
+      alias($._private_struct_field, $.struct_field),
       $.reserved_declaration,
     )), '}'),
 
@@ -242,13 +243,27 @@ export default grammar({
     // `type` declaration when a `#[wire]` attribute is present.
     struct_field: $ => seq(
       repeat($.attribute),
-      field('name', $.identifier),
-      ':',
-      field('type', $._type),
+      $._struct_field_value,
       optional(seq('@', $.integer_literal)),
       repeat($.wire_attribute),
       ';',
     ),
+
+    _private_struct_field: $ => seq(
+      repeat($.attribute),
+      field('visibility', $.field_visibility),
+      $._struct_field_value,
+      ';',
+    ),
+
+    _struct_field_value: $ => seq(
+      // The modifier is contextual. The same word before a colon is a name.
+      field('name', choice($.identifier, alias('private', $.identifier))),
+      ':',
+      field('type', $._type),
+    ),
+
+    field_visibility: _ => 'private',
 
     // `type Name(T, T, ...);` — positional/tuple record. The bare `record`
     // keyword form (both named- and tuple-body) was removed from the
